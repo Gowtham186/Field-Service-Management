@@ -1,7 +1,9 @@
 import { Schema, model } from "mongoose";
 
-const userSchema = new Schema(
-  {
+const userSchema = new Schema({
+    name:{
+      type:String
+    },
     phone_number: {
       type: Number
     },
@@ -17,9 +19,7 @@ const userSchema = new Schema(
       code: String,
       expiresAt: Date,
     },
-  },
-  { timestamps: true }
-);
+  },{ timestamps: true });
 
 const User = model("User", userSchema);
 export default User;

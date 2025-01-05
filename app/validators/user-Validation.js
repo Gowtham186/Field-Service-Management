@@ -16,6 +16,7 @@ export const registerValidation = {
         }
     }
 }
+
 export const adminLoginValidation = {
     email:{
         in:['body'],

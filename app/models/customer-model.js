@@ -33,6 +33,6 @@ const customerSchema = new Schema({
             default:[]
         }
     ]
-})
+}, { timestamps: true})
 const Customer = model('Customer', customerSchema)
 export default Customer

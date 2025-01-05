@@ -37,7 +37,7 @@ userCtlr.login = async(req,res)=>{
 
         const otp = generateOtp()
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000)
-        console.log(otp)
+        //console.log(otp)
         user.otp  = { code:otp, expiresAt}
         await user.save()
         
