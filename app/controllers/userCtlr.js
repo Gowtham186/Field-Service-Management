@@ -41,9 +41,9 @@ userCtlr.login = async(req,res)=>{
         user.otp  = { code:otp, expiresAt}
         await user.save()
         
-        await sendSMS(phone_number, otp)
+        //await sendSMS(phone_number, otp)
 
-        res.json({message : 'otp sent successfully'})
+        res.json({message : 'otp sent successfully', otp:otp})
         
     }catch(err){
         console.log(err)
@@ -59,7 +59,7 @@ userCtlr.verifyOtp = async(req,res)=>{
         if(!user){
             return res.status(404).json({errors: 'invalid phone number'})
         }
-        console.log(user.otp.code)
+        //console.log(user.otp.code)
         if(user.otp.code != otp){
             return res.status(400).json({errors : 'invalid otp'})
         }
@@ -92,7 +92,7 @@ userCtlr.adminLogin = async(req,res)=>{
             return res.status(400).json({errors : 'invalid password'})
         }
 
-        const token =  jwt.sign({userId:admin._id, role:admin}, process.env.SECRET_KEY, {expiresIn : '7d'})
+        const token =  jwt.sign({userId:admin._id, role:admin.role}, process.env.SECRET_KEY, {expiresIn : '7d'})
         res.json({token : `Bearer ${token}`})
     }catch(err){
         console.log(err)

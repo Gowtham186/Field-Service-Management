@@ -14,6 +14,3 @@ export const sendSMS = (phone_number, otp) => {
         to : phoneNumber
     })
 }
-console.log(accountSid)
-console.log(authToken)
-console.log(process.env.TWILIO_PHONE_NUMBER)

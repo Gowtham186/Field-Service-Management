@@ -2,26 +2,74 @@ import Expert from "../models/expert-model.js"
 
 const expertCtlr = {}
 
-expertCtlr.create = async(req,res)=>{
+expertCtlr.create = async (req, res) => {   
+    try {
+        const body = req.body;
+
+        if(body.skills && typeof body.skills == 'string'){
+            body.skills = JSON.parse(body.skills)
+        }
+        
+        if (req.files && req.files.length > 0) {
+            const uploadDocuments = req.files.map((file) => ({
+                pathName: file.path,
+                type: file.mimetype,
+                isVerified: "pending", 
+            }));
+            body.documents = uploadDocuments;
+        }
+
+        //console.log("Documents:", body.documents); 
+        //console.log("Body:", body); 
+
+        const expert = new Expert(body);
+        expert.userId = req.currentUser.userId; 
+        await expert.save(); 
+
+        res.json(expert);
+    } catch (err) {
+        console.error(err); 
+        res.status(500).json({ errors: "Something went wrong" }); 
+    }
+};
+
+expertCtlr.update = async(req,res)=>{
+    const id = req.params.id
+    const { skills }  = req.body
     try{
-       const body = req.body
+        const updateExpert = await Expert.findByIdAndUpdate(
+            {_id : id},
+            {}
+        )
+        if(!updateExpert){
+            return res.status(404).json({errors : 'record not found'})
+        }
+        res.json(updateExpert)
 
-       if(req.files && req.files.length > 0){
-            const updloadDocuments = req.files.map(file=>({
-                pathName : file.path,
-                type : file.mimetype,
-                isVerified : "pending"
-            }))
-            body.documents = updloadDocuments
-       }
-
-        const expert = new Expert(body)
-        expert.userId = req.currentUser.userId    
-        await expert.save()
-        res.json(expert)  
     }catch(err){
-        res.status(500).json({errors: 'something went wrong'})
+        console.log(err)
+        res.status(500).json({errors : 'something went wrong'})
     }
 }
+
+expertCtlr.verify = async(req,res)=>{
+    const id = req.params.id
+    const body = req.body
+    try{
+        if(body.isVerified === true){
+            body["documents.$[].isVerified"] = "verified"
+        }else{
+            body["documents.$[].isVerified"] = "pending"
+        }
+        const verifyExpert = await Expert.findByIdAndUpdate(id, body, { new : true, runValidators: true})
+        if(!verifyExpert){
+            return res.status(404).json({errors : 'record not found'})
+        }
+        res.json(verifyExpert)
+    }catch(err){
+        res.status(500).json({errors : 'something went wrong'})
+    }
+}
+
 
 export default expertCtlr

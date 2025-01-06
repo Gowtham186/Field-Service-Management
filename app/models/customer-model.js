@@ -19,20 +19,16 @@ const customerSchema = new Schema({
         state : String, 
         country : String
     },
-    requestedServices : [
-        {
-            type:Schema.Types.ObjectId,
-            //ref:'Service'
-            default:[]
-        }
-    ],
-    feedbacks:[
-        {
+    requestedServices : {
             type:[Schema.Types.ObjectId],
             //ref:'Service'
             default:[]
-        }
-    ]
+    },
+    feedbacks:{
+        type:[Schema.Types.ObjectId],
+        // ref:'Service',
+        default:[]
+    },
 }, { timestamps: true})
 const Customer = model('Customer', customerSchema)
 export default Customer

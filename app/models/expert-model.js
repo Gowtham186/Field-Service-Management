@@ -3,11 +3,11 @@ import {Schema,model} from 'mongoose'
 const epxertSchema = new Schema({
     userId:{
         type:Schema.Types.ObjectId,
-        //ref:'User'
+        ref:'User'
     },
     skills:{
         type:[Schema.Types.ObjectId],
-        //ref : 'Skills'
+        ref : 'Skills'
     },
     location:{
         city:String,
@@ -15,16 +15,16 @@ const epxertSchema = new Schema({
         country:String
     },
     experience : { type: Number},
-    documents:{
-        type:[
+    documents: {
+        type: [
             {
-                pathName:String,
-                type:String,
-                isVerified:String
+                pathName: { type: String, required: true },
+                type: { type: String, required: true },
+                isVerified: { type: String, default: "pending" }
             }
         ],
-        default:[]
-    },
+        default: []
+    },    
     availability:{
         type:[
             {

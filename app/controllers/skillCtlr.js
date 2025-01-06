@@ -1,8 +1,15 @@
+import { validationResult } from "express-validator";
 import Skill from "../models/skill-model.js";
 
 const skillCtlr = {}
 
 skillCtlr.create = async(req, res)=>{
+    const errors = validationResult(req)
+    
+    if(!errors.isEmpty()){
+        return res.status(400).json({errors : errors.array()})
+    }
+
     const body = req.body
     try{
         const skill = await Skill.create(body)

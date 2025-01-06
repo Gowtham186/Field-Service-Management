@@ -13,8 +13,8 @@ Customer :
 ● User Id : ref : user model
 ● Address,
 ● Location - {city, state, country},
-● Requested services - [serviceIds ],
-● Feedbacks - [ ServiceId] 
+● Requested services - [serviceIds],
+● Feedbacks - [ReviewId] 
 
 Skills
 * name 
@@ -25,14 +25,14 @@ Expert:
 ● Location : {city, state, country}
 ● Experience
 ● documents - [{ pathName: '', type: '', isVerified}]
-● Availability : [ { date : , isAvailable: } ],
+● Availability : [ { date : } ],
 ● MyServices : [ServiceId]
-● Feedbacks : [ServiceId],
+● Feedbacks : [ReviewId],
 ● isPremium,
 ● isVerified
 
 Service:
-● serviceType - [],
+● serviceType - [ {categoryId, serviceTypes:[serviceTypeId]}],
 ● Description,
 ● address,
 ● Location,
@@ -44,7 +44,7 @@ Service:
 ● expertId,
 ● Status : [ requested, proposed, assigned, in-progress, completed, cancelled ]
 ● Is Approved,
-● Feedback : { customer : { expertId, rating, review }, expert: { customerid, rating, review } } ,
+● review : ref : 'review model'
 ● createdAt,
 ● Completion Date,
 * finalBill
@@ -53,9 +53,8 @@ Service:
 Budget Model :
 ● serviceId,
 ● customerId,
-● suggestedRange,
+● suggestedPrice,
 ● finalPrice
- 
  
 Payment Model :
 ● paymentId,
@@ -64,3 +63,15 @@ Payment Model :
 ● Amount,
 ● Status,
 ● datePaid
+
+Review Model :
+● customerId
+● expertId
+● serviceId
+● rating
+● comment
+● date
+
+Category :
+● category : String
+● serviceTypes : [ {name, price, primarySkill} ]
