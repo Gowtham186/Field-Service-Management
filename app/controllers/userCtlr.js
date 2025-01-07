@@ -4,6 +4,7 @@ import User from "../models/user-model.js";
 import { generateOtp } from "../utils.js/otphelper.js";
 import { sendSMS } from "../utils.js/sendSMS.js";
 import { validationResult } from 'express-validator';
+import Otp from '../models/otp-model.js';
 const userCtlr = {}
 
 userCtlr.register = async(req,res)=>{
@@ -28,22 +29,43 @@ userCtlr.register = async(req,res)=>{
 
 userCtlr.login = async(req,res)=>{
     try{
-        const { phone_number } = req.body
+        const body = req.body
+        let user;
+        //customer login
+        if(body.phone_number){
+            user = await User.findOne({phone_number : body.phone_number})
+            if(!user){
+                return res.status(404).json({errors : 'invalid phone number'})
+            }
+            const otp = generateOtp()
 
-        const user = await User.findOne({phone_number})
-        if(!user){
-            return res.status(404).json({errors : 'invalid phone number'})
+            const otpDoc = await Otp.create({
+                identifier: body.phone_number,
+                otpCode: otp,
+                purpose: 'login'
+            })
+            await user.save()
+            
+            //await sendSMS(phone_number, otp)
+    
+           return res.json({message : 'otp sent successfully', otpDoc})
         }
 
-        const otp = generateOtp()
-        const expiresAt = new Date(Date.now() + 5 * 60 * 1000)
-        //console.log(otp)
-        user.otp  = { code:otp, expiresAt}
-        await user.save()
-        
-        //await sendSMS(phone_number, otp)
+        if(body.email){
+            user = await User.findOne({email : body.email})
+            if(!user){
+                return res.status(404).json({errors : 'invalid email'})
+            }
+            
+            const isValidUser = await bcryptjs.compare(body.password, user.password)
+            if(!isValidUser){
+                return res.status(404).json({errors : 'invalid password'})
+            }
+        }
 
-        res.json({message : 'otp sent successfully', otp:otp})
+        const token = jwt.sign({ userId : user._id, role: user.role}, process.env.SECRET_KEY, {expiresIn : '7d'})
+        res.json({token : `Bearer ${token}`})
+
         
     }catch(err){
         console.log(err)
@@ -52,21 +74,17 @@ userCtlr.login = async(req,res)=>{
 }
 
 userCtlr.verifyOtp = async(req,res)=>{
-    const { phone_number, otp } = req.body
+    const { identifier, otp } = req.body
     try{
-        const user = await User.findOne({phone_number})
-
+        const user = await Otp.findOne({identifier})
+        console.log(user)
         if(!user){
             return res.status(404).json({errors: 'invalid phone number'})
         }
-        //console.log(user.otp.code)
-        if(user.otp.code != otp){
+        
+        if(user.otpCode != otp){
             return res.status(400).json({errors : 'invalid otp'})
         }
-        
-       /*  if(user.otp.expiresAt < new Date()){
-            return res.status(400).json({errors : 'otp has expired'})
-        } */
 
         const token = jwt.sign({userId: user._id, role:user.role}, process.env.SECRET_KEY, { expiresIn : '7d'})
         return res.json({message:'otp has verified successfully', token : `Bearer ${token}`})

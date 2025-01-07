@@ -75,3 +75,9 @@ Review Model :
 Category :
 ● category : String
 ● serviceTypes : [ {name, price, primarySkill} ]
+
+Otp : 
+● identifier
+● otpCode
+● createdAt
+● purpose

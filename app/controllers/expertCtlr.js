@@ -9,6 +9,9 @@ expertCtlr.create = async (req, res) => {
         if(body.skills && typeof body.skills == 'string'){
             body.skills = JSON.parse(body.skills)
         }
+        if(body.location && typeof body.location == 'string'){
+            body.location = JSON.parse(body.location)
+        }
         
         if (req.files && req.files.length > 0) {
             const uploadDocuments = req.files.map((file) => ({
@@ -33,14 +36,11 @@ expertCtlr.create = async (req, res) => {
     }
 };
 
-expertCtlr.update = async(req,res)=>{
+expertCtlr.profileUpdate = async(req,res)=>{
     const id = req.params.id
-    const { skills }  = req.body
+    const body  = req.body
     try{
-        const updateExpert = await Expert.findByIdAndUpdate(
-            {_id : id},
-            {}
-        )
+        const updateExpert = await Expert.findByIdAndUpdate({_id : id}, body, { new : true, runValidators : true}).populate('userId')
         if(!updateExpert){
             return res.status(404).json({errors : 'record not found'})
         }

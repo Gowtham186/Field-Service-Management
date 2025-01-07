@@ -14,11 +14,7 @@ const userSchema = new Schema({
     role: {
       type: String,
       default: "customer",
-    },
-    otp: {
-      code: String,
-      expiresAt: Date,
-    },
+    }
   },{ timestamps: true });
 
 const User = model("User", userSchema);
