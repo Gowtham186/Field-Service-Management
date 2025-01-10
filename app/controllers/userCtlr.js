@@ -31,11 +31,11 @@ userCtlr.login = async(req,res)=>{
     try{
         const body = req.body
         let user;
-        //customer login
+        //customer login / register
         if(body.phone_number){
             user = await User.findOne({phone_number : body.phone_number})
             if(!user){
-                return res.status(404).json({errors : 'invalid phone number'})
+                user = new User({phone_number : body.phone_number}) //new customer
             }
             const otp = generateOtp()
 
@@ -76,13 +76,15 @@ userCtlr.login = async(req,res)=>{
 userCtlr.verifyOtp = async(req,res)=>{
     const { identifier, otp } = req.body
     try{
-        const user = await Otp.findOne({identifier})
-        console.log(user)
-        if(!user){
+        const findOtp = await Otp.findOne({identifier})
+        const user = await User.findOne({phone_number : identifier})
+        //console.log(user)
+
+        if(!findOtp){
             return res.status(404).json({errors: 'invalid phone number'})
         }
         
-        if(user.otpCode != otp){
+        if(findOtp.otpCode != otp){
             return res.status(400).json({errors : 'invalid otp'})
         }
 

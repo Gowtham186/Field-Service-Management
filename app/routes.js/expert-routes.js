@@ -6,8 +6,9 @@ import { authorizeUser } from '../middlewares/authorize.js'
 
 const router = express.Router()
 
-router.post('/', authenticateUser, uploadMiddleware, expertCtlr.create)
-router.put('/:id', authenticateUser, expertCtlr.profileUpdate)
-router.put('/verify/:id', authenticateUser, authorizeUser(['admin']), expertCtlr.verify)
+router.post('/experts', authenticateUser, uploadMiddleware, expertCtlr.create)
+router.get('/experts/:id', authenticateUser, expertCtlr.getProfile)
+router.put('/experts/:id', authenticateUser, expertCtlr.profileUpdate)
+router.put('/experts/verify/:id', authenticateUser, authorizeUser(['admin']), expertCtlr.verify)
 
 export default router

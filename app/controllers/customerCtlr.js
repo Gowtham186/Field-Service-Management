@@ -31,6 +31,21 @@ customerCtlr.create = async(req,res)=>{
     }
 }
 
+customerCtlr.profile = async(req,res)=>{
+    const id = req.params.id
+    console.log(id)
+    try{
+        const customer = await Customer.findOne({userId:id})
+        if(!customer){
+            return res.status(404).json({errors : 'no customer found'})
+        }
+        res.json(customer)
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors : 'something went wrong'})
+    }
+}
+
 customerCtlr.update = async(req,res)=>{
     try{
         const id = req.params.id
@@ -44,4 +59,6 @@ customerCtlr.update = async(req,res)=>{
         res.status(500).json({errors : 'something went wrong'})
     }
 }
+
+
 export default customerCtlr

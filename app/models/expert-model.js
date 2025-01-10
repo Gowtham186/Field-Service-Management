@@ -5,9 +5,9 @@ const epxertSchema = new Schema({
         type:Schema.Types.ObjectId,
         ref:'User'
     },
-    skills:{
+    categories:{
         type:[Schema.Types.ObjectId],
-        ref : 'Skills'
+        ref : 'Category'
     },
     location:{
         city:String,

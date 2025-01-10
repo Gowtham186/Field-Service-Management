@@ -4,9 +4,9 @@ import { adminLoginValidation, registerValidation } from '../validators/user-Val
 import { checkSchema } from 'express-validator'
 const router = express.Router()
 
-router.post('/register', checkSchema(registerValidation), userCtlr.register)
-router.post('/login', userCtlr.login)
-router.post('/verifyOtp', userCtlr.verifyOtp)
-router.post('/admin', checkSchema(adminLoginValidation), userCtlr.adminLogin)
+router.post('/users/register', userCtlr.register)
+router.post('/users/login', userCtlr.login)
+router.post('/users/verifyOtp', userCtlr.verifyOtp)
+router.post('/users/admin', checkSchema(adminLoginValidation), userCtlr.adminLogin)
 
 export default router

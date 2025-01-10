@@ -74,7 +74,8 @@ Review Model :
 
 Category :
 ● category : String
-● serviceTypes : [ {name, price, primarySkill} ]
+
+services
 
 Otp : 
 ● identifier

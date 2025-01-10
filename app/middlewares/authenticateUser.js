@@ -12,7 +12,7 @@ export default function authenticateUser(req,res,next){
     try{
         const tokenData = jwt.verify(token, process.env.SECRET_KEY)
         req.currentUser = { userId: tokenData.userId, role : tokenData.role}
-        //console.log(tokenData)
+        //console.log('tokenData',tokenData)
         next()
     }catch(err){
         return res.status(401).json({errors: err.message})

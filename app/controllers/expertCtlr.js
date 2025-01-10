@@ -1,3 +1,4 @@
+import Category from "../models/category-model.js";
 import Expert from "../models/expert-model.js"
 
 const expertCtlr = {}
@@ -6,8 +7,8 @@ expertCtlr.create = async (req, res) => {
     try {
         const body = req.body;
 
-        if(body.skills && typeof body.skills == 'string'){
-            body.skills = JSON.parse(body.skills)
+        if(body.categories && typeof body.categories == 'string'){
+            body.categories = JSON.parse(body.categories)
         }
         if(body.location && typeof body.location == 'string'){
             body.location = JSON.parse(body.location)
@@ -36,15 +37,57 @@ expertCtlr.create = async (req, res) => {
     }
 };
 
+expertCtlr.getProfile = async(req,res)=>{
+    const id = req.params.id
+    try{
+        const expert = await Expert.findOne({userId : id})
+            .populate('categories', 'name')
+            .populate('userId', 'phone_number')
+        if(!expert){
+            return res.status(404).json({errors : 'expert not found'})
+        }
+        return res.json(expert)
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors : 'something went wrong'})
+    }
+}
+
 expertCtlr.profileUpdate = async(req,res)=>{
     const id = req.params.id
     const body  = req.body
     try{
-        const updateExpert = await Expert.findByIdAndUpdate({_id : id}, body, { new : true, runValidators : true}).populate('userId')
-        if(!updateExpert){
+        const expert = await Expert.findOne({userId : id})
+            .populate('categories', 'name')
+        if(!expert){
             return res.status(404).json({errors : 'record not found'})
         }
-        res.json(updateExpert)
+
+        if(body.categories){
+            const newCategories = body.categories.map(category => category._id || category)
+            
+            await Expert.findOneAndUpdate(
+                {userId : id},
+                { 
+                    $addToSet : { categories : { $each : newCategories } },  //it adds unique/new category
+                    $set : { location : body.location, experience : body.experience} //updating
+                },
+                { new : true}
+            )
+        }else{
+            await Expert.findOneAndUpdate(
+                {userId : id},
+                { $set : { location : body.location, experience : body.experience}}, 
+                {new : true}
+            )
+        }
+
+        /* if(body.categories){
+           const newCategories = body.categories.filter(newCat => !expert.categories.some(existCat => existCat._id.equals(newCat._id)))
+           console.log(newCategories)
+           expert.categories = [...expert.categories, ...newCategories]
+        } */
+        return res.json(expert)
 
     }catch(err){
         console.log(err)

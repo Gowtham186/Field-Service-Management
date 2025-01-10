@@ -1,9 +1,9 @@
 import { validationResult } from "express-validator";
-import Skill from "../models/skill-model.js";
+import Category from "../models/category-model.js";
 
-const skillCtlr = {}
+const categoryCtlr = {}
 
-skillCtlr.create = async(req, res)=>{
+categoryCtlr.create = async(req, res)=>{
     const errors = validationResult(req)
     
     if(!errors.isEmpty()){
@@ -12,21 +12,21 @@ skillCtlr.create = async(req, res)=>{
 
     const body = req.body
     try{
-        const skill = await Skill.create(body)
-        res.json(skill)
+        const category = await Category.create(body)
+        res.json(category)
     }catch(err){
         res.status(500).json({errors : 'something went wrong'})
     }
 }
 
-skillCtlr.getAllSkills = async(req,res)=>{
+categoryCtlr.getAllCategory = async(req,res)=>{
     try{
-        const allSkills = await Skill.find()
-        res.json(allSkills)
+        const allcategory = await Category.find()
+        res.json(allcategory)
     }catch(err){
         res.status(500).json({errors : 'something went wrong'})
     }
 }
 
-export default skillCtlr
+export default categoryCtlr
 
