@@ -42,7 +42,7 @@ Service:
 ● Booking fee - fixed for all services
 ● customerId,
 ● expertId,
-● Status : [ requested, proposed, assigned, in-progress, completed, cancelled ]
+● Status : [ requested, assigned, in-progress, completed, cancelled ]
 ● Is Approved,
 ● review : ref : 'review model'
 ● createdAt,

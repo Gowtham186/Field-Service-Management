@@ -11,8 +11,6 @@ const epxertSchema = new Schema({
     },
     location:{
         city:String,
-        state:String,
-        country:String
     },
     experience : { type: Number},
     documents: {

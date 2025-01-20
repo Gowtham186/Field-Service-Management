@@ -22,9 +22,8 @@ expertCtlr.create = async (req, res) => {
             }));
             body.documents = uploadDocuments;
         }
-
-        //console.log("Documents:", body.documents); 
-        //console.log("Body:", body); 
+        
+        //console.log(body); 
 
         const expert = new Expert(body);
         expert.userId = req.currentUser.userId; 

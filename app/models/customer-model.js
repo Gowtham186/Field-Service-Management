@@ -8,16 +8,10 @@ const customerSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
-    address:{
-        type:String
-    },
-    coords:{
-        type:Object
-    },
     location:{
-        city : String, 
-        state : String, 
-        country : String
+        city : String,
+        address:String,
+        coords:Object
     },
     requestedServices : {
             type:[Schema.Types.ObjectId],

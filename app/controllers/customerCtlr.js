@@ -9,16 +9,16 @@ customerCtlr.create = async(req,res)=>{
         const existAddress = await Customer.findOne({address : body.address})
         if(!existAddress){
             const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
-                params :{ q : body.address,  key : process.env.OPENCAGE_API_KEY }
+                params :{ q : body.location.address,  key : process.env.OPENCAGE_API_KEY }
             })
             //console.log(resource.data)
             if(resource.data.results.length > 0){
-                customer.coords = resource.data.results[0].geometry
+                customer.location.coords = resource.data.results[0].geometry
             }else{
                 return res.status(400).json({errors : 'try other address'})
             }
         }else{
-            customer.coords = existAddress.coords
+            customer.location.coords = existAddress.location.coords
         }
         
         customer.userId = req.currentUser.userId

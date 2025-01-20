@@ -17,8 +17,5 @@ const storage = new CloudinaryStorage({
         resource_type : 'auto'
     }
 })
-
 //initializing multer with cloudinary storage
-const upload = multer({ storage })
-
-export const uploadMiddleware = upload.array("documents", 5)
+export const upload = multer({ storage })
