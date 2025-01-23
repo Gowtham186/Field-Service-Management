@@ -1,5 +1,6 @@
 import Category from "../models/category-model.js";
 import Expert from "../models/expert-model.js"
+import ServiceRequest from "../models/serviceRequest-model.js";
 
 const expertCtlr = {}
 
@@ -37,9 +38,8 @@ expertCtlr.create = async (req, res) => {
 };
 
 expertCtlr.getProfile = async(req,res)=>{
-    const id = req.params.id
     try{
-        const expert = await Expert.findOne({userId : id})
+        const expert = await Expert.findOne({userId : req.currentUser.userId})
             .populate('categories', 'name')
             .populate('userId', 'phone_number')
         if(!expert){
@@ -53,7 +53,7 @@ expertCtlr.getProfile = async(req,res)=>{
 }
 
 expertCtlr.profileUpdate = async(req,res)=>{
-    const id = req.params.id
+    const id = req.currentUser.userId
     const body  = req.body
     try{
         const expert = await Expert.findOne({userId : id})
@@ -96,16 +96,15 @@ expertCtlr.profileUpdate = async(req,res)=>{
 
 expertCtlr.verify = async(req,res)=>{
     const id = req.params.id
-    const body = req.body
     try{
-        if(body.isVerified === true){
-            body["documents.$[].isVerified"] = "verified"
-        }else{
-            body["documents.$[].isVerified"] = "pending"
-        }
-        const verifyExpert = await Expert.findByIdAndUpdate(id, body, { new : true, runValidators: true})
+
+        const verifyExpert = await Expert.findOneAndUpdate(
+            {userId : id},
+            { $set : { isVerified : true}},
+            { new : true}
+        )
         if(!verifyExpert){
-            return res.status(404).json({errors : 'record not found'})
+            return res.status(404).json({errors : 'expert record not found'})
         }
         res.json(verifyExpert)
     }catch(err){
@@ -113,5 +112,16 @@ expertCtlr.verify = async(req,res)=>{
     }
 }
 
+expertCtlr.availability = async (req,res)=>{
+    try{
+        const expert = await Expert.findOne({userId : req.currentUser.userId})
+            .populate('availability.serviceId')
+
+        res.json(expert.availability)
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors : 'something went wrong'})
+    }
+}
 
 export default expertCtlr

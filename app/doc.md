@@ -48,13 +48,6 @@ Service:
 ● createdAt,
 ● Completion Date,
 * finalBill
-
- 
-Budget Model :
-● serviceId,
-● customerId,
-● suggestedPrice,
-● finalPrice
  
 Payment Model :
 ● paymentId,
@@ -73,9 +66,12 @@ Review Model :
 ● date
 
 Category :
-● category : String
+● name : String
 
-services
+Service :
+● category : CategoryId
+● serviceName : String
+● price : Number 
 
 Otp : 
 ● identifier

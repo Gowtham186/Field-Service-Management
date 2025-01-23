@@ -1,5 +1,6 @@
 export const authorizeUser = (permittedRoles)=>{
     return (req,res,next)=>{
+        //console.log(req.currentUser.role)
         if(permittedRoles.includes(req.currentUser.role)){
             next()
         }else{

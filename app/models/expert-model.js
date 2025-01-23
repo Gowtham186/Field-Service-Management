@@ -10,7 +10,7 @@ const epxertSchema = new Schema({
         ref : 'Category'
     },
     location:{
-        city:String,
+        type:String,
     },
     experience : { type: Number},
     documents: {
@@ -27,19 +27,10 @@ const epxertSchema = new Schema({
         type:[
             {
                 date:Date,
-                isAvailable:Boolean,
+                serviceId: { type : Schema.Types.ObjectId, ref : 'ServiceRequest'},
+                _id : false
             }
         ],
-        default:[]
-    },
-    myServices:{
-        type:[Schema.Types.ObjectId],
-        //ref:'Service'
-        default:[]
-    },
-    feedbacks:{
-        type:[Schema.Types.ObjectId],
-        //ref:'Service',
         default:[]
     },
     isPremium: {

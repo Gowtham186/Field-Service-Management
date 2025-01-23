@@ -6,7 +6,8 @@ import userRoutes from './app/routes.js/user.js'
 import customerRoutes from './app/routes.js/customer-routes.js'
 import expertRoutes from './app/routes.js/expert-routes.js'
 import categoryRoutes from './app/routes.js/category-routes.js'
-import serviceRequestRoutes from './app/routes.js/serviceRequset-routes.js'
+import serviceRequestRoutes from './app/routes.js/serviceRequest-routes.js'
+import reviewRoutes from './app/routes.js/review-routes.js'
 const app = express()
 dotenv.config()
 configureDb()
@@ -21,6 +22,7 @@ app.use('/api', customerRoutes)
 app.use('/api', expertRoutes)
 app.use('/api', categoryRoutes)
 app.use('/api', serviceRequestRoutes)
+app.use('/api', reviewRoutes)
 
 
 
