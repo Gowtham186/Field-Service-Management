@@ -8,9 +8,32 @@ import expertRoutes from './app/routes.js/expert-routes.js'
 import categoryRoutes from './app/routes.js/category-routes.js'
 import serviceRequestRoutes from './app/routes.js/serviceRequest-routes.js'
 import reviewRoutes from './app/routes.js/review-routes.js'
+// import { Server } from 'socket.io'
+// import http from 'http'
+
 const app = express()
 dotenv.config()
 configureDb()
+
+//socket code 
+/* const server = http.createServer(app)
+
+const io = new Server(server, {
+    cors : {
+        origin : '*',
+        methods : ['GET', 'POST'],
+    },
+})
+
+io.on('connection', (socket) => {
+    console.log('A user connected:', socket.id);
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
+}); */
+
+
 
 app.use(express.json())
 app.use(cors())
@@ -24,6 +47,10 @@ app.use('/api', categoryRoutes)
 app.use('/api', serviceRequestRoutes)
 app.use('/api', reviewRoutes)
 
+//export { io }
 
-
-app.listen(process.env.PORT, ()=> console.log('server is running'))
+//server
+app.listen(4500, () => {
+    console.log('server is running');
+    //console.log('WebSocket server is running on ws://localhost:4500');
+});

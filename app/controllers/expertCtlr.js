@@ -1,7 +1,7 @@
 import Category from "../models/category-model.js";
 import Expert from "../models/expert-model.js"
 import ServiceRequest from "../models/serviceRequest-model.js";
-
+import axios from "axios";
 const expertCtlr = {}
 
 expertCtlr.create = async (req, res) => {   
@@ -27,6 +27,20 @@ expertCtlr.create = async (req, res) => {
         //console.log(body); 
 
         const expert = new Expert(body);
+        const existAddress = await Expert.findOne({address : body.address})
+        if(!existAddress){
+            const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
+                params :{ q : body.location.address,  key : process.env.OPENCAGE_API_KEY }
+            })
+            //console.log(resource.data)
+            if(resource.data.results.length > 0){
+                expert.location.coords = resource.data.results[0].geometry
+            }else{
+                return res.status(400).json({errors : 'try other address'})
+            }
+        }else{
+            expert.location.coords = existAddress.location.coords
+        }
         expert.userId = req.currentUser.userId; 
         await expert.save(); 
 
@@ -58,8 +72,29 @@ expertCtlr.profileUpdate = async(req,res)=>{
     try{
         const expert = await Expert.findOne({userId : id})
             .populate('categories', 'name')
+
         if(!expert){
             return res.status(404).json({errors : 'record not found'})
+        }
+        console.log(body.location.address)
+        if(body.location.address){
+            const existAddress = await Expert.findOne({'location.address' : body.location.address})
+            console.log(existAddress)
+            if(!existAddress){
+                const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
+                    params :{ q : body.location.address,  key : process.env.OPENCAGE_API_KEY }
+                })
+                console.log(resource.data)
+                if(resource.data.results.length > 0){
+                    expert.location.coords = resource.data.results[0].geometry
+                    expert.location.address = body.location.address
+                }else{
+                    return res.status(400).json({errors : 'try other address'})
+                }
+            }else{
+                expert.location.coords = existAddress.location.coords
+                expert.location.address = body.location.address
+            }
         }
 
         if(body.categories){
@@ -80,12 +115,8 @@ expertCtlr.profileUpdate = async(req,res)=>{
                 {new : true}
             )
         }
-
-        /* if(body.categories){
-           const newCategories = body.categories.filter(newCat => !expert.categories.some(existCat => existCat._id.equals(newCat._id)))
-           console.log(newCategories)
-           expert.categories = [...expert.categories, ...newCategories]
-        } */
+        await expert.save()
+        console.log(expert)
         return res.json(expert)
 
     }catch(err){

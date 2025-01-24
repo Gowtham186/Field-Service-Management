@@ -10,7 +10,9 @@ const epxertSchema = new Schema({
         ref : 'Category'
     },
     location:{
-        type:String,
+        city : String,
+        address:String,
+        coords:Object
     },
     experience : { type: Number},
     documents: {

@@ -2,7 +2,10 @@ import Customer from "../models/customer-model.js"
 import ServiceRequest from "../models/serviceRequest-model.js"
 import Service from "../models/service-model.js"
 import Expert from "../models/expert-model.js"
-
+import axios from "axios"
+import geolib, { getDistance } from 'geolib'
+import Category from "../models/category-model.js"
+//import { io } from "../../index.js"
 
 const serviceRequestCtlr = {}
 
@@ -12,6 +15,9 @@ serviceRequestCtlr.create = async (req, res) => {
     try {
         // console.log(req.files);
         //console.log(body);
+        const customerDoc = await Customer.findOne({userId : req.currentUser.userId}).populate('userId')
+        //console.log(customerDoc)
+
         
         if (body.serviceType && typeof body.serviceType === 'string') {
             body.serviceType = JSON.parse(body.serviceType);
@@ -24,7 +30,7 @@ serviceRequestCtlr.create = async (req, res) => {
         if(invalidService){
             return res.status(400).json({errors: 'choose a service'})
         }
-
+        
         if (req.files && req.files.length > 0) {
             const uploadImages = req.files.map(file => ({
                 pathName: file.path,
@@ -32,28 +38,92 @@ serviceRequestCtlr.create = async (req, res) => {
             }));
             body.serviceImages = uploadImages;
         }
+        
+        let lat, lng
+        const customerLocation = await Customer.findOne({ 'location.address' : body.location.address})
+        if(!customerLocation){
+            const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
+                params :{ q : body.location.address,  key : process.env.OPENCAGE_API_KEY }
+            })
+            //console.log(resource.data.results[0].geometry)
+            const geometry = resource.data.results[0].geometry
+            lat = geometry.lat
+            lng = geometry.lng
+            console.log({lat, lng})
+        }else{
+            const geometry = customerLocation.location.coords
+            lat = geometry.lat
+            lng = geometry.lng
+            //console.log('old', {lat, lng})
+        }
+        
+        const experts = await Expert.find()
 
-        const customerRecord = await Customer.findOneAndUpdate(
-            { userId : req.currentUser.userId},
-            { $setOnInsert : { location : body.location }},
-            { new : true, upsert : true}
-        )
+        const filteredExperts = experts.filter(expert => {
+            if(!expert.location.coords || !expert.location.coords.lat || !expert.location.coords.lng){
+                return false
+            }
+            //console.log(expert.location.coords)
+            return geolib.isPointWithinRadius(
+                { latitude : expert.location.coords.lat, longitude : expert.location.coords.lng},
+                { latitude : lat, longitude : lng},
+                10000
+            )
+        })
+        console.log(filteredExperts)
 
+        
+        const updateLocation = { address : body.location.address, coords : { lat, lng }}
+        
         const serviceRequest = new ServiceRequest({
             ...body,
             customerId : req.currentUser.userId,
-            location : customerRecord?.location || body.location,
+            location : updateLocation,
             budget : { bookingFee : 50 },
         })
         
         const selectedServices = body.serviceType.flatMap(({servicesChoosen}) => servicesChoosen)
         const servicePrices = await Promise.all(selectedServices.map(id => Service.findById(id)))
-
+        
         serviceRequest.budget.servicePrice = servicePrices.reduce((sum, cv) => sum + cv.price, 0)
         serviceRequest.budget.finalPrice = serviceRequest.budget.servicePrice + serviceRequest.budget.bookingFee
- 
-        console.log(serviceRequest)
-        await serviceRequest.save();
+        
+        if(!customerDoc){
+            const newCustomerDoc = new Customer()
+            newCustomerDoc.location = updateLocation
+            await newCustomerDoc.save()
+            //console.log('new')
+        }else{
+            customerDoc.location = updateLocation
+            await customerDoc.save()
+            //console.log('old')
+        }
+
+        // filteredExperts.forEach(expert => {
+        //     if(expert.socketId){
+        //         io.to(expert.socketId).emit('new-service-request', {
+        //             requestedId : serviceRequest._id,
+        //             customerLocation : { lat, lng },
+        //             serviceCategory : body.serviceType
+        //         })
+        //     }
+        // })
+
+        /* console.log('Notification sent to filtered experts.')
+
+            io.emit('new-service-request', { message: 'New service request received!' }, (ack) => {
+                if (ack) {
+                    console.log('Client acknowledged receipt of event');
+                } else {
+                    console.error('Client did not acknowledge event');
+                }
+            });
+            
+             */console.log('Event emitted: new-service-request');
+            
+
+        //console.log(serviceRequest)
+        //await serviceRequest.save();
         
         res.status(201).json(serviceRequest);
     } catch (err) {
@@ -281,7 +351,7 @@ serviceRequestCtlr.getByExpert = async(req,res)=>{
     }
 }
 
-serviceRequestCtlr.querying = async (req, res) => {
+/* serviceRequestCtlr.querying = async (req, res) => {
     try {
       const { location } = req.query;
   
@@ -320,8 +390,78 @@ serviceRequestCtlr.querying = async (req, res) => {
       console.error(err);
       res.status(500).json({ errors: 'Something went wrong' });
     }
-  };
+  }; */
   
+
+serviceRequestCtlr.querying = async(req,res)=>{
+    try{
+        const { location } = req.query
+        //console.log(location)
+
+        const existAddress = await Customer.findOne({'location.address' : location})
+
+        let lat, lng;
+        if(!existAddress){
+            const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
+                params :{ q : location,  key : process.env.OPENCAGE_API_KEY }
+            })
+
+            const geometry = resource.data.results[0].geometry
+            lat = geometry.lat
+            lng = geometry.lng
+
+            if(resource.data.results.length == 0){
+                return res.status(400).json({errors : 'try other address'})
+            }
+        }else{
+            const geometry = existAddress.location.coords
+            lat = geometry.lat
+            lng = geometry.lng
+        }
+        //console.log({lat, lng})
+
+        const experts = await Expert.find()
+        console.log(experts.length)
+
+        const filteredExperts = experts.filter(expert => {
+            if(!expert.location.coords || !expert.location.coords.lat || !expert.location.coords.lng){
+                return false
+            }
+            //console.log(expert.location.coords)
+            return geolib.isPointWithinRadius(
+                { latitude : expert.location.coords.lat, longitude : expert.location.coords.lng},
+                { latitude : lat, longitude : lng},
+                10000
+            )
+
+            /* return distane = geolib.getDistance(
+                { latitude : expert.location.coords.lat, longitude : expert.location.coords.lng},
+                { latitude : lat, longitude : lng}
+            )
+            console.log(distane) */
+        })
+
+        if(filteredExperts.length == 0){
+            return res.status(404).json({errors : 'No experts found withing 5km radius'})
+        }
+        //console.log(filteredExperts)
+
+        const allCategoryIds = filteredExperts.flatMap(expert => expert.categories.map(cat => cat))
+        const uniqueCategoryIds = allCategoryIds.filter((id, index, self)=> self.indexOf(id) === index)
+        
+        // console.log(allCategoryIds)
+        // console.log(uniqueCategoryIds)
+
+        const categories = await Category.find({_id : { $in : uniqueCategoryIds}}).select('name')
+        //console.log(categories)
+
+        res.json({categories, experts : filteredExperts})
+
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors : 'something went wrong'})
+    }
+}
   
 
 export default serviceRequestCtlr
