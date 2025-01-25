@@ -47,7 +47,7 @@ userCtlr.login = async(req,res)=>{
             await user.save()
             
             //await sendSMS(phone_number, otp)
-    
+            console.log({message : 'otp sent successfully', otpDoc})
            return res.json({message : 'otp sent successfully', otpDoc})
         }
 
@@ -61,10 +61,9 @@ userCtlr.login = async(req,res)=>{
             if(!isValidUser){
                 return res.status(404).json({errors : 'invalid password'})
             }
-        }
-
-        const token = jwt.sign({ userId : user._id, role: user.role}, process.env.SECRET_KEY, {expiresIn : '7d'})
-        res.json({token : `Bearer ${token}`})
+            const token = jwt.sign({ userId : user?._id, role: user?.role}, process.env.SECRET_KEY, {expiresIn : '7d'})
+            return res.json({token : `Bearer ${token}`})
+        }    
 
         
     }catch(err){
@@ -75,6 +74,7 @@ userCtlr.login = async(req,res)=>{
 
 userCtlr.verifyOtp = async(req,res)=>{
     const { identifier, otp } = req.body
+    //console.log({identifier, otp})
     try{
         const findOtp = await Otp.findOne({identifier})
         const user = await User.findOne({phone_number : identifier})
@@ -120,5 +120,19 @@ userCtlr.adminLogin = async(req,res)=>{
     }
 }
 
+userCtlr.profile = async (req,res)=>{
+    try{
+        const user = await User.findById(req.currentUser.userId)
+        console.log(req.currentUser.userId)
+        if(!user){
+            return res.status(404).json({errors : 'record not found'})
+        }
+        return res.json(user)
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors : 'something went wrong'})
+    }
+
+}
 
 export default userCtlr
