@@ -1,6 +1,6 @@
 import express from 'express'
 import userCtlr from '../controllers/userCtlr.js'
-import { adminLoginValidation, registerValidation } from '../validators/user-Validation.js'
+import { adminLoginValidation } from '../validators/user-Validation.js'
 import { checkSchema } from 'express-validator'
 import authenticateUser from '../middlewares/authenticateUser.js'
 const router = express.Router()

@@ -47,7 +47,7 @@ userCtlr.login = async(req,res)=>{
             await user.save()
             
             //await sendSMS(phone_number, otp)
-            console.log({message : 'otp sent successfully', otpDoc})
+            //console.log({message : 'otp sent successfully', otpDoc})
            return res.json({message : 'otp sent successfully', otpDoc})
         }
 
@@ -76,12 +76,12 @@ userCtlr.verifyOtp = async(req,res)=>{
     const { identifier, otp } = req.body
     //console.log({identifier, otp})
     try{
-        const findOtp = await Otp.findOne({identifier})
+        const findOtp = await Otp.findOne({identifier : identifier})
+        //console.log(findOtp)
         const user = await User.findOne({phone_number : identifier})
-        //console.log(user)
 
         if(!findOtp){
-            return res.status(404).json({errors: 'invalid phone number'})
+            return res.status(404).json({errors: 'invalid otp or otp expired'})
         }
         
         if(findOtp.otpCode != otp){
@@ -92,6 +92,7 @@ userCtlr.verifyOtp = async(req,res)=>{
         return res.json({message:'otp has verified successfully', token : `Bearer ${token}`})
         
     }catch(err){
+        console.log(err)
         res.status(500).json({errors : 'something went wrong'})
     }
 }

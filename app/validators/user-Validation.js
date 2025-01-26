@@ -1,19 +1,10 @@
 import User from "../models/user-model.js"
 
-export const registerValidation = {
+export const customerLoginValidation = {
     phone_number : {
         in:['body'],
         exists:{errorMessage : 'phone number is required'},
         notEmpty:{errorMessage : 'phone number should not be empty'},
-        custom :{
-            options : async function (value) {
-                const user = await User.findOne({phone_number: value})
-                if(user){
-                    throw new Error('phone number is already in use')
-                }
-                return true
-            }
-        }
     }
 }
 
