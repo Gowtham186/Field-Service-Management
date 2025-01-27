@@ -20,7 +20,10 @@ userCtlr.register = async(req,res)=>{
             body.password = hashedPassword
         }
         const user = await User.create(body)
-        res.json(user)
+
+        const token = jwt.sign({ userId : user?._id, role: user?.role}, process.env.SECRET_KEY, {expiresIn : '7d'})
+        return res.json({token : `Bearer ${token}`})    
+        //res.json(user)
     }catch(err){
         console.log(err)
         res.status(500).json({errors : 'something went wrong'})
@@ -61,6 +64,7 @@ userCtlr.login = async(req,res)=>{
             if(!isValidUser){
                 return res.status(404).json({errors : 'invalid password'})
             }
+            //console.log(user)
             const token = jwt.sign({ userId : user?._id, role: user?.role}, process.env.SECRET_KEY, {expiresIn : '7d'})
             return res.json({token : `Bearer ${token}`})
         }    

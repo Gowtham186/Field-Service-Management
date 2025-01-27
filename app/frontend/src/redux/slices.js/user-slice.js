@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import axios from "../../config/axios"
-import _ from 'lodash'
+//import lodash from 'lodash'
 
 export const customerLogin = createAsyncThunk('user/customerLogin', async(formData)=>{
     try{
@@ -11,39 +11,56 @@ export const customerLogin = createAsyncThunk('user/customerLogin', async(formDa
     }
 } )
 
-export const verifyOtpApi = createAsyncThunk('user/verifyOtpApi', async(verifyOtpData, {dispatch})=>{
+export const verifyOtpApi = createAsyncThunk('user/verifyOtpApi', async({verifyOtpData, resetForm}, {dispatch, rejectWithValue})=>{
     try{
         const response = await axios.post('/api/users/verifyOtp', verifyOtpData)
         console.log(response.data)
         localStorage.setItem('token', response.data.token)
         dispatch(getUserProfile())
-        console.log(localStorage.getItem('token'))
+        resetForm()
     }catch(err){    
         console.log(err)
+        return rejectWithValue(err.response?.data?.errors)
     }
 })
 
-export const getUserProfile = createAsyncThunk('user/getUserProfile', async()=>{
+export const getUserProfile = createAsyncThunk('user/getUserProfile', async(_, {rejectWithValue})=>{
     try{
         const userProfile = await axios.get('/api/users/profile', { headers : { Authorization : localStorage.getItem('token')}})
         console.log(userProfile.data)
-        const userData = _.pick(userProfile.data, ['_id', 'phone_number', 'role', 'email'])
+        //const userData = lodash._.pick(userProfile.data, ['_id', 'phone_number', 'role', 'email'])
+        const { _id, phone_number, role, email } = userProfile.data;
+        const userData = { _id, phone_number, role, email };
         console.log(userData)
         return userData
     }catch(err){        
         console.log(err)
+        return rejectWithValue(err.response?.data?.errors || 'Error fetching user profile')
     }
 })
 
-export const expertLogin = createAsyncThunk('user/expertLogin', async({formData, resetForm}, {rejectWithValue})=>{
+export const expertLogin = createAsyncThunk('user/expertLogin', async({formData, resetForm}, {dispatch, rejectWithValue})=>{
     try{
         const response = await axios.post('/api/users/login', formData)
         console.log(response.data)
-        resetForm()
         localStorage.setItem('token', response.data.token)
+        dispatch(getUserProfile())
+        resetForm()
     }catch(err){
         console.log(err)
-        return rejectWithValue(err.response.data.errors)
+        return rejectWithValue(err.response?.data?.errors)
+    }
+})
+
+export const expertRegister = createAsyncThunk('user/expertRegister', async({formData, resetForm}, { rejectWithValue})=>{
+    try{
+        const response = await axios.post('/api/users/register', formData)
+        console.log(response.data)
+        localStorage.setItem('token', response.data.token)
+        resetForm()
+    }catch(err){
+        console.log(err)
+        return rejectWithValue(err.response?.data.errors)
     }
 })
 
@@ -61,6 +78,12 @@ const userSlice = createSlice({
             state.serverError = null
         })
         builder.addCase(getUserProfile.rejected, (state, action)=>{
+            state.serverError = action.payload
+        })
+        builder.addCase(expertLogin.rejected, (state, action)=>{
+            state.serverError = action.payload
+        })
+        builder.addCase(expertRegister.rejected, (state, action)=>{
             state.serverError = action.payload
         })
 

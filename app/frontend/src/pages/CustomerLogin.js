@@ -62,7 +62,7 @@ export default function CustomerLogin(){
             setClientErrors(errors)
         }else{
             setClientErrors({})
-            dispatch(verifyOtpApi(verifyOtpData))
+            dispatch(verifyOtpApi({verifyOtpData, resetForm}))
         }
     }
 

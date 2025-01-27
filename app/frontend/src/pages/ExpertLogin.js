@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
-import ExpertRegister from "./ExpertRegister";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { expertLogin } from "../redux/slices.js/user-slice";
 import validator from 'validator'
 
@@ -12,7 +11,8 @@ export default function ExpertLogin(){
     })
     const [clientErrors, setClientErrors] = useState({})
     const dispatch = useDispatch()
-    const errors = {}
+    const { serverError } = useSelector((state)=> state.user)
+    const errors = {} 
 
     const runClientValidations = ()=>{
         if (!formData.email) {
@@ -56,9 +56,8 @@ export default function ExpertLogin(){
                         setClientErrors({...clientErrors, email : null})
                     }}
                     />
-                {clientErrors && (
-                    <p className="text-red-500 text-xs">{clientErrors.email}</p>
-                )}
+                {clientErrors && ( <p className="text-red-500 text-xs">{clientErrors.email}</p>)}
+                {serverError && serverError.includes('email') && ( <p className="text-red-500 text-xs">{serverError}</p>)}
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password:</label>
                 <input 
                     type="password"
@@ -70,16 +69,15 @@ export default function ExpertLogin(){
                     }}
                     className="mt-1 block p-1 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {clientErrors && (
-                        <p className="text-red-500 text-xs">{clientErrors.password}</p>
-                    )}
+                    {clientErrors && ( <p className="text-red-500 text-xs">{clientErrors.password}</p>)}
+                    {serverError && serverError.includes('password') && ( <p className="text-red-500 text-xs">{serverError}</p>)}
                     <button
                     type="submit"
                     className="mt-1 py-1 px-2 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     Login
                     </button>
             </form>
-            <Link to="/expertregister"><ExpertRegister /></Link>
+            <Link to="/expertregister">Expert Register</Link>
         </>
     )
 }

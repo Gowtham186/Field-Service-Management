@@ -8,13 +8,13 @@ expertCtlr.create = async (req, res) => {
     try {
         const body = req.body;
 
-        if(body.categories && typeof body.categories == 'string'){
-            body.categories = JSON.parse(body.categories)
+        if (body.categories && typeof body.categories == 'string') {
+            body.categories = JSON.parse(body.categories);
         }
-        if(body.location && typeof body.location == 'string'){
-            body.location = JSON.parse(body.location)
+        if (body.location && typeof body.location == 'string') {
+            body.location = JSON.parse(body.location);
         }
-        
+        console.log(req.files)
         if (req.files && req.files.length > 0) {
             const uploadDocuments = req.files.map((file) => ({
                 pathName: file.path,
@@ -23,33 +23,35 @@ expertCtlr.create = async (req, res) => {
             }));
             body.documents = uploadDocuments;
         }
-        
-        //console.log(body); 
 
         const expert = new Expert(body);
-        const existAddress = await Expert.findOne({address : body.address})
-        if(!existAddress){
+        const existAddress = await Expert.findOne({'location.address': body.location.address});
+        
+        if (!existAddress) {
             const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
-                params :{ q : body.location.address,  key : process.env.OPENCAGE_API_KEY }
-            })
-            //console.log(resource.data)
-            if(resource.data.results.length > 0){
-                expert.location.coords = resource.data.results[0].geometry
-            }else{
-                return res.status(400).json({errors : 'try other address'})
+                params: { q: body.location.address, key: process.env.OPENCAGE_API_KEY }
+            });
+
+            if (resource.data.results.length > 0) {
+                expert.location.coords = resource.data.results[0].geometry;
+            } else {
+                return res.status(400).json({ errors: 'Invalid address, plxease try another.' });
             }
-        }else{
-            expert.location.coords = existAddress.location.coords
+        } else {
+            expert.location.coords = existAddress.location.coords;
         }
-        expert.userId = req.currentUser.userId; 
-        await expert.save(); 
+
+        expert.userId = req.currentUser.userId;
+        console.log(expert)
+        await expert.save();
 
         res.json(expert);
     } catch (err) {
-        console.error(err); 
-        res.status(500).json({ errors: "Something went wrong" }); 
+        console.error(err);
+        res.status(500).json({ errors: "Something went wrong, please try again later." });
     }
 };
+
 
 expertCtlr.getProfile = async(req,res)=>{
     try{
