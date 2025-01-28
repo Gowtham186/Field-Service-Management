@@ -7,6 +7,7 @@ const expertCtlr = {}
 expertCtlr.create = async (req, res) => {   
     try {
         const body = req.body;
+        console.log(req.body)
 
         if (body.categories && typeof body.categories == 'string') {
             body.categories = JSON.parse(body.categories);
@@ -52,6 +53,14 @@ expertCtlr.create = async (req, res) => {
     }
 };
 
+expertCtlr.getAllExperts = async (req,res) => {
+    try{
+        const allExperts = await Expert.find()
+        res.json(allExperts)
+    }catch(err){
+        res.status(500).json({errors : 'something went wrong'})
+    }
+}
 
 expertCtlr.getProfile = async(req,res)=>{
     try{

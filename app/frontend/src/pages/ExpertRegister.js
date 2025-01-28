@@ -50,18 +50,22 @@ export default function ExpertRegister(){
         }
         
     }
-    const handleRegister = (e)=> {
+    const handleRegister = async (e)=> {
         e.preventDefault()
         runClientValidations()
         console.log(formData)
-        const resetForm = formInitialState
+        const resetForm = ()=> setFormData(formInitialState) 
         if(Object.keys(errors).length !== 0){
             setClientErrors(errors)
         }else{
-            setClientErrors({})
-            dispatch(expertRegister({formData, resetForm}))
-            setOpenExpertForm(true)
-            navigate('/create-expert')
+            try{
+                setClientErrors({})
+                await dispatch(expertRegister({formData, resetForm})).unwrap()
+                setOpenExpertForm(true)
+                navigate('/create-expert')
+            }catch(err){
+                console.log('Error registering expert', err)
+            }
         }
     }
     return(

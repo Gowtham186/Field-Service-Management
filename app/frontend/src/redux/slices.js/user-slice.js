@@ -52,11 +52,12 @@ export const expertLogin = createAsyncThunk('user/expertLogin', async({formData,
     }
 })
 
-export const expertRegister = createAsyncThunk('user/expertRegister', async({formData, resetForm}, { rejectWithValue})=>{
+export const expertRegister = createAsyncThunk('user/expertRegister', async({formData, resetForm}, {dispatch, rejectWithValue})=>{
     try{
         const response = await axios.post('/api/users/register', formData)
         console.log(response.data)
         localStorage.setItem('token', response.data.token)
+        dispatch(getUserProfile())
         resetForm()
     }catch(err){
         console.log(err)

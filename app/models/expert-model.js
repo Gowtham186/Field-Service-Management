@@ -5,6 +5,10 @@ const epxertSchema = new Schema({
         type:Schema.Types.ObjectId,
         ref:'User'
     },
+    age:Number,
+    gender:{
+        type:String,
+    },
     categories:{
         type:[Schema.Types.ObjectId],
         ref : 'Category'

@@ -1,12 +1,14 @@
 import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import validator from 'validator'
-import { customerLogin, verifyOtpApi } from "../redux/slices.js/user-slice"
+import { customerLogin, getUserProfile, verifyOtpApi } from "../redux/slices.js/user-slice"
+import { useNavigate } from "react-router-dom"
 export default function CustomerLogin(){
     const [phone_number, setPhoneNumber] = useState("")
     const [otp, setOtp] = useState("")
     const [clientErrors, setClientErrors] = useState({})
     const dispatch = useDispatch()
+    const navigate = useNavigate()
     const errors = {}
     const { serverError } = useSelector((state)=> state.user)
 
@@ -30,7 +32,7 @@ export default function CustomerLogin(){
         }
     }
 
-    const handleSubmit = (e)=>{
+    const handleSubmit = async (e)=>{
         e.preventDefault()
         runClientValidations()
         console.log(errors)
@@ -41,8 +43,14 @@ export default function CustomerLogin(){
         if(Object.keys(errors).length !== 0){
             setClientErrors(errors)
         }else{
-            setClientErrors({})
-            dispatch(customerLogin(formData))
+            try{
+                setClientErrors({})
+                await dispatch(customerLogin(formData)).unwrap()
+                await dispatch(getUserProfile()).unwrap()
+                navigate('/dashboard')
+            }catch(err){
+                console.log(err)
+            }
         }
     }
 

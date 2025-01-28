@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { expertLogin } from "../redux/slices.js/user-slice";
@@ -9,6 +9,7 @@ export default function ExpertLogin(){
         email:'',
         password:''
     })
+    const navigate = useNavigate()
     const [clientErrors, setClientErrors] = useState({})
     const dispatch = useDispatch()
     const { serverError } = useSelector((state)=> state.user)
@@ -29,7 +30,7 @@ export default function ExpertLogin(){
           }
     }
 
-    const handleExpertLogin = (e)=>{
+    const handleExpertLogin = async (e)=>{
         e.preventDefault()
         runClientValidations()
         console.log(formData)
@@ -37,8 +38,13 @@ export default function ExpertLogin(){
         if(Object.keys(errors).length !== 0){
             setClientErrors(errors)
         }else{
-            setClientErrors({})
-            dispatch(expertLogin({formData, resetForm}))
+            try{
+                setClientErrors({})
+                await dispatch(expertLogin({formData, resetForm})).unwrap()
+                navigate('/dashboard')
+            }catch(err){
+                console.log('Error login expert', err)
+            }
         }
     }
     return(
