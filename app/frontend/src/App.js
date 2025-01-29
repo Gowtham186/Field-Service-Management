@@ -1,4 +1,5 @@
 import './index.css'
+import './App.css'
 import { Routes, Route } from 'react-router-dom'
 import CustomerLogin from './pages/CustomerLogin';
 import ExpertLogin from './pages/ExpertLogin';
@@ -8,8 +9,24 @@ import ExpertCreation from './pages/ExpertCreation';
 import Dashboard from './components/Dashboard';
 import MainLayout from './components/MainLayout';
 import VerifyExperts from './pages/VerifyExperts';
+import MaterialUIForm from './components/Material';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUserProfile } from './redux/slices.js/user-slice';
 
 function App() {
+  const dispatch = useDispatch()
+  const user = useSelector((state) => state.user)
+
+  useEffect(()=>{
+    if(localStorage.getItem('token')){
+      dispatch(getUserProfile())
+    }
+  },[dispatch])
+
+  if(localStorage.getItem('token') && !user.user){
+    return <p>...loading</p>
+  }
   return (
     <div>
         <Routes>
@@ -28,6 +45,7 @@ function App() {
               <VerifyExperts />
             </MainLayout>
           }/>
+          
         </Routes>
     </div>
   );

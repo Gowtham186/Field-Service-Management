@@ -52,23 +52,27 @@ export const expertLogin = createAsyncThunk('user/expertLogin', async({formData,
     }
 })
 
-export const expertRegister = createAsyncThunk('user/expertRegister', async({formData, resetForm}, {dispatch, rejectWithValue})=>{
+export const expertRegister = createAsyncThunk('user/expertRegister', async({formData, resetForm}, {rejectWithValue})=>{
     try{
         const response = await axios.post('/api/users/register', formData)
         console.log(response.data)
         localStorage.setItem('token', response.data.token)
-        dispatch(getUserProfile())
         resetForm()
     }catch(err){
         console.log(err)
-        return rejectWithValue(err.response?.data.errors)
+        return rejectWithValue(err.response?.data?.errors)
     }
 })
 
 const userSlice = createSlice({
     name : 'user',
     initialState : { isLoggedIn : false, user : null, serverError : null},
-    
+    reducers : {
+        logout : (state,action)=>{
+            state.isLoggedIn = false
+            state.user = null
+        }
+    },
     extraReducers : (builder)=> {
         builder.addCase(verifyOtpApi.rejected, (state,action)=>{
             state.serverError = action.payload
@@ -92,4 +96,5 @@ const userSlice = createSlice({
         
     }
 })
+export const { logout } = userSlice.actions
 export default userSlice.reducer

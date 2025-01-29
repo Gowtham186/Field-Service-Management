@@ -7,7 +7,6 @@ const expertCtlr = {}
 expertCtlr.create = async (req, res) => {   
     try {
         const body = req.body;
-        console.log(req.body)
 
         if (body.categories && typeof body.categories == 'string') {
             body.categories = JSON.parse(body.categories);
@@ -16,6 +15,7 @@ expertCtlr.create = async (req, res) => {
             body.location = JSON.parse(body.location);
         }
         console.log(req.files)
+        console.log(req.body)
         if (req.files && req.files.length > 0) {
             const uploadDocuments = req.files.map((file) => ({
                 pathName: file.path,
@@ -56,6 +56,19 @@ expertCtlr.create = async (req, res) => {
 expertCtlr.getAllExperts = async (req,res) => {
     try{
         const allExperts = await Expert.find()
+            .populate('userId')
+            .populate('categories')
+        res.json(allExperts)
+    }catch(err){
+        res.status(500).json({errors : 'something went wrong'})
+    }
+}
+
+expertCtlr.unVerifiedExperts = async (req,res) => {
+    try{
+        const allExperts = await Expert.find({isVerified: false})
+            .populate('userId')
+            .populate('categories')
         res.json(allExperts)
     }catch(err){
         res.status(500).json({errors : 'something went wrong'})
@@ -63,8 +76,9 @@ expertCtlr.getAllExperts = async (req,res) => {
 }
 
 expertCtlr.getProfile = async(req,res)=>{
+    const id = req.params.id
     try{
-        const expert = await Expert.findOne({userId : req.currentUser.userId})
+        const expert = await Expert.findById({userId : id})
             .populate('categories', 'name')
             .populate('userId', 'phone_number')
         if(!expert){
@@ -138,18 +152,20 @@ expertCtlr.profileUpdate = async(req,res)=>{
 
 expertCtlr.verify = async(req,res)=>{
     const id = req.params.id
+    const { isVerified } = req.body
     try{
 
         const verifyExpert = await Expert.findOneAndUpdate(
-            {userId : id},
-            { $set : { isVerified : true}},
-            { new : true}
-        )
+            { userId : id }, 
+            { $set : { isVerified }},
+            { new: true }
+        );
         if(!verifyExpert){
             return res.status(404).json({errors : 'expert record not found'})
         }
         res.json(verifyExpert)
     }catch(err){
+        console.log(err)
         res.status(500).json({errors : 'something went wrong'})
     }
 }
