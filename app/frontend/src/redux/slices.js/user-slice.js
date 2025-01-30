@@ -16,7 +16,6 @@ export const verifyOtpApi = createAsyncThunk('user/verifyOtpApi', async({verifyO
         const response = await axios.post('/api/users/verifyOtp', verifyOtpData)
         console.log(response.data)
         localStorage.setItem('token', response.data.token)
-        dispatch(getUserProfile())
         resetForm()
     }catch(err){    
         console.log(err)
@@ -39,12 +38,11 @@ export const getUserProfile = createAsyncThunk('user/getUserProfile', async(_, {
     }
 })
 
-export const expertLogin = createAsyncThunk('user/expertLogin', async({formData, resetForm}, {dispatch, rejectWithValue})=>{
+export const expertLogin = createAsyncThunk('user/expertLogin', async({formData, resetForm}, {rejectWithValue})=>{
     try{
         const response = await axios.post('/api/users/login', formData)
         console.log(response.data)
         localStorage.setItem('token', response.data.token)
-        dispatch(getUserProfile())
         resetForm()
     }catch(err){
         console.log(err)

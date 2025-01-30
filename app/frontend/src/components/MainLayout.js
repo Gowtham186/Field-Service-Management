@@ -14,7 +14,7 @@ export default function MainLayout({ children }) {
       {user.role === "expert" || user.role === "admin" ? (
         <>
           <Sidebar role={user.role} />
-          <div className="flex-grow ml-40 p-4">{children}</div>
+          <div className="flex-grow ml-52 p-4">{children}</div>
         </>
       ) : (
         <>

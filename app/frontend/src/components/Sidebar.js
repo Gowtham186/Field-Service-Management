@@ -12,7 +12,7 @@ export default function Sidebar({ role }) {
     navigate('/')
   }
   return (
-    <div className="bg-blue-950 h-screen p-4 shadow-md fixed transition-all duration-300 w-24 md:w-40">
+    <div className="bg-blue-950 h-screen p-4 shadow-md fixed transition-all duration-300 w-24 md:w-48">
       <ul className="space-y-4">
         <li>
           <Link to="/dashboard" className="text-white hover:text-blue-700">
@@ -36,6 +36,11 @@ export default function Sidebar({ role }) {
           <li>
             <Link to="/verify-experts" className="text-white hover:text-blue-700">
               Manage Experts
+            </Link>
+          </li>
+          <li>
+            <Link to="/manage-categories" className="text-white hover:text-blue-700">
+              Manage Categories & Services
             </Link>
           </li>
           <li>

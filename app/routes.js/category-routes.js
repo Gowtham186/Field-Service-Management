@@ -11,11 +11,12 @@ const router = express.Router()
 
 router.post('/categories', authenticateUser, authorizeUser(['expert', 'admin']), checkSchema(categoryValidation), categoryCtlr.create)
 router.get('/categories', categoryCtlr.getAllCategory)
-router.get('/categories/:id', checkSchema(idValidation), categoryCtlr.getCategory)
+router.get('/categories/withServices', authenticateUser, authorizeUser(['admin']), categoryCtlr.categoriesWithServices)
+router.put('/categories/:id', authenticateUser, authorizeUser(['admin']), categoryCtlr.updateCategoryWithServices)
+//router.get('/categories/:id', checkSchema(idValidation), categoryCtlr.getCategory)
 
 router.post('/categories/:categoryId/services', authenticateUser, authorizeUser(['admin']), checkSchema(serviceValidation), categoryCtlr.addService)
 router.get('/categories/:id/services', checkSchema(idValidation), categoryCtlr.getServicesByCategory)
 router.get('/categories/:categoryId/services/:serviceId', checkSchema(idValidation), categoryCtlr.getSingleService)
-router.delete('/categories/:categoryId/services/:serviceId', authenticateUser, authorizeUser(['admin']), checkSchema(idValidation), categoryCtlr.removeService)
-
+router.delete('/services/:serviceId', authenticateUser, authorizeUser(['admin']), checkSchema(idValidation), categoryCtlr.removeService)
 export default router

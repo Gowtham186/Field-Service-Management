@@ -88,9 +88,9 @@ categoryCtlr.addService = async (req,res)=>{
 }
 
 categoryCtlr.removeService = async(req,res)=>{
-    const { categoryId, serviceId } = req.params
+    const { serviceId } = req.params
     try{
-        const deleteService = await Service.findOneAndDelete({category : categoryId, _id : serviceId})
+        const deleteService = await Service.findByIdAndDelete(serviceId)
 
         if(!deleteService){
             return res.status(404).json({errors : 'category or service not found'})
@@ -114,6 +114,62 @@ categoryCtlr.getSingleService = async(req,res)=>{
         res.json(service)        
     }catch(err){
         return res.status(500).json({errors : 'something went wrong'})
+    }
+}
+
+
+categoryCtlr.categoriesWithServices = async (req,res)=>{
+    try{
+        const categories = await Category.aggregate([
+            {
+                $lookup : {
+                    from : "services",
+                    localField : "_id",
+                    foreignField : "category",
+                    as : "services"
+                }
+            }
+        ])
+        res.json(categories)
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors : 'something went wrong'})
+    }
+}
+
+categoryCtlr.updateCategoryWithServices = async(req,res)=>{
+    const id = req.params.id
+    console.log('id', id)
+    const { name, services } = req.body
+    try{
+        const updatedCategory = await Category.findByIdAndUpdate(id, { name : name}, { new : true})
+
+        if(!updatedCategory){
+            return res.status(404).json({errors : 'category not found'})
+        }
+
+        const updatedServices = await Promise.all(services.map(async(service) => {
+            if(service._id){
+                return Service.findByIdAndUpdate(
+                    service._id, 
+                    { serviceName : service.serviceName, price : service.price}, 
+                    { new : true})
+            }else{
+                const newService = new Service({
+                    serviceName : service.serviceName,
+                    price : service.price,
+                    category : updatedCategory._id
+                })
+                return newService.save()
+            }
+        }
+        ))
+
+        return res.json({...updatedCategory.toObject(), services : updatedServices})
+
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors :'something went wrong'})
     }
 }
 

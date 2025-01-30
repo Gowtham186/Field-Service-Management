@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { expertLogin } from "../redux/slices.js/user-slice";
+import { expertLogin, getUserProfile } from "../redux/slices.js/user-slice";
 import validator from 'validator'
 
 
@@ -46,6 +46,7 @@ export default function ExpertLogin() {
       try {
         setClientErrors({});
         await dispatch(expertLogin({ formData, resetForm })).unwrap();
+        await dispatch(getUserProfile()).unwrap()
         //localStorage.removeItem('expertLogin')
         navigate('/dashboard');
       } catch (err) {
@@ -88,13 +89,13 @@ export default function ExpertLogin() {
             }}
             className="mt-1 block w-1/2 p-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {clientErrors && <p className="text-red-500 text-xs text-left mb-3">{clientErrors.password}</p>}
+          {clientErrors && <p className="text-red-500 text-xs text-left">{clientErrors.password}</p>}
           {serverError && serverError.includes('password') && (
             <p className="text-red-500 text-xs text-left mb-3">{serverError}</p>
           )}
           <button
             type="submit"
-            className="mt-1 py-2 px-4 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="mt-3 py-2 px-4 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             Login
           </button>

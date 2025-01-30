@@ -13,6 +13,7 @@ import MaterialUIForm from './components/Material';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserProfile } from './redux/slices.js/user-slice';
+import ManageCategories from './components/ManageCategories';
 
 function App() {
   const dispatch = useDispatch()
@@ -43,6 +44,11 @@ function App() {
           <Route path="/verify-experts" element={ 
             <MainLayout> 
               <VerifyExperts />
+            </MainLayout>
+          }/>
+          <Route path="/manage-categories" element={ 
+            <MainLayout> 
+              <ManageCategories />
             </MainLayout>
           }/>
           
