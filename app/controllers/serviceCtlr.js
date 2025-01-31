@@ -5,7 +5,7 @@ const serviceCtlr = {}
 
 serviceCtlr.deleteService = async (req,res)=>{
     const { serviceId } = req.params
-    console.log('delete one')
+    console.log('serviceCtlr')
     try{
         const service = await Service.findByIdAndDelete(serviceId)
         if(!service){

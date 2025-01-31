@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "../../config/axios";
+import { act } from "react";
 
 export const fetchCategories = createAsyncThunk('category/fetchCategories', async()=>{
     try{
@@ -10,13 +11,14 @@ export const fetchCategories = createAsyncThunk('category/fetchCategories', asyn
     }
 })
 
-export const getCategoriesWithServices = createAsyncThunk('category/getCategoriesWithServices', async()=>{
+export const getCategoriesWithServices = createAsyncThunk('category/getCategoriesWithServices', async(_, {rejectWithValue})=>{
     try{
         const response = await axios.get('/api/categories/withServices', { headers : { Authorization : localStorage.getItem('token')}})
         console.log(response.data)
         return response.data
     }catch(err){
         console.log(err)
+        return rejectWithValue(err.response.data.errors)
     }
 })
 
@@ -31,19 +33,19 @@ export const updateCategoryWithServices = createAsyncThunk('category/updatedCate
     }
 })
 
-export const deleteService = createAsyncThunk('category/deleteService', async(serviceId)=>{
+export const deleteService = createAsyncThunk('category/deleteService', async(serviceId, {rejectWithValue})=>{
     try{
         const response = await axios.delete(`/api/services/${serviceId}`, { headers : { Authorization : localStorage.getItem('token')}})
         console.log(response.data)
         return response.data
     }catch(err){
         console.log(err)
+        return rejectWithValue(err.response.data.errors)
     }
 })
 
-export const deleteManyServices = createAsyncThunk('category/deleteManyServices', async({serviceIds})=> {
+export const deleteManyServices = createAsyncThunk('category/deleteManyServices', async({serviceIds}, {rejectWithValue})=> {
     try{
-        console.log(localStorage.getItem('token'))
         const response = await axios.delete('/api/services', {
             data : { serviceIds },
             headers : { Authorization : localStorage.getItem('token')}
@@ -52,6 +54,18 @@ export const deleteManyServices = createAsyncThunk('category/deleteManyServices'
         return { deletedCount : response.data.deletedCount, serviceIds : response.data.serviceIds}
     }catch(err){
         console.log(err)
+        return rejectWithValue(err.response.data.errors)
+    }
+})
+
+export const deleteCategoryAndServices = createAsyncThunk('category/deleteCategoryAndServices', async(id, {rejectWithValue}) => {
+    try{
+        const response = await axios.delete(`/api/categories/${id}`, { headers : { Authorization : localStorage.getItem('token')}})
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+        return rejectWithValue(err.response.data.errors)
     }
 })
 
@@ -59,7 +73,7 @@ const categorySlice = createSlice({
     name : 'category',
     initialState : {
         data : [],
-        error : null,
+        serverError : null,
         categoriesWithServices : []
     },
     extraReducers:(builder)=>{
@@ -68,6 +82,10 @@ const categorySlice = createSlice({
         })
         builder.addCase(getCategoriesWithServices.fulfilled, (state,action) => {
             state.categoriesWithServices = action.payload
+            state.serverError = action.payload
+        })
+        builder.addCase(getCategoriesWithServices.rejected, (state,action)=>{
+            state.categoriesWithServices = null
         })
         builder.addCase(updateCategoryWithServices.fulfilled, (state, action) => {
             const updatedCategories = state.categoriesWithServices.map((category) => {
@@ -82,6 +100,7 @@ const categorySlice = createSlice({
             });
           
             state.categoriesWithServices = updatedCategories;
+            state.serverError = null
           });      
           builder.addCase(updateCategoryWithServices.rejected, (state,action)=>{
             state.serverError = action.payload
@@ -91,6 +110,10 @@ const categorySlice = createSlice({
             ...category,
             services : category.services.filter(service => service._id !== action.payload._id)
            }))
+           state.serverError = null
+        })
+        builder.addCase(deleteService.rejected, (state,action) => {
+            state.serverError = action.payload
         })
         builder.addCase(deleteManyServices.fulfilled, (state, action) => {
             const { serviceIds } = action.payload;
@@ -101,7 +124,15 @@ const categorySlice = createSlice({
                 }
                 return category;
             });
+            state.serverError = null
         });
+        builder.addCase(deleteCategoryAndServices.fulfilled, (state,action)=> {
+            state.categoriesWithServices = state.categoriesWithServices.filter(ele => ele._id !== action.payload._id)
+            state.serverError = null
+        })
+        builder.addCase(deleteCategoryAndServices.rejected, (state,action)=>{
+            state.serverError = action.payload
+        })
         
         
     }

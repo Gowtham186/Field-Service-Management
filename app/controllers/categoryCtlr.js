@@ -89,6 +89,7 @@ categoryCtlr.addService = async (req,res)=>{
 
 categoryCtlr.removeService = async(req,res)=>{
     const { serviceId } = req.params
+    console.log('categoryCltr')
     try{
         const deleteService = await Service.findByIdAndDelete(serviceId)
 
@@ -117,7 +118,7 @@ categoryCtlr.getSingleService = async(req,res)=>{
     }
 }
 
-
+//
 categoryCtlr.categoriesWithServices = async (req,res)=>{
     try{
         const categories = await Category.aggregate([
@@ -170,6 +171,27 @@ categoryCtlr.updateCategoryWithServices = async(req,res)=>{
     }catch(err){
         console.log(err)
         return res.status(500).json({errors :'something went wrong'})
+    }
+}
+
+categoryCtlr.deleteCategoryAndServices = async (req,res)=>{
+    const { id } = req.params
+    console.log(id)
+    try{
+        const category =  await Category.findById(id)
+
+        if(!category){
+            return res.status(404).json({errors : 'category not found'})
+        }
+
+        await Service.deleteMany({category})
+
+        await Category.findByIdAndDelete(id)
+
+        res.json(category) //only returnig category not with services
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors : 'something went wrong'})
     }
 }
 

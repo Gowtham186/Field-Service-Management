@@ -17,21 +17,21 @@ export default function VerifyExperts(){
         }
     },[experts])
 
-    if(experts?.length == 0) return <p>...loading</p>
+    if(experts?.length === 0) return <p>...loading</p>
 
     const handleVerify = async(expert)=>{
         const updateVerify = !expert.isVerified
         console.log(updateVerify)
         const getConfirm = window.confirm("Are you sure?")
         if(getConfirm){
-            await dispatch(toggledIsVerified({ id : expert.userId._id, body : { isVerified : updateVerify}}))
+            await dispatch(toggledIsVerified({ id : expert.userId._id, body : { isVerified : updateVerify}})).unwrap()
         }
     }
 
     return(
         <>
             <h1 className="text-2xl font-semibold mb-4">Verify Experts</h1> 
-            {experts?.length == 0 ? (
+            {experts?.length === 0 ? (
                 <p>No verify experts found</p>
             ) : (
                 <div>

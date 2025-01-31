@@ -5,8 +5,21 @@ body {
     font-family: 'Readex Pro';
 }
 
+body{
+    max-height: 90vh; /* Set the max height of the form */
+    overflow-y: auto; /* Allow vertical scrolling when the content exceeds the max height */
+  }
+
+body::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome, Safari, Edge */
+  }
+
 .edit-form-container {
     max-height: 80vh; /* Set the max height of the form */
     overflow-y: auto; /* Allow vertical scrolling when the content exceeds the max height */
-    padding-right: 15px; /* Optional: prevent content from touching the scrollbar */
+  }
+
+
+  .edit-form-container::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome, Safari, Edge */
   }
