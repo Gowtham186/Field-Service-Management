@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "../../config/axios";
-import { act } from "react";
 
 export const fetchCategories = createAsyncThunk('category/fetchCategories', async()=>{
     try{
@@ -61,6 +60,17 @@ export const deleteManyServices = createAsyncThunk('category/deleteManyServices'
 export const deleteCategoryAndServices = createAsyncThunk('category/deleteCategoryAndServices', async(id, {rejectWithValue}) => {
     try{
         const response = await axios.delete(`/api/categories/${id}`, { headers : { Authorization : localStorage.getItem('token')}})
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+        return rejectWithValue(err.response.data.errors)
+    }
+})
+
+export const newCategoryWithServices = createAsyncThunk('category/newCategoryWithServices', async(newItem, {rejectWithValue})=>{
+    try{
+        const response = await axios.post('/api/categories', newItem, { headers : { Authorization : localStorage.getItem('token')}})
         console.log(response.data)
         return response.data
     }catch(err){
@@ -131,6 +141,13 @@ const categorySlice = createSlice({
             state.serverError = null
         })
         builder.addCase(deleteCategoryAndServices.rejected, (state,action)=>{
+            state.serverError = action.payload
+        })
+        builder.addCase(newCategoryWithServices.fulfilled, (state,action)=>{
+            state.categoriesWithServices =  [...state.categoriesWithServices, action.payload]
+            state.serverError = null
+        })
+        builder.addCase(newCategoryWithServices.rejected, (state,action)=> {
             state.serverError = action.payload
         })
         

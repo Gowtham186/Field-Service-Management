@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import '../App.css'
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from 'uuid'
-import { deleteCategoryAndServices, deleteManyServices, deleteService, getCategoriesWithServices, updateCategoryWithServices } from "../redux/slices.js/category-slice";
+import { deleteCategoryAndServices, deleteManyServices, deleteService, getCategoriesWithServices, newCategoryWithServices, updateCategoryWithServices } from "../redux/slices.js/category-slice";
 
 export default function ManageCategories() {
   const dispatch = useDispatch();
@@ -22,7 +22,9 @@ export default function ManageCategories() {
 
   const validations = (updateItem)=>{
     if(!updateItem.name){
-      errors.category = "Category name should be empty"
+      errors.category = "Category name should not be empty"
+    } else if (/\d/.test(updateItem.name)) {  // Checks if the category name contains any numbers
+      errors.category = "Category name should not contain numbers";
     }
 
       updateItem.services.map((ele, i) => {
@@ -30,7 +32,7 @@ export default function ManageCategories() {
         errors.serviceName.push(ele._id || ele.id)
       }
 
-      if(ele.price === "" || isNaN(ele.price)){
+      if(ele.price === "" || isNaN(ele.price) || Number(ele.price <= 0)){
         errors.price.push(ele._id || ele.id)
       }
     })
@@ -61,12 +63,16 @@ export default function ManageCategories() {
             await dispatch(deleteService(deletedServices[0])).unwrap();
           }
 
-          // After deletion, we update the category with the remaining services
+          // After deletion, update the category with the remaining services
           const updatedServices = editItem.services.filter(service => !deletedServices.includes(service._id));
           await dispatch(updateCategoryWithServices({ id: editItem?._id, updatedItem: { ...editItem, services: updatedServices } })).unwrap();
-        } else {
+        }
+        else if(editItem.hasOwnProperty('_id')){
           // In case no service was deleted, directly update the category
           await dispatch(updateCategoryWithServices({ id: editItem?._id, updatedItem: editItem })).unwrap();
+        }else{
+          console.log('new category')
+          await dispatch(newCategoryWithServices(editItem)).unwrap()
         }
         
         setEditItem(null);
@@ -155,10 +161,19 @@ export default function ManageCategories() {
     setDeletedServices((prevDeletedServices) => prevDeletedServices.filter(deletedService => deletedService !== serviceId))
   }
 
+  const handleNewCategory = ()=>{
+    setEditItem({
+      id : uuidv4(),
+      services:[]
+    })
+  }
+
   return (
     <div className="relative max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Manage Categories</h1>
-      <button className="mb-4 py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">
+      <button className="mb-4 py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
+        onClick={handleNewCategory}
+        >
         Add New Category
       </button>
 
@@ -231,7 +246,7 @@ export default function ManageCategories() {
                     onChange={(e) => handleServiceChange(e, ele.id || ele._id)}
                     className={`p-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-100 
                       ${clientErrors?.serviceName?.some(errorService => errorService === ele.id || errorService === ele._id) ? 'border-red-500 border-2' : 'border-gray-300'}`}
-                      placeholder={clientErrors?.serviceName?.some(errorService => errorService.id === ele.id || errorService === ele._id) ? "Enter a valid name" : ""}
+                      placeholder={clientErrors?.serviceName?.some(errorService => errorService === ele.id || errorService === ele._id) ? " Enter a valid name" : ""}
                      />
 
                   <label className="text-gray-600">Price:</label>

@@ -14,8 +14,26 @@ categoryCtlr.create = async(req, res)=>{
 
     const body = req.body
     try{
-        const category = await Category.create(body)
-        res.json(category)
+        if(req.currentUser.role == 'expert'){
+            const category = await Category.create(body)
+            return res.json(category)
+        }else if(req.currentUser.role == 'admin'){
+            //console.log(body)
+            const newCategory = await Category.create({
+                name : body.name
+            })
+
+            const newServices = await Promise.all(body.services.map(async(service)=> { 
+                    const newService = new Service({
+                    serviceName : service.serviceName,
+                    price : service.price,
+                    category : newCategory._id
+                })
+                return newService.save()
+            }))
+            console.log({...newCategory.toObject(), services : newServices})
+            return res.status(201).json({...newCategory.toObject(), services : newServices})
+        }
     }catch(err){
        return res.status(500).json({errors : 'something went wrong'})
     }
@@ -46,7 +64,6 @@ categoryCtlr.getCategory = async (req,res)=>{
         return res.status(500).json({errors : 'something went wrong'})
     }
 }
-
 
 categoryCtlr.getServicesByCategory = async(req,res)=>{
     const errors = validationResult(req)

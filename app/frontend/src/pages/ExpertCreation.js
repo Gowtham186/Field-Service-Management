@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { fetchCategories } from "../redux/slices.js/category-slice"
 import Select from 'react-select'
-import { createExpertProfile } from "../redux/slices.js/expert-slice"
+import { createExpertProfile, fetchSkills } from "../redux/slices.js/expert-slice"
 import { useNavigate } from "react-router-dom"
 
 const formInitialState = {
     age:'',
     gender:'',
     experience: '',
-    categories: [],
+    skills: [],
     location: { address: '' },
     documents: []
 }
@@ -19,12 +18,13 @@ export default function ExpertCreation() {
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const { data } = useSelector((state) => state.category)
+    const { allSkills } = useSelector((state) => state.expert)
     const [clientErrors, setClientErrors] = useState({})
     const errors = {}
-    const newData = data?.map(ele => ({ value: ele._id, label: ele.name }))
+    const newData = allSkills?.map(ele => ({ value: ele._id, label: ele.name }))
 
     useEffect(() => {
-        dispatch(fetchCategories())
+        dispatch(fetchSkills())
     }, [])
 
     const runClientValidaions = ()=>{
@@ -39,8 +39,8 @@ export default function ExpertCreation() {
         if(!expertForm.experience){
             errors.experience = 'experience should be atleast 1 year'
         }
-        if(expertForm.categories.length === 0){
-            errors.categories = 'select skills'
+        if(expertForm.skills.length === 0){
+            errors.skills = 'select skills'
         }
         if(!expertForm.location.address){
             errors.location = 'location is required'
@@ -66,7 +66,7 @@ export default function ExpertCreation() {
                 formData.append('gender', expertForm.gender)
                 formData.append('experience', expertForm.experience);
                 formData.append('location', JSON.stringify(expertForm.location)); 
-                formData.append('categories', JSON.stringify(expertForm.categories.map(ele => ele.value)));
+                formData.append('skills', JSON.stringify(expertForm.skills.map(ele => ele.value)));
                 
                 expertForm.documents.forEach((file, index) => {
                     formData.append('documents', file); 
@@ -85,11 +85,11 @@ export default function ExpertCreation() {
         }
     }
 
-    const handleSelectCategories = (selectedOptions) => {
-        setClientErrors({...clientErrors, categories : null})
+    const handleSelectSkills = (selectedOptions) => {
+        setClientErrors({...clientErrors, skills : null})
         setExpertForm((prevForm) => ({
             ...prevForm,
-            categories: selectedOptions.map(ele => ele) || []
+            skills: selectedOptions.map(ele => ele) || []
 
         }))
     }
@@ -156,15 +156,15 @@ export default function ExpertCreation() {
                     </div>
 
                     <div>
-                        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">Skills :</label>
+                        <label htmlFor="skills" className="block text-sm font-medium text-gray-700 mb-1">Skills :</label>
                         <Select
                             options={newData}
-                            id="category"
-                            onChange={handleSelectCategories}
+                            id="skills"
+                            onChange={handleSelectSkills}
                             className="w-3/4"
-                            value={expertForm.categories}
+                            value={expertForm.skills}
                             isMulti />
-                        {clientErrors && ( <p className="text-red-500 text-xs">{clientErrors.categories}</p>)}
+                        {clientErrors && ( <p className="text-red-500 text-xs">{clientErrors.skills}</p>)}
                     </div>
                 </div>
 

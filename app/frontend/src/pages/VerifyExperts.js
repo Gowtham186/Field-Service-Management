@@ -45,7 +45,7 @@ export default function VerifyExperts(){
                             <p className="mb-1 text-md">Location: {expert.location.address}</p>
                             <p className="mb-1 text-md">Experience: {expert.experience}</p>
                             <h2 className="text-lg font-medium">Skills:</h2>
-                            {expert.categories?.map((category, index) => (
+                            {expert.skills?.map((category, index) => (
                                 <span key={index}>{category.name} </span>
                             ))}
                           </div>

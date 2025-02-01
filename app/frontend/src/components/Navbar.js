@@ -28,13 +28,18 @@ const handleLogout = ()=>{
           {isLoggedIn && user.role === "customer" ? (
             <>
               <li>
-                <Link to="/dashboard" className="text-black-500 hover:text-blue-700">
-                  Dashboard
+                <Link to="/" className="text-black-500 hover:text-blue-700">
+                  Home
                 </Link>
               </li>
               <li>
                 <Link to="/make-service" className="text-black-500 hover:text-blue-700">
                   Make Service
+                </Link>
+              </li>
+              <li>
+                <Link to="/make-service" className="text-black-500 hover:text-blue-700">
+                  Profile
                 </Link>
               </li>
               <li>

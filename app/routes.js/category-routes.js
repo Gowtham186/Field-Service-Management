@@ -9,13 +9,12 @@ import idValidation from '../validators/idValidation.js'
 
 const router = express.Router()
 
-router.post('/categories', authenticateUser, authorizeUser(['expert', 'admin']), checkSchema(categoryValidation), categoryCtlr.create)
+router.post('/categories', authenticateUser, authorizeUser(['expert', 'admin']), categoryCtlr.create)
 router.get('/categories', categoryCtlr.getAllCategory)
 router.get('/categories/withServices', authenticateUser, authorizeUser(['admin']), categoryCtlr.categoriesWithServices)
 router.put('/categories/:id', authenticateUser, authorizeUser(['admin']), categoryCtlr.updateCategoryWithServices)
 router.get('/categories/:id', checkSchema(idValidation), categoryCtlr.getCategory)
 router.delete('/categories/:id', authenticateUser, authorizeUser(['admin']), checkSchema(idValidation), categoryCtlr.deleteCategoryAndServices)
-
 
 
 router.post('/categories/:categoryId/services', authenticateUser, authorizeUser(['admin']), checkSchema(serviceValidation), categoryCtlr.addService)

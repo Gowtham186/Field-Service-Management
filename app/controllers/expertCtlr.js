@@ -8,8 +8,8 @@ expertCtlr.create = async (req, res) => {
     try {
         const body = req.body;
 
-        if (body.categories && typeof body.categories == 'string') {
-            body.categories = JSON.parse(body.categories);
+        if (body.skills && typeof body.skills == 'string') {
+            body.skills = JSON.parse(body.skills);
         }
         if (body.location && typeof body.location == 'string') {
             body.location = JSON.parse(body.location);
@@ -57,7 +57,7 @@ expertCtlr.getAllExperts = async (req,res) => {
     try{
         const allExperts = await Expert.find()
             .populate('userId')
-            .populate('categories')
+            .populate('skills')
         res.json(allExperts)
     }catch(err){
         res.status(500).json({errors : 'something went wrong'})

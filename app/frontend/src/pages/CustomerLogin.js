@@ -91,7 +91,8 @@ export default function CustomerLogin({ closeLogin }) {
             setClientErrors({});
             await dispatch(verifyOtpApi({verifyOtpData, resetForm})).unwrap();
             await dispatch(getUserProfile()).unwrap();
-            navigate("/dashboard");
+            closeLogin()
+            navigate("/");
         }catch(err){
             console.log(err)
         }

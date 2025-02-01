@@ -6,14 +6,14 @@ import ExpertLogin from './pages/ExpertLogin';
 import Home from './pages/Home';
 import ExpertRegister from './pages/ExpertRegister';
 import ExpertCreation from './pages/ExpertCreation';
-import Dashboard from './components/Dashboard';
+import Dashboard from './pages/Dashboard';
 import MainLayout from './components/MainLayout';
 import VerifyExperts from './pages/VerifyExperts';
 import MaterialUIForm from './components/Material';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserProfile } from './redux/slices.js/user-slice';
-import ManageCategories from './components/ManageCategories';
+import ManageCategories from './pages/ManageCategories';
 
 function App() {
   const dispatch = useDispatch()

@@ -9,6 +9,7 @@ import categoryRoutes from './app/routes.js/category-routes.js'
 import serviceRoutes from './app/routes.js/service-routes.js'
 import serviceRequestRoutes from './app/routes.js/serviceRequest-routes.js'
 import reviewRoutes from './app/routes.js/review-routes.js'
+import skillRoutes from './app/routes.js/skill-routes.js'
 // import { Server } from 'socket.io'
 // import http from 'http'
 
@@ -44,6 +45,7 @@ app.use(cors())
 app.use('/api', userRoutes)
 app.use('/api', customerRoutes)
 app.use('/api', expertRoutes)
+app.use('/api', skillRoutes)
 app.use('/api', categoryRoutes)
 app.use('/api', serviceRoutes)
 app.use('/api', serviceRequestRoutes)

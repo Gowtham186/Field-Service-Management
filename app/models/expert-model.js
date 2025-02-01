@@ -9,9 +9,9 @@ const epxertSchema = new Schema({
     gender:{
         type:String,
     },
-    categories:{
+    skills:{
         type:[Schema.Types.ObjectId],
-        ref : 'Category'
+        ref : 'Skill'
     },
     location:{
         city : String,

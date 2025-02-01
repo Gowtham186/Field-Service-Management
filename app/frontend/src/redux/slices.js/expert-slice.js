@@ -13,6 +13,16 @@ export const createExpertProfile = createAsyncThunk('expert/createExpertProfile'
     }
 })  
 
+export const fetchSkills = createAsyncThunk('/expert/fetchSkills', async()=>{
+    try{
+        const response = await axios.get('/api/skills')
+        return response.data
+        console.log(response.data)
+    }catch(err){
+        console.log(err)
+    }
+})
+
 export const getAllExperts = createAsyncThunk('expert/getAllExperts', async()=>{
     try{
         const allExperts = await axios.get('/api/experts', { headers : { Authorization : localStorage.getItem('token')}})
@@ -39,11 +49,15 @@ const expertSlice = createSlice({
     name : 'expert',
     initialState : { 
         profile : null, 
+        allSkills : [],
         experts :[], 
         serverError : null,
 
     },
     extraReducers : (builder)=>{
+        builder.addCase(fetchSkills.fulfilled, (state,action)=> {
+            state.allSkills = action.payload
+        })
         builder.addCase(createExpertProfile.rejected, (state,action)=>{
             state.serverError = action.payload
         })
