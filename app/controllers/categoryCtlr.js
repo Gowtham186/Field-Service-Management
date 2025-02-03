@@ -5,48 +5,49 @@ import categoryValidation from "../validators/category-validation.js";
 
 const categoryCtlr = {}
 
-categoryCtlr.create = async(req, res)=>{
-    const errors = validationResult(req)
-    
-    if(!errors.isEmpty()){
-        return res.status(400).json({errors : errors.array()})
+categoryCtlr.create = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
     }
 
-    const body = req.body
-    try{
-        if(req.currentUser.role == 'expert'){
-            const category = await Category.create(body)
-            return res.json(category)
-        }else if(req.currentUser.role == 'admin'){
-            //console.log(body)
-            const newCategory = await Category.create({
-                name : body.name
-            })
+    const body = req.body;
+    try {
+        
+        const newCategory = await Category.create(body);
 
-            const newServices = await Promise.all(body.services.map(async(service)=> { 
+        if(body.services){
+            let newServices = []
+            newServices = await Promise.all(
+                body.services.map(async (service) => {
                     const newService = new Service({
-                    serviceName : service.serviceName,
-                    price : service.price,
-                    category : newCategory._id
+                        serviceName: service.serviceName,
+                        price: service.price,
+                        category: newCategory._id
+                    });
+                    return newService.save();
                 })
-                return newService.save()
-            }))
-            console.log({...newCategory.toObject(), services : newServices})
-            return res.status(201).json({...newCategory.toObject(), services : newServices})
+            );
         }
-    }catch(err){
-       return res.status(500).json({errors : 'something went wrong'})
+        
+        console.log({ ...newCategory.toObject(), services: newServices });
+        return res.status(201).json({ ...newCategory.toObject(), services: newServices });
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json({ errors: 'Something went wrong' });
     }
-}
+};
 
-categoryCtlr.getAllCategory = async(req,res)=>{
-    try{
-        const allcategory = await Category.find()
-        res.json(allcategory)
-    }catch(err){
-       return res.status(500).json({errors : 'something went wrong'})
-    }
-}
+
+// categoryCtlr.getAllCategory = async(req,res)=>{
+//     try{
+//         const allcategory = await Category.find()
+//         res.json(allcategory)
+//     }catch(err){
+//        return res.status(500).json({errors : 'something went wrong'})
+//     }
+// }
 
 categoryCtlr.getCategory = async (req,res)=>{
     const errors = validationResult(req)
@@ -146,8 +147,22 @@ categoryCtlr.categoriesWithServices = async (req,res)=>{
                     foreignField : "category",
                     as : "services"
                 }
+            },
+            {
+                $lookup: {
+                    from: "skills", 
+                    localField: "skill",
+                    foreignField: "_id",
+                    as: "skill"
+                }
+            },
+            {
+                $set: {
+                    skill: { $arrayElemAt: ["$skill", 0] } // Extract the first (and only) element from the skill array
+                }
             }
         ])
+        //console.log(categories)
         res.json(categories)
     }catch(err){
         console.log(err)
@@ -209,6 +224,27 @@ categoryCtlr.deleteCategoryAndServices = async (req,res)=>{
     }catch(err){
         console.log(err)
         return res.status(500).json({errors : 'something went wrong'})
+    }
+}
+
+categoryCtlr.getCategoryAndServicesBySkill = async(req,res)=>{
+    const { skill } = req.params
+    console.log(skill)
+    try{
+        const category = await Category.findOne({skill : skill})
+        console.log(category)
+
+        if(!category){
+            return res.status(404).json({errors : 'no categry found on this skill'})
+        }
+        
+        const services = await Service.find({category : category._id})
+        
+        res.json({...category.toObject(), services : services})
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors : 'something went wrong'})
+        
     }
 }
 

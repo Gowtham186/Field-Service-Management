@@ -16,5 +16,5 @@ router.get('/service-requests/customer/:customerId', authenticateUser, serviceRe
 router.get('/service-requests/expert/:expertId', authenticateUser, serviceRequestCtlr.getByExpert)
 
 //querying
-router.get('/search', serviceRequestCtlr.querying)
+
 export default router

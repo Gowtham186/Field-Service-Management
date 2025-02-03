@@ -5,13 +5,19 @@ const epxertSchema = new Schema({
         type:Schema.Types.ObjectId,
         ref:'User'
     },
+    profilePic : { type : String},
     age:Number,
     gender:{
         type:String,
     },
     skills:{
-        type:[Schema.Types.ObjectId],
-        ref : 'Skill'
+        type:[
+            {
+                type : Schema.Types.ObjectId,
+                ref : 'Skill',
+            }
+        ],
+        default : []
     },
     location:{
         city : String,

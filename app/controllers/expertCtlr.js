@@ -1,47 +1,80 @@
 import Category from "../models/category-model.js";
 import Expert from "../models/expert-model.js"
 import ServiceRequest from "../models/serviceRequest-model.js";
+import Skill from "../models/skill-model.js";
+import mongoose from "mongoose";
 import axios from "axios";
 const expertCtlr = {}
 
-expertCtlr.create = async (req, res) => {   
+expertCtlr.create = async (req, res) => {
     try {
         const body = req.body;
 
-        if (body.skills && typeof body.skills == 'string') {
+        if (typeof body.skills === 'string') {
             body.skills = JSON.parse(body.skills);
         }
-        if (body.location && typeof body.location == 'string') {
+        if (typeof body.location === 'string') {
             body.location = JSON.parse(body.location);
         }
-        console.log(req.files)
-        console.log(req.body)
-        if (req.files && req.files.length > 0) {
-            const uploadDocuments = req.files.map((file) => ({
+
+        console.log('Request Body:', JSON.stringify(req.body, null, 2));  
+        console.log('Request Files:', JSON.stringify(req.files, null, 2));
+
+
+        let profilePicUrl = null
+
+        if(req.files && req.files['profilePic'] && req.files['profilePic'][0]){
+            profilePicUrl = req.files['profilePic'][0].path
+        }
+
+        if (req.files && req.files['documents']) {
+            const uploadDocuments = req.files['documents'].map((file) => ({
                 pathName: file.path,
                 type: file.mimetype,
-                isVerified: "pending", 
+                isVerified: "pending",
             }));
             body.documents = uploadDocuments;
         }
 
+        // Process skills to either find existing ones or create new ones
+        const createSkills = await Promise.all(
+            body.skills.map(async (ele) => {
+                let skill;
+                if (mongoose.Types.ObjectId.isValid(ele)) {
+                    skill = await Skill.findOne({ _id: ele });
+                } else {
+                    skill = await Skill.findOne({ name: ele });
+                    if (!skill) {
+                        skill = await Skill.create({ name: ele });
+                    }
+                }
+                return skill._id;
+            })
+        );
+        body.skills = createSkills; 
+
         const expert = new Expert(body);
-        const existAddress = await Expert.findOne({'location.address': body.location.address});
+
+        const existAddress = await Expert.findOne({ 'location.address': body.location.address });
         
         if (!existAddress) {
-            const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
+            const resource = await axios.get('https://api.opencagedata.com/geocode/v1/json', {
                 params: { q: body.location.address, key: process.env.OPENCAGE_API_KEY }
             });
 
             if (resource.data.results.length > 0) {
                 expert.location.coords = resource.data.results[0].geometry;
             } else {
-                return res.status(400).json({ errors: 'Invalid address, plxease try another.' });
+                return res.status(400).json({ errors: 'Invalid address, please try another.' });
             }
         } else {
             expert.location.coords = existAddress.location.coords;
         }
 
+        if(profilePicUrl){
+            expert.profilePic = profilePicUrl
+        }
+        
         expert.userId = req.currentUser.userId;
         console.log(expert)
         await expert.save();
@@ -49,7 +82,7 @@ expertCtlr.create = async (req, res) => {
         res.json(expert);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ errors: "Something went wrong, please try again later." });
+        res.status(500).json({ errors: 'Something went wrong, please try again later.' });
     }
 };
 
@@ -78,9 +111,9 @@ expertCtlr.unVerifiedExperts = async (req,res) => {
 expertCtlr.getProfile = async(req,res)=>{
     const id = req.params.id
     try{
-        const expert = await Expert.findById({userId : id})
-            .populate('categories', 'name')
-            .populate('userId', 'phone_number')
+        const expert = await Expert.findOne({userId : id})
+            .populate('skills')
+            .populate('userId')
         if(!expert){
             return res.status(404).json({errors : 'expert not found'})
         }

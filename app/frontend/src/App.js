@@ -14,6 +14,8 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserProfile } from './redux/slices.js/user-slice';
 import ManageCategories from './pages/ManageCategories';
+import ExpertDetails from './pages/ExpertDetails';
+import CategoryDetails from './pages/CategoryDetails';
 
 function App() {
   const dispatch = useDispatch()
@@ -51,6 +53,8 @@ function App() {
               <ManageCategories />
             </MainLayout>
           }/>
+          <Route path="/experts/:id" element={<ExpertDetails />}/>
+          <Route path="/categories" element={<CategoryDetails />}/>
           
         </Routes>
     </div>

@@ -185,6 +185,11 @@ export default function ManageCategories() {
                 <h2 className="text-lg font-semibold text-gray-700">Category:</h2>
                 <p className="text-lg font-medium text-gray-900">{ele.name}</p>
               </div>
+              <div className="flex justify-between items-center mt-4">
+                <h2 className="text-lg font-semibold text-gray-700">Skill:</h2>
+                <p className="text-lg font-medium text-gray-900">{ele.skill.name}</p>
+              </div>
+
 
               <h2 className="text-lg font-semibold text-gray-700 mt-4">Services:</h2>
               <div className="mt-3 space-y-3">

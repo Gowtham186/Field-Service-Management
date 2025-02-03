@@ -10,6 +10,7 @@ import serviceRoutes from './app/routes.js/service-routes.js'
 import serviceRequestRoutes from './app/routes.js/serviceRequest-routes.js'
 import reviewRoutes from './app/routes.js/review-routes.js'
 import skillRoutes from './app/routes.js/skill-routes.js'
+import queryRoutes from './app/routes.js/query-routes.js'
 // import { Server } from 'socket.io'
 // import http from 'http'
 
@@ -50,6 +51,7 @@ app.use('/api', categoryRoutes)
 app.use('/api', serviceRoutes)
 app.use('/api', serviceRequestRoutes)
 app.use('/api', reviewRoutes)
+app.use('/api', queryRoutes)
 
 //export { io }
 

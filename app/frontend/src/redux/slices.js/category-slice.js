@@ -12,7 +12,7 @@ export const fetchCategories = createAsyncThunk('category/fetchCategories', asyn
 
 export const getCategoriesWithServices = createAsyncThunk('category/getCategoriesWithServices', async(_, {rejectWithValue})=>{
     try{
-        const response = await axios.get('/api/categories/withServices', { headers : { Authorization : localStorage.getItem('token')}})
+        const response = await axios.get('/api/categories')
         console.log(response.data)
         return response.data
     }catch(err){
@@ -79,20 +79,34 @@ export const newCategoryWithServices = createAsyncThunk('category/newCategoryWit
     }
 })
 
+// export const getCategoryWithServices = createAsyncThunk('category/getCategoryWithServices', async({skill})=>{
+//     try{
+//         const response  = await axios.get('/api/categories')
+//         console.log(response.data)
+//     }catch(err){
+//         console.log(err)
+//     }
+// })
+
 const categorySlice = createSlice({
     name : 'category',
     initialState : {
         data : [],
         serverError : null,
-        categoriesWithServices : []
+        categoriesWithServices : [],
+        loading : false
     },
     extraReducers:(builder)=>{
         builder.addCase(fetchCategories.fulfilled, (state,action) => {
             state.data = action.payload
         })
+        builder.addCase(getCategoriesWithServices.pending, (state,action) => {
+            state.loading = true
+        })
         builder.addCase(getCategoriesWithServices.fulfilled, (state,action) => {
+            state.loading = false
             state.categoriesWithServices = action.payload
-            state.serverError = action.payload
+            state.serverError = null
         })
         builder.addCase(getCategoriesWithServices.rejected, (state,action)=>{
             state.categoriesWithServices = null

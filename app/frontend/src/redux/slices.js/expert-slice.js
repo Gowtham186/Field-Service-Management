@@ -16,8 +16,8 @@ export const createExpertProfile = createAsyncThunk('expert/createExpertProfile'
 export const fetchSkills = createAsyncThunk('/expert/fetchSkills', async()=>{
     try{
         const response = await axios.get('/api/skills')
-        return response.data
         console.log(response.data)
+        return response.data
     }catch(err){
         console.log(err)
     }
@@ -44,6 +44,17 @@ export const toggledIsVerified = createAsyncThunk('expert/editExpert', async({id
     }
 })
 
+export const getExpertProfile = createAsyncThunk('expert/getExpertProfile', async({id}, {rejectWithValue}) => {
+    try{
+        const response = await axios.get(`/api/experts/${id}`)
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+        return rejectWithValue(err.response.data.errors)
+    }
+})
+
 
 const expertSlice = createSlice({
     name : 'expert',
@@ -52,7 +63,11 @@ const expertSlice = createSlice({
         allSkills : [],
         experts :[], 
         serverError : null,
-
+    },
+    reducers : {
+        setSelectedExpertProfile : (state,action)=>{
+            state.profile = action.payload
+        }
     },
     extraReducers : (builder)=>{
         builder.addCase(fetchSkills.fulfilled, (state,action)=> {
@@ -80,6 +95,14 @@ const expertSlice = createSlice({
         builder.addCase(toggledIsVerified.rejected, (state,action)=>{
             state.serverError = action.payload
         })
+        builder.addCase(getExpertProfile.fulfilled, (state,action)=>{
+            state.profile = action.payload
+            state.serverError = null
+        })
+        builder.addCase(getExpertProfile.rejected, (state,action)=>{
+            state.serverError = null
+        })
     }
 })
+export const { setSelectedExpertProfile } = expertSlice.actions
 export default expertSlice.reducer

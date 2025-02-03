@@ -5,6 +5,7 @@ import Expert from "../models/expert-model.js"
 import axios from "axios"
 import geolib, { getDistance } from 'geolib'
 import Category from "../models/category-model.js"
+import Skill from "../models/skill-model.js"
 //import { io } from "../../index.js"
 
 const serviceRequestCtlr = {}
@@ -353,180 +354,79 @@ serviceRequestCtlr.getByExpert = async(req,res)=>{
 
 /* serviceRequestCtlr.querying = async (req, res) => {
     try {
-      const { location } = req.query;
-  
-      if (!location) {
-        return res.status(400).json({ errors: 'Location is required' });
-      }
-  
-      let results = await Expert.find({ location }).select('categories').populate('categories', 'name');
-  
-      if (!results.length) {
-        return res.status(404).json({ errors: 'No results found for this specified location' });
-      }
-
-      if (category) {
-        results = results.filter(expert => 
-          expert.categories.some(cat => cat.name === category)
-        );
-  
-        if (!results.length) {
-          return res.status(404).json({ errors: `No results found for category '${category}' in the specified location` });
-        }
-      }
-      
-      const allCategories = results.flatMap(expert => expert.categories.map(cat => cat.name))
-
-      const uniqueCategories = []
-      allCategories.forEach(category => {
-        if(!uniqueCategories.includes(category)){
-            uniqueCategories.push(category)
-        }
-      })
-    
-      res.json(uniqueCategories);
-  
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ errors: 'Something went wrong' });
-    }
-  }; */
-  
-
-// serviceRequestCtlr.querying = async(req,res)=>{
-//     try{
-//         const { location } = req.query
-//         console.log(location)
-
-//         const existAddress = await Customer.findOne({'location.address' : location})
-
-//         let lat, lng;
-//         if(!existAddress){
-//             const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
-//                 params :{ q : location,  key : process.env.OPENCAGE_API_KEY }
-//             })
-
-            
-//             if(resource.data.results.length == 0){
-//                 return res.status(400).json({errors : 'try other address'})
-//             }
-            
-//             const geometry = resource.data.results[0].geometry
-//             lat = geometry.lat
-//             lng = geometry.lng
-//             console.log('new', {lat,lng})
-//         }else{
-//             const geometry = existAddress.location.coords
-//             lat = geometry.lat
-//             lng = geometry.lng
-//             console.log('old', {lat,lng})
-//         }
-//         //console.log({lat, lng})
-//         //res.json({lat, lng})
-
-//         const experts = await Expert.find()
-//         console.log(experts.length)
-
-//         const filteredExperts = experts.filter(expert => {
-//             if(!expert.location.coords || !expert.location.coords.lat || !expert.location.coords.lng){
-//                 return false
-//             }
-//             //console.log(expert.location.coords)
-//             return geolib.isPointWithinRadius(
-//                 { latitude : expert.location.coords.lat, longitude : expert.location.coords.lng},
-//                 { latitude : lat, longitude : lng},
-//                 10000
-//             )
-
-//             /* return distane = geolib.getDistance(
-//                 { latitude : expert.location.coords.lat, longitude : expert.location.coords.lng},
-//                 { latitude : lat, longitude : lng}
-//             )
-//             console.log(distane) */
-//         })
-
-//         // if(filteredExperts.length == 0){
-//         //     return res.status(404).json({errors : 'No experts found withing 5km radius'})
-//         // }
-//         console.log(filteredExperts)
-
-//         // const allSkillIds = filteredExperts.flatMap(expert => expert.skills.map(cat => cat))
-//         // const uniqueSkillIds = allSkillIds.filter((id, index, self)=> self.indexOf(id) === index)
-        
-//         // console.log(allSkillIds)
-//         // console.log(uniqueSkillIds)
-
-//         // const skills = await Skill.find({_id : { $in : uniqueSkillIds}}).select('name')
-//         // console.log(skills)
-
-//         res.json(filteredExperts)
-
-//     }catch(err){
-//         console.log(err)
-//         return res.status(500).json({errors : 'something went wrong'})
-//     }
-// }
-
-serviceRequestCtlr.querying = async (req, res) => {
-    try {
-        const { location } = req.query;
-        console.log(location);
+        const { location, skill } = req.query;
+        console.log(location, skill);
 
         let lat, lng;
-        const existAddress = await Customer.findOne({ 'location.address': location });
+        let filteredExperts;
 
-        if (!existAddress) {
-            const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
-                params: { q: location, key: process.env.OPENCAGE_API_KEY }
-            });
+        if(location){
+            const existAddress = await Customer.findOne({ 'location.address': location });
 
-            if (resource.data.results.length === 0) {
-                return res.status(400).json({ errors: 'Try another address' });
+            if (!existAddress) {
+                const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
+                    params: { q: location, key: process.env.OPENCAGE_API_KEY }
+                });
+
+                if (resource.data.results.length === 0) {
+                    return res.status(400).json({ errors: 'Try another address' });
+                }
+
+                const geometry = resource.data.results[0].geometry;
+                lat = geometry.lat;
+                lng = geometry.lng;
+                console.log('New Location:', { lat, lng });
+
+            } else {
+                const geometry = existAddress.location.coords;
+                lat = geometry.lat;
+                lng = geometry.lng;
+                console.log('Existing Location:', { lat, lng });
             }
 
-            const geometry = resource.data.results[0].geometry;
-            lat = geometry.lat;
-            lng = geometry.lng;
-            console.log('New Location:', { lat, lng });
+            const experts = await Expert.find({'location.coords': { $exists: true }})
+                .populate('userId')
+                .populate('skills');
 
-        } else {
-            const geometry = existAddress.location.coords;
-            lat = geometry.lat;
-            lng = geometry.lng;
-            console.log('Existing Location:', { lat, lng });
+            filteredExperts = experts.filter(expert => {
+                if (!expert.location.coords || !expert.location.coords.lat || !expert.location.coords.lng) {
+                    return false;
+                }
+
+                const distance = geolib.getDistance(
+                    { latitude: expert.location.coords.lat, longitude: expert.location.coords.lng },
+                    { latitude: lat, longitude: lng }
+                );
+
+                console.log(`Distance to ${expert.userId.name}: ${distance} meters`);
+
+                return distance <= 10000; // 10 km radius
+            });
+            console.log(`Filtered Experts by location: ${filteredExperts.length}`);
+        }else{
+            filteredExperts = await Expert.find().populate('userId').populate('skills')
+            console.log(`Total experts no location filter: ${filteredExperts.length}`)
         }
 
-        // **Find experts near the given location (10 km radius)**
-        const experts = await Expert.find({
-            'location.coords': { $exists: true }  // Ensure experts have location data
-        });
+        // const allSkillIds = filteredExperts.flatMap(expert => expert.skills.map(skill => skill))
+        // const uniqueSkillIds = allSkillIds.filter((id, index, self) => self.indexOf(id) === index)
+        // const skills = await Skill.find({_id : { $in : uniqueSkillIds}}).select('name')
 
-        console.log(`Total Experts: ${experts}`);
-
-        const filteredExperts = experts.filter(expert => {
-            if (!expert.location.coords || !expert.location.coords.lat || !expert.location.coords.lng) {
-                return false;
-            }
-
-            const distance = geolib.getDistance(
-                { latitude: expert.location.coords.lat, longitude: expert.location.coords.lng },
-                { latitude: lat, longitude: lng }
-            );
-
-            console.log(`Distance to ${expert.name}: ${distance} meters`);
-
-            return distance <= 10000; // 10 km radius
-        });
-
-        console.log(`Filtered Experts: ${filteredExperts.length}`);
-
-        res.json(filteredExperts);
-
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ errors: 'Something went wrong' });
-    }
-};
-
+        
+        if(skill){
+            filteredExperts = filteredExperts.filter(expert => 
+                expert.skills.some(cat =>  cat._id.toString() === skill))
+        }
+        console.log(`Filtered Experts by location & skill: ${filteredExperts.length}`);
+        console.log(filteredExperts)
+            
+        res.json({filteredExperts});
+            
+        } catch (err) {
+            console.error(err);
+            return res.status(500).json({ errors: 'Something went wrong' });
+        }
+    }; */
+    
   
 export default serviceRequestCtlr

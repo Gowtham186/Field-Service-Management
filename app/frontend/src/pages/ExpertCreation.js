@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import Select from 'react-select'
+import CreatableSelect from 'react-select/creatable'
 import { createExpertProfile, fetchSkills } from "../redux/slices.js/expert-slice"
 import { useNavigate } from "react-router-dom"
+import { getAddress } from "../redux/slices.js/search-slice"
+import { expertRegister } from "../redux/slices.js/user-slice"
 
 const formInitialState = {
+    profilePic : '',
     age:'',
     gender:'',
     experience: '',
@@ -17,15 +20,38 @@ export default function ExpertCreation() {
     const [expertForm, setExpertForm] = useState(formInitialState)
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    const { data } = useSelector((state) => state.category)
-    const { allSkills } = useSelector((state) => state.expert)
     const [clientErrors, setClientErrors] = useState({})
+    const { currentAddress } = useSelector((state) => state.search)
+    const [options, setOptions] = useState([])
     const errors = {}
-    const newData = allSkills?.map(ele => ({ value: ele._id, label: ele.name }))
 
     useEffect(() => {
-        dispatch(fetchSkills())
-    }, [])
+        dispatch(fetchSkills()).unwrap().then((data) => {
+            const newData = data?.map(ele => ({value : ele._id, label : ele.name}))
+            setOptions(newData)
+        })
+    }, [dispatch])
+
+    useEffect(() => {
+        if (currentAddress && !expertForm.location.address) {
+            setExpertForm((prevForm) => ({
+                ...prevForm,
+                location: { address: currentAddress }
+            }));
+        }
+    }, [currentAddress, expertForm.location.address]);    
+
+    const handleCreate = (inputValue)=>{
+        const formatInput = inputValue.slice(0,1).toUpperCase() + inputValue.slice(1)
+
+        const newOption = { value : formatInput, label : formatInput}
+        console.log(newOption)
+        setOptions((prevOptions) => [...prevOptions, newOption]);
+        setExpertForm((prev)=> ({
+            ...prev,
+            skills : [...prev.skills, newOption]
+        }))
+    }
 
     const runClientValidaions = ()=>{
         if(!expertForm.age){
@@ -52,7 +78,7 @@ export default function ExpertCreation() {
 
     const handleExpertCreation = async (e) => {
         e.preventDefault()
-        runClientValidaions()
+        //runClientValidaions()
         console.log(errors)
         const resetForm = ()=> setExpertForm(formInitialState)
         if(Object.keys(errors).length !== 0){
@@ -62,6 +88,7 @@ export default function ExpertCreation() {
                 setClientErrors({})
                 const formData = new FormData();
                 
+                formData.append('profilePic', expertForm.profilePic)
                 formData.append('age', expertForm.age)
                 formData.append('gender', expertForm.gender)
                 formData.append('experience', expertForm.experience);
@@ -89,7 +116,7 @@ export default function ExpertCreation() {
         setClientErrors({...clientErrors, skills : null})
         setExpertForm((prevForm) => ({
             ...prevForm,
-            skills: selectedOptions.map(ele => ele) || []
+            skills: selectedOptions || []
 
         }))
     }
@@ -103,12 +130,54 @@ export default function ExpertCreation() {
         }));
     };
 
+    const handleProfilePic = (e)=>{
+        const pic = e.target.files[0]
+        setExpertForm((prevForm)=>({
+            ...prevForm,
+            profilePic : pic
+        }))
+    }
+
+    const handleGetAddress = ()=>{
+        if("geolocation" in navigator){
+            navigator.geolocation.getCurrentPosition(async(position) => {
+                const lat = position.coords.latitude
+                const lng = position.coords.longitude
+                console.log(position.coords.latitude)
+                console.log(position.coords.longitude)
+
+                await dispatch(getAddress({lat, lng})).unwrap()
+            })   
+        }
+    }
+
+    const handleLocationChange = (e) => {
+        console.log(e.target.value);
+        console.log(currentAddress);
+        setClientErrors({...clientErrors, location: null});
+        setExpertForm((prevForm) => ({
+            ...prevForm,
+            location: { ...prevForm.location, address: e.target.value || currentAddress }
+        }));
+    }    
+
     return (
         <>
             <h1 className="text-center text-2xl mt-9">Fill Your Professional Details</h1>
             <form onSubmit={handleExpertCreation} className="grid grid-cols-2 gap-8 w-full h-full max-w-5xl mx-auto p-6 shadow-lg rounded-lg">
                 {/* Left Column */}
                 <div className="space-y-4">
+                <div>
+                        <label htmlFor="profilePic" className="block text-sm font-medium text-gray-700 mb-1">profilePic :</label>
+                        <input
+                            type="file"
+                            id="profilePic"
+                            name="profilePic"
+                            onChange={handleProfilePic}
+                            className="mt-1 block p-1 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                        />
+                        {clientErrors && ( <p className="text-red-500 text-xs">{clientErrors.profilePic}</p>)}
+                    </div>
                     <div>
                         <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">Age :</label>
                         <input
@@ -156,12 +225,13 @@ export default function ExpertCreation() {
                     </div>
 
                     <div>
-                        <label htmlFor="skills" className="block text-sm font-medium text-gray-700 mb-1">Skills :</label>
-                        <Select
-                            options={newData}
+                        <label htmlFor="skills" className=" text-sm font-medium text-gray-700 mb-1">Skills :</label>
+                        <CreatableSelect
+                            options={options}
+                            onCreateOption={handleCreate}
                             id="skills"
                             onChange={handleSelectSkills}
-                            className="w-3/4"
+                            className="w-full"
                             value={expertForm.skills}
                             isMulti />
                         {clientErrors && ( <p className="text-red-500 text-xs">{clientErrors.skills}</p>)}
@@ -191,11 +261,8 @@ export default function ExpertCreation() {
                             <input
                                 type="text"
                                 id="location"
-                                value={expertForm.location.address}
-                                onChange={(e) => {
-                                    setExpertForm({ ...expertForm, location: { ...expertForm.location, address: e.target.value } })
-                                    setClientErrors({ ...clientErrors, location: null })
-                                }}
+                                value={expertForm.location.address || currentAddress}
+                                onChange={handleLocationChange}
                                 className="mt-1 block p-1 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                             />
                              {clientErrors && <p className="text-red-500 text-xs">{clientErrors.location}</p>}
@@ -203,9 +270,9 @@ export default function ExpertCreation() {
                         <div>
                             <button
                                 type="button"
-                                
+                                onClick={handleGetAddress}
                                 className="relative right-4 mt-6 p-1 bg-slate-500 text-white font-semibold focus:outline-none">
-                                ?
+                                Get Current Address
                             </button>
                         </div>
                     </div>
