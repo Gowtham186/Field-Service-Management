@@ -5,6 +5,9 @@ import { customerLogin, getUserProfile, verifyOtpApi } from "../redux/slices.js/
 import { useNavigate } from "react-router-dom";
 
 export default function CustomerLogin({ closeLogin }) {
+  if (!closeLogin) {
+    console.error("closeLogin function is not passed to CustomerLogin");
+  }
   const [phone_number, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [openOtpForm, setOpenOtpForm] = useState(false);
@@ -14,6 +17,7 @@ export default function CustomerLogin({ closeLogin }) {
   const errors = {};
   const { serverError } = useSelector((state) => state.user);
   const formRef = useRef(null); 
+  const { isLoggedIn } = useSelector((state) => state.user)
 
   // Close the login form if clicked outside
   useEffect(() => {
@@ -91,8 +95,13 @@ export default function CustomerLogin({ closeLogin }) {
             setClientErrors({});
             await dispatch(verifyOtpApi({verifyOtpData, resetForm})).unwrap();
             await dispatch(getUserProfile()).unwrap();
-            closeLogin()
-            navigate("/");
+            // console.log('closing login')
+            // closeLogin()
+            // navigate("/");
+            if (isLoggedIn) {
+              closeLogin(); // Close the modal if the user is successfully logged in
+              navigate("/"); // Navigate to the homepage or any other page
+            }
         }catch(err){
             console.log(err)
         }

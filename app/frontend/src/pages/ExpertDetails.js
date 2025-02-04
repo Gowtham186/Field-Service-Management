@@ -14,8 +14,8 @@ export default function ExpertDetails(){
         dispatch(getExpertProfile({id}))
     }, []);
 
-    const handleBookExpert = ()=>{
-        navigate('/categories')
+    const handleBookExpert = (id)=>{
+        navigate(`/experts/${id}/categories`)
     }
 
     return(
@@ -32,7 +32,7 @@ export default function ExpertDetails(){
             <p><span className="font-semibold">Skills:</span> {profile?.skills?.map(skill => skill.name).join(", ")}</p>
             <button
               className="bg-blue-500 text-white p-2 rounded-md cursor-pointer hover:bg-blue-600"
-              onClick={handleBookExpert}            
+              onClick={()=> handleBookExpert(id)}            
             >Book Expert</button>
         </div>
     </div>

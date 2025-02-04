@@ -27,6 +27,11 @@ export default function Sidebar({ role }) {
             </Link>
           </li>
           <li>
+            <Link to="/experts/availability" className="text-white hover:text-blue-700">
+              Manage availability
+            </Link>
+          </li>
+          <li>
           <button onClick={handleLogout} className="text-white">Logout</button>
         </li>
         </>

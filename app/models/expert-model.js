@@ -36,13 +36,7 @@ const epxertSchema = new Schema({
         default: []
     },    
     availability:{
-        type:[
-            {
-                date:Date,
-                serviceId: { type : Schema.Types.ObjectId, ref : 'ServiceRequest'},
-                _id : false
-            }
-        ],
+        type:[String],
         default:[]
     },
     isPremium: {

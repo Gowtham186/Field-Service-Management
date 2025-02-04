@@ -23,3 +23,10 @@ body::-webkit-scrollbar {
   .edit-form-container::-webkit-scrollbar {
     display: none; /* Hide scrollbar for Chrome, Safari, Edge */
   }
+
+  .custom-event {
+    height: 25px;
+    background-color: lightblue;
+    border: none;
+    color: black;
+  }

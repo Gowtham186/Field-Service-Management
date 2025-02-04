@@ -21,6 +21,8 @@ export const getCategoriesWithServices = createAsyncThunk('category/getCategorie
     }
 })
 
+
+
 export const updateCategoryWithServices = createAsyncThunk('category/updatedCategoryWithServices', async({id, updatedItem}, {rejectWithValue})=>{
     try{
         const response = await axios.put(`/api/categories/${id}`, updatedItem, { headers : { Authorization : localStorage.getItem('token')}} )

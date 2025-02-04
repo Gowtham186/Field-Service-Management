@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+
 import CustomerLogin from "../pages/CustomerLogin";
 import { logout } from "../redux/slices.js/user-slice";
 
@@ -38,7 +39,7 @@ const handleLogout = ()=>{
                 </Link>
               </li>
               <li>
-                <Link to="/make-service" className="text-black-500 hover:text-blue-700">
+                <Link to="/profile" className="text-black-500 hover:text-blue-700">
                   Profile
                 </Link>
               </li>

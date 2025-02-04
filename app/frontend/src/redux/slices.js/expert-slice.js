@@ -55,6 +55,25 @@ export const getExpertProfile = createAsyncThunk('expert/getExpertProfile', asyn
     }
 })
 
+export const updateAvailability = createAsyncThunk('expert/updateAvailability', async({availability})=>{
+    try{
+        const response = await axios.put('/api/experts/availability', {availability}, { headers : { Authorization : localStorage.getItem('token')}})
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+    }
+})
+
+export const expertCategoriesBySkills = createAsyncThunk('expert/expertCategoriesBySkills', async(id) => {
+    try{
+        const response = await axios.get(`/api/experts/${id}/categories`)
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+    }
+})
 
 const expertSlice = createSlice({
     name : 'expert',
@@ -63,6 +82,8 @@ const expertSlice = createSlice({
         allSkills : [],
         experts :[], 
         serverError : null,
+        categoriesBySkills : [],
+        loading : false
     },
     reducers : {
         setSelectedExpertProfile : (state,action)=>{
@@ -101,6 +122,15 @@ const expertSlice = createSlice({
         })
         builder.addCase(getExpertProfile.rejected, (state,action)=>{
             state.serverError = null
+        })
+        builder.addCase(updateAvailability.fulfilled, (state,action)=>{
+            state.profile.availability = action.payload
+        })
+        builder.addCase(expertCategoriesBySkills.pending, (state,action)=>{
+            state.loading = true
+        })
+        builder.addCase(expertCategoriesBySkills.fulfilled, (state,action)=>{
+            state.categoriesBySkills = action.payload
         })
     }
 })

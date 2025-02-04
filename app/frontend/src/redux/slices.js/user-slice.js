@@ -26,11 +26,10 @@ export const verifyOtpApi = createAsyncThunk('user/verifyOtpApi', async({verifyO
 export const getUserProfile = createAsyncThunk('user/getUserProfile', async(_, {rejectWithValue})=>{
     try{
         const userProfile = await axios.get('/api/users/profile', { headers : { Authorization : localStorage.getItem('token')}})
-        console.log(userProfile.data)
         //const userData = lodash._.pick(userProfile.data, ['_id', 'phone_number', 'role', 'email'])
         const { _id, phone_number, role, email } = userProfile.data;
         const userData = { _id, phone_number, role, email };
-        console.log(userData)
+        //console.log(userData)
         return userData
     }catch(err){        
         console.log(err)

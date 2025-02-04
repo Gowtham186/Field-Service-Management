@@ -78,7 +78,7 @@ export default function ExpertCreation() {
 
     const handleExpertCreation = async (e) => {
         e.preventDefault()
-        //runClientValidaions()
+        runClientValidaions()
         console.log(errors)
         const resetForm = ()=> setExpertForm(formInitialState)
         if(Object.keys(errors).length !== 0){

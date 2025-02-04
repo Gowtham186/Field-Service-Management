@@ -4,6 +4,7 @@ import ServiceRequest from "../models/serviceRequest-model.js";
 import Skill from "../models/skill-model.js";
 import mongoose from "mongoose";
 import axios from "axios";
+import Service from "../models/service-model.js";
 const expertCtlr = {}
 
 expertCtlr.create = async (req, res) => {
@@ -201,18 +202,89 @@ expertCtlr.verify = async(req,res)=>{
         console.log(err)
         res.status(500).json({errors : 'something went wrong'})
     }
-}
+ }
 
-expertCtlr.availability = async (req,res)=>{
-    try{
-        const expert = await Expert.findOne({userId : req.currentUser.userId})
-            .populate('availability.serviceId')
+// expertCtlr.availability = async (req,res)=>{
+//     try{
+//         const expert = await Expert.findOne({userId : req.currentUser.userId})
+//             .populate('availability.serviceId')
 
-        res.json(expert.availability)
-    }catch(err){
-        console.log(err)
-        return res.status(500).json({errors : 'something went wrong'})
+//         res.json(expert.availability)
+//     }catch(err){
+//         console.log(err)
+//         return res.status(500).json({errors : 'something went wrong'})
+//     }
+// }
+
+
+expertCtlr.updateAvailability =  async (req, res) => {
+        try {
+            const body = req.body;
+            
+            if (typeof body.availability === 'string') {
+                body.availability = JSON.parse(body.availability);
+            }
+
+            const expert = await Expert.findOne({ userId : req.currentUser.userId})
+
+            let updatedAvailability
+            if(expert.availability.some(date => body.availability.includes(date))){
+                updatedAvailability = await Expert.findOneAndUpdate(
+                    { userId : req.currentUser.userId },
+                    { $pull : { availability : { $in : body.availability}}},
+                    { new : true}
+                )
+            }else{
+                updatedAvailability = await Expert.findOneAndUpdate(
+                    { userId : req.currentUser.userId},
+                    { $push : { availability : { $each : body.availability}}},
+                    { new : true }
+                )
+            }
+            /* const expert = await Expert.findOneAndUpdate(
+                { userId: req.currentUser.userId },
+                {
+                    $addToSet: { availability: { $each: body.availability } }
+                },
+                { new: true }
+            ); */
+
+            return res.json(updatedAvailability.availability); // Respond with the updated expert data
+                
+            
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({ errors: 'Something went wrong' });
+        }
     }
-}
+
+    expertCtlr.expertCategoriesBySkills = async (req,res)=>{
+        try{
+            const id = req.params.id
+            const expert = await Expert.findOne({userId : id}).populate('skills')
+
+            if (!expert) {
+                return res.status(404).json({ message: "Expert not found" });
+            }
+
+            if (!expert.skills || expert.skills.length === 0) {
+                return res.status(400).json({ message: "Expert has no skills assigned" });
+            }
+
+            const expertCategories = await Promise.all(
+                expert.skills.map(async (ele) => {
+                   const category =  await Category.findOne({ skill: ele._id })
+                   if(!category) return null
+                
+                   const services = await Service.find({category : category._id})
+                   return { ...category.toObject(), services}
+                })       
+            );
+            console.log(expertCategories)   
+            res.json(expertCategories)         
+        }catch(err){
+            console.log(err)
+        }
+    }
 
 export default expertCtlr

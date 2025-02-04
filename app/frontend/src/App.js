@@ -9,13 +9,15 @@ import ExpertCreation from './pages/ExpertCreation';
 import Dashboard from './pages/Dashboard';
 import MainLayout from './components/MainLayout';
 import VerifyExperts from './pages/VerifyExperts';
-import MaterialUIForm from './components/Material';
+//import MaterialUIForm from './components/Material';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserProfile } from './redux/slices.js/user-slice';
 import ManageCategories from './pages/ManageCategories';
 import ExpertDetails from './pages/ExpertDetails';
 import CategoryDetails from './pages/CategoryDetails';
+import ExpertAvailability from './components/ExpertAvailability';
+import ServiceRequest from './pages/ServiceRequest';
 
 function App() {
   const dispatch = useDispatch()
@@ -53,8 +55,14 @@ function App() {
               <ManageCategories />
             </MainLayout>
           }/>
+          <Route path="/experts/availability" element={ 
+            <MainLayout> 
+              <ExpertAvailability />
+            </MainLayout>
+          }/>
           <Route path="/experts/:id" element={<ExpertDetails />}/>
-          <Route path="/categories" element={<CategoryDetails />}/>
+          <Route path="/experts/:id/categories" element={<CategoryDetails />}/>
+          <Route path="/service-requests" element={<ServiceRequest />}/>
           
         </Routes>
     </div>

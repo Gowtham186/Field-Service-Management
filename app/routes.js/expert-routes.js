@@ -12,6 +12,9 @@ router.get('/experts', authenticateUser, authorizeUser(['admin']), expertCtlr.un
 router.put('/experts/verify/:id', authenticateUser, authorizeUser(['admin']), expertCtlr.verify)
 router.get('/experts/:id', expertCtlr.getProfile)
 router.put('/experts', authenticateUser, expertCtlr.profileUpdate)
-router.get('/experts/availability', authenticateUser, expertCtlr.availability)
+//router.get('/experts/:id/availability', authenticateUser, expertCtlr.availability)
+router.put('/experts/availability', authenticateUser, expertCtlr.updateAvailability)
+router.get('/experts/:id/categories', expertCtlr.expertCategoriesBySkills)
+
 
 export default router
