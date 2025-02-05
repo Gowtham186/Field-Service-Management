@@ -13,7 +13,7 @@ export default function ExpertLogin() {
   const navigate = useNavigate();
   const [clientErrors, setClientErrors] = useState({});
   const dispatch = useDispatch();
-  const { serverError } = useSelector((state) => state.user);
+  const { serverError, user } = useSelector((state) => state.user);
   const errors = {};
 
 /* useEffect(()=>{
@@ -47,8 +47,14 @@ export default function ExpertLogin() {
         setClientErrors({});
         await dispatch(expertLogin({ formData, resetForm })).unwrap();
         await dispatch(getUserProfile()).unwrap()
+        console.log(user)
+        if(user.role === 'expert'){
+          navigate('/expert-dashboard')
+        }else{
+          navigate('/admin-dashboard')
+        }
         //localStorage.removeItem('expertLogin')
-        navigate('/dashboard');
+        //navigate('/dashboard');
       } catch (err) {
         console.log('Error login expert', err);
       }

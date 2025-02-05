@@ -17,8 +17,6 @@ export default function VerifyExperts(){
         }
     },[experts])
 
-    if(experts?.length === 0) return <p>...loading</p>
-
     const handleVerify = async(expert)=>{
         const updateVerify = !expert.isVerified
         console.log(updateVerify)

@@ -98,10 +98,10 @@ export default function CustomerLogin({ closeLogin }) {
             // console.log('closing login')
             // closeLogin()
             // navigate("/");
-            if (isLoggedIn) {
+            
               closeLogin(); // Close the modal if the user is successfully logged in
               navigate("/"); // Navigate to the homepage or any other page
-            }
+            
         }catch(err){
             console.log(err)
         }

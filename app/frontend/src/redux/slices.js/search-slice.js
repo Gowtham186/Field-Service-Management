@@ -31,7 +31,8 @@ const searchSlice = createSlice({
         resultsExperts : null,
         serverError : null,
         selectedSkill : null,
-        choosenServices : []
+        choosenServices : [],
+        selectedExpert : null
     },
     reducers : {
         setSearchSkillState : (state,action)=>{
@@ -39,6 +40,9 @@ const searchSlice = createSlice({
         },
         selectService : (state,action)=>{
             state.choosenServices = action.payload
+        },
+        setSelectedExpert : (state,action)=>{
+            state.selectedExpert = action.payload
         }
     },
     extraReducers : (builder)=>{
@@ -55,5 +59,5 @@ const searchSlice = createSlice({
         })
     }
 })
-export const { setSearchSkillState, selectService } = searchSlice.actions
+export const { setSearchSkillState, selectService, setSelectedExpert } = searchSlice.actions
 export default searchSlice.reducer    

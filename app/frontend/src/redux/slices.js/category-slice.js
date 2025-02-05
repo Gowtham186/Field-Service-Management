@@ -21,8 +21,6 @@ export const getCategoriesWithServices = createAsyncThunk('category/getCategorie
     }
 })
 
-
-
 export const updateCategoryWithServices = createAsyncThunk('category/updatedCategoryWithServices', async({id, updatedItem}, {rejectWithValue})=>{
     try{
         const response = await axios.put(`/api/categories/${id}`, updatedItem, { headers : { Authorization : localStorage.getItem('token')}} )
@@ -113,24 +111,33 @@ const categorySlice = createSlice({
         builder.addCase(getCategoriesWithServices.rejected, (state,action)=>{
             state.categoriesWithServices = null
         })
-        builder.addCase(updateCategoryWithServices.fulfilled, (state, action) => {
-            const updatedCategories = state.categoriesWithServices.map((category) => {
-              if (category._id === action.payload._id) {
-                return {
-                  ...category,
-                  ...action.payload.category,
-                  services: action.payload.services,
-                };
-              }
-              return category;
-            });
+        // builder.addCase(updateCategoryWithServices.fulfilled, (state, action) => {
+        //     const updatedCategories = state.categoriesWithServices.map((category) => {
+        //       if (category._id === action.payload._id) {
+        //         return {
+        //           ...category,
+        //           ...action.payload.category,
+        //           services: action.payload.services,
+        //         };
+        //       }
+        //       return category;
+        //     });
           
-            state.categoriesWithServices = updatedCategories;
-            state.serverError = null
-          });      
-          builder.addCase(updateCategoryWithServices.rejected, (state,action)=>{
-            state.serverError = action.payload
-          })    
+        //     state.categoriesWithServices = updatedCategories;
+        //     state.serverError = null
+        //   });      
+        builder.addCase(updateCategoryWithServices.fulfilled, (state, action) => {
+            state.categoriesWithServices = state.categoriesWithServices.map((category) =>
+                category._id === action.payload._id
+                    ? { ...category, ...action.payload }
+                    : category
+            );
+        
+            state.serverError = null;
+        });        
+        builder.addCase(updateCategoryWithServices.rejected, (state,action)=>{
+        state.serverError = action.payload
+        })    
         builder.addCase(deleteService.fulfilled, (state,action)=>{
            state.categoriesWithServices = state.categoriesWithServices.map(category => ({
             ...category,

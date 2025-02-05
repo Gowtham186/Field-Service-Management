@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { querying, getAddress, setSearchSkillState } from "../redux/slices.js/search-slice"
+import { querying, getAddress, setSearchSkillState, setSelectedExpert } from "../redux/slices.js/search-slice"
 import { useNavigate } from "react-router-dom"
-import { fetchSkills, setSelectedExpertProfile } from "../redux/slices.js/expert-slice"
+import { fetchSkills } from "../redux/slices.js/expert-slice"
+
 import Select from 'react-select'
 
 export default function SearchComponent(){
@@ -68,7 +69,7 @@ export default function SearchComponent(){
 
     const handleViewDetails = (expert)=>{
         //console.log('view details', expert)
-        dispatch(setSelectedExpertProfile(expert))
+        dispatch(setSelectedExpert(expert))
         navigate(`/experts/${expert.userId._id}`)
     }
 

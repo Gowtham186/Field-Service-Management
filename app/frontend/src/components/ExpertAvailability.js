@@ -32,7 +32,7 @@ export default function ExpertAvailability(){
         }
     }, [selectedDates, dispatch])  
 
-    const handleEventClick = useCallback((info) => {
+    const handleEventClick = (info) => {
         const clickedDate = info.dateStr
         setSelectedDates(prev => {
             const isDateSelected = prev.includes(clickedDate)
@@ -41,7 +41,7 @@ export default function ExpertAvailability(){
             }
             return [...prev, clickedDate]
         })
-    }, [])
+    }
 
     const events = Array.isArray(profile?.availability)
         ? profile.availability.map((date) => ({
@@ -59,7 +59,7 @@ export default function ExpertAvailability(){
                 initialDate={new Date()}
                 selectable={true}
                 dateClick={handleDateSelect}
-                select={handleDateSelect}
+                //select={handleDateSelect}
                 eventClick={handleEventClick}  
                 validRange={{ start: new Date() }}
                 events={events}

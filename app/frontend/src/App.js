@@ -6,7 +6,6 @@ import ExpertLogin from './pages/ExpertLogin';
 import Home from './pages/Home';
 import ExpertRegister from './pages/ExpertRegister';
 import ExpertCreation from './pages/ExpertCreation';
-import Dashboard from './pages/Dashboard';
 import MainLayout from './components/MainLayout';
 import VerifyExperts from './pages/VerifyExperts';
 //import MaterialUIForm from './components/Material';
@@ -18,6 +17,9 @@ import ExpertDetails from './pages/ExpertDetails';
 import CategoryDetails from './pages/CategoryDetails';
 import ExpertAvailability from './components/ExpertAvailability';
 import ServiceRequest from './pages/ServiceRequest';
+import ExpertDashboard from './pages/ExpertDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import ManageExperts from './pages/ManageExperts';
 
 function App() {
   const dispatch = useDispatch()
@@ -40,14 +42,24 @@ function App() {
           <Route path='/expertlogin' element={<ExpertLogin />}/>
           <Route path='/expertregister' element={<ExpertRegister />}/>
           <Route path='/create-expert' element={<ExpertCreation />}/>
-          <Route path="/dashboard" element={ 
+          <Route path="/expert-dashboard" element={ 
             <MainLayout> 
-              <Dashboard />
+              <ExpertDashboard />
+            </MainLayout>
+          }/>
+          <Route path="/admin-dashboard" element={ 
+            <MainLayout> 
+              <AdminDashboard />
             </MainLayout>
           }/>
           <Route path="/verify-experts" element={ 
             <MainLayout> 
               <VerifyExperts />
+            </MainLayout>
+          }/>
+          <Route path="/manage-experts" element={ 
+            <MainLayout> 
+              <ManageExperts />
             </MainLayout>
           }/>
           <Route path="/manage-categories" element={ 

@@ -5,6 +5,7 @@ import Skill from "../models/skill-model.js";
 import mongoose from "mongoose";
 import axios from "axios";
 import Service from "../models/service-model.js";
+import User from "../models/user-model.js";
 const expertCtlr = {}
 
 expertCtlr.create = async (req, res) => {
@@ -87,16 +88,24 @@ expertCtlr.create = async (req, res) => {
     }
 };
 
-expertCtlr.getAllExperts = async (req,res) => {
-    try{
-        const allExperts = await Expert.find()
-            .populate('userId')
-            .populate('skills')
-        res.json(allExperts)
-    }catch(err){
-        res.status(500).json({errors : 'something went wrong'})
+expertCtlr.getAllExperts = async (req, res) => {
+    try {
+        const search = req.query.search || '';  
+        
+        const experts = await Expert.find({})
+            .populate('userId', 'name')  
+            .exec();
+
+            console.log(experts)
+
+          res.json(experts)
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ errors: 'Something went wrong' });
     }
-}
+};
+
+
 
 expertCtlr.unVerifiedExperts = async (req,res) => {
     try{
@@ -234,24 +243,17 @@ expertCtlr.updateAvailability =  async (req, res) => {
                     { $pull : { availability : { $in : body.availability}}},
                     { new : true}
                 )
-            }else{
-                updatedAvailability = await Expert.findOneAndUpdate(
-                    { userId : req.currentUser.userId},
-                    { $push : { availability : { $each : body.availability}}},
-                    { new : true }
-                )
+                return res.json(updatedAvailability.availability)
             }
-            /* const expert = await Expert.findOneAndUpdate(
-                { userId: req.currentUser.userId },
-                {
-                    $addToSet: { availability: { $each: body.availability } }
-                },
-                { new: true }
-            ); */
 
-            return res.json(updatedAvailability.availability); // Respond with the updated expert data
+            updatedAvailability = await Expert.findOneAndUpdate(
+                { userId : req.currentUser.userId},
+                { $push : { availability : { $each : body.availability}}},
+                { new : true }
+            )
+
+            return res.json(updatedAvailability.availability); 
                 
-            
         } catch (err) {
             console.log(err);
             return res.status(500).json({ errors: 'Something went wrong' });

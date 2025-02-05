@@ -16,7 +16,7 @@ const serviceRequestSchema = new Schema({
     scheduleDate : { type : Date},
     budget:{
         bookingFee : Number,
-        servicePrice : Number,
+        servicesPrice : Number,
         finalPrice : Number
     },
     serviceImages : [ 

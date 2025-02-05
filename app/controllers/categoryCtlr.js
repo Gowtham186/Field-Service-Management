@@ -2,23 +2,33 @@ import { validationResult } from "express-validator";
 import Category from "../models/category-model.js";
 import Service from "../models/service-model.js";
 import categoryValidation from "../validators/category-validation.js";
+import Skill from "../models/skill-model.js";
 
 const categoryCtlr = {}
 
 categoryCtlr.create = async (req, res) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
 
     const body = req.body;
     try {
         
-        const newCategory = await Category.create(body);
+        
+        let skillId = null;
 
+        if(body.skill){
+            let existingSkill = await Skill.findOne({name : body.skill})
+
+            if(!existingSkill){
+                const newSkill = new Skill({ name : body.skill })
+                existingSkill = await newSkill.save()
+            }
+
+            skillId = existingSkill._id
+        }
+        
+        const newCategory = await Category.create({ ...body, skill : skillId});
+
+        let newServices = []
         if(body.services){
-            let newServices = []
             newServices = await Promise.all(
                 body.services.map(async (service) => {
                     const newService = new Service({
@@ -30,9 +40,11 @@ categoryCtlr.create = async (req, res) => {
                 })
             );
         }
+
+        const findSkill = await Skill.findById(skillId)
         
-        console.log({ ...newCategory.toObject(), services: newServices });
-        return res.status(201).json({ ...newCategory.toObject(), services: newServices });
+        console.log({ ...newCategory.toObject(), skill : skillId, services: newServices });
+        return res.status(201).json({ ...newCategory.toObject(), skill : findSkill, services: newServices });
     } catch (err) {
         console.log(err)
         return res.status(500).json({ errors: 'Something went wrong' });
@@ -173,9 +185,12 @@ categoryCtlr.categoriesWithServices = async (req,res)=>{
 categoryCtlr.updateCategoryWithServices = async(req,res)=>{
     const id = req.params.id
     console.log('id', id)
-    const { name, services } = req.body
+    const { name, skill, services } = req.body
     try{
-        const updatedCategory = await Category.findByIdAndUpdate(id, { name : name}, { new : true})
+        const updatedCategory = await Category.findByIdAndUpdate(id, 
+            { name : name, skill : skill.value}, 
+            { new : true}
+        ).populate('skill')
 
         if(!updatedCategory){
             return res.status(404).json({errors : 'category not found'})
@@ -197,6 +212,7 @@ categoryCtlr.updateCategoryWithServices = async(req,res)=>{
             }
         }
         ))
+        console.log(updatedCategory)
 
         return res.json({...updatedCategory.toObject(), services : updatedServices})
 

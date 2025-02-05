@@ -75,6 +75,8 @@ export const expertCategoriesBySkills = createAsyncThunk('expert/expertCategorie
     }
 })
 
+
+
 const expertSlice = createSlice({
     name : 'expert',
     initialState : { 
@@ -83,12 +85,9 @@ const expertSlice = createSlice({
         experts :[], 
         serverError : null,
         categoriesBySkills : [],
-        loading : false
-    },
-    reducers : {
-        setSelectedExpertProfile : (state,action)=>{
-            state.profile = action.payload
-        }
+        loading : false,
+        myServices : [],
+        allExperts : []
     },
     extraReducers : (builder)=>{
         builder.addCase(fetchSkills.fulfilled, (state,action)=> {
@@ -134,5 +133,4 @@ const expertSlice = createSlice({
         })
     }
 })
-export const { setSelectedExpertProfile } = expertSlice.actions
 export default expertSlice.reducer

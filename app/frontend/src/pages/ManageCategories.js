@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import '../App.css'
+import CreatableSelect from 'react-select/creatable'
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from 'uuid'
 import { deleteCategoryAndServices, deleteManyServices, deleteService, getCategoriesWithServices, newCategoryWithServices, updateCategoryWithServices } from "../redux/slices.js/category-slice";
+import { fetchSkills } from "../redux/slices.js/expert-slice";
 
 export default function ManageCategories() {
   const dispatch = useDispatch();
@@ -11,10 +13,47 @@ export default function ManageCategories() {
   const [deletedServices, setDeletedServices] = useState([]);
   const [newServices, setNewServices] = useState([]);
   const [clientErrors, setClientErrors] = useState({})
+  const [options, setOptions] = useState([])
 
   useEffect(() => {
     dispatch(getCategoriesWithServices());
   }, [dispatch]);
+  
+  useEffect(() => {
+    dispatch(fetchSkills()).unwrap().then((data) => {
+        const newData = data?.map(ele => ({ value: ele._id, label: ele.name }));
+        setOptions(newData);
+
+        // Set default value for skill if it exists in editItem
+        if (editItem?.skill && typeof editItem.skill === 'object' && editItem.skill.name) {
+            setEditItem((prev) => ({
+                ...prev,
+                skill: newData.find((s) => s.label === editItem.skill.name) || null,
+            }));
+        }
+    });
+}, [dispatch, editItem?.skill]);
+
+const handleCreate = (inputValue) => {
+    const formatInput = inputValue.slice(0, 1).toUpperCase() + inputValue.slice(1);
+    const newOption = { value: formatInput, label: formatInput };
+
+    setOptions((prevOptions) => [...prevOptions, newOption]);
+    setEditItem((prev) => ({
+        ...prev,
+        skill: newOption, // Set newly created skill
+    }));
+};
+
+const handleSelectSkills = (selectedOption) => {
+    setClientErrors((prevErrors) => ({ ...prevErrors, skills: null }));
+
+    setEditItem((prevForm) => ({
+        ...prevForm,
+        skill: selectedOption, // Update selected skill
+    }));
+};
+
   
   const errors = {
     serviceName :[], price:[]
@@ -25,6 +64,12 @@ export default function ManageCategories() {
       errors.category = "Category name should not be empty"
     } else if (/\d/.test(updateItem.name)) {  // Checks if the category name contains any numbers
       errors.category = "Category name should not contain numbers";
+    }
+
+    if(!updateItem.skill){
+      errors.skill = "Category skill should not be empty"
+    } else if (/\d/.test(updateItem.skill)) {  // Checks if the category skill contains any numbers
+      errors.category = "Category skill should not contain numbers";
     }
 
       updateItem.services.map((ele, i) => {
@@ -39,6 +84,7 @@ export default function ManageCategories() {
   }
 
   const handleEdit = (item) => {
+    console.log(item)
     setEditItem({ ...item });
     setDeletedServices([]);
     document.body.style.overflow = "hidden"; 
@@ -143,6 +189,7 @@ export default function ManageCategories() {
 
   const handleCancel = () => {
     setEditItem(null);
+    setClientErrors({})
     setDeletedServices([]);
     setNewServices([]);
     document.body.style.overflow = "auto";
@@ -164,6 +211,7 @@ export default function ManageCategories() {
   const handleNewCategory = ()=>{
     setEditItem({
       id : uuidv4(),
+      skill : "",
       services:[]
     })
   }
@@ -234,11 +282,41 @@ export default function ManageCategories() {
                 <input
                   type="text"
                   value={editItem.name}
-                  onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}
+                  onChange={(e) => {
+                    setEditItem({ ...editItem, name: e.target.value })
+                    setClientErrors({ ...clientErrors, name : null})
+                  }}
                   className="border-gray-300 p-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 {clientErrors && <p className="relative text-red-500 text-xs left-56 bottom-4">{clientErrors.category}</p>}
               </div>
+
+              {/* <div className="grid grid-cols-2 items-center gap-4">
+                <label className="text-gray-900 font-medium">Skill:</label>
+                <input
+                  type="text"
+                  value={editItem.skill?.name}
+                  onChange={(e) => {
+                    setEditItem({ ...editItem, skill: e.target.value })
+                    setClientErrors({...clientErrors, skill : null})
+                  }}
+                  className="border-gray-300 p-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {clientErrors && <p className="relative text-red-500 text-xs left-56 bottom-4">{clientErrors.skill}</p>}
+              </div> */}
+
+                    <div  className="grid grid-cols-2 items-center gap-4">
+                        <label htmlFor="skills" className=" text-sm font-medium text-gray-700 mb-1">Skills :</label>
+                        <CreatableSelect
+                            options={options}
+                            onCreateOption={handleCreate}
+                            id="skills"
+                            onChange={handleSelectSkills}
+                            className="w-full "
+                            value={editItem.skill ? { label: editItem.skill.label, value: editItem.skill.value } : null}
+                        />
+                        {clientErrors && ( <p className="text-red-500 text-xs">{clientErrors.skills}</p>)}
+                    </div>
 
               <label className="text-gray-900 font-medium block">Services:</label>
               {editItem.services?.map((ele, i) => (

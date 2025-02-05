@@ -14,16 +14,16 @@ export default function Sidebar({ role }) {
   return (
     <div className="bg-blue-950 h-screen p-4 shadow-md fixed transition-all duration-300 w-24 md:w-48">
       <ul className="space-y-4">
-        <li>
-          <Link to="/dashboard" className="text-white hover:text-blue-700">
-            Dashboard
-          </Link>
-        </li>
         {role === "expert" && (
           <>
           <li>
-            <Link to="/service-requests" className="text-white hover:text-blue-700">
-              Service Requests
+            <Link to="/expert-dashboard" className="text-white hover:text-blue-700">
+              Dashboard
+            </Link>
+          </li>
+          <li>
+            <Link to="/current-bookings" className="text-white hover:text-blue-700">
+              Current Bookings
             </Link>
           </li>
           <li>
@@ -39,7 +39,17 @@ export default function Sidebar({ role }) {
         {role === "admin" && (
           <>
           <li>
+            <Link to="/admin-dashboard" className="text-white hover:text-blue-700">
+              Admin Dashboard
+            </Link>
+          </li>
+          <li>
             <Link to="/verify-experts" className="text-white hover:text-blue-700">
+              Verify Experts
+            </Link>
+          </li>
+          <li>
+            <Link to="/manage-experts" className="text-white hover:text-blue-700">
               Manage Experts
             </Link>
           </li>
