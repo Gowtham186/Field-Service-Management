@@ -22,8 +22,13 @@ export default function Sidebar({ role }) {
             </Link>
           </li>
           <li>
-            <Link to="/current-bookings" className="text-white hover:text-blue-700">
-              Current Bookings
+            <Link to="/new-bookings" className="text-white hover:text-blue-700">
+              New Bookings
+            </Link>
+          </li>
+          <li>
+            <Link to="/experts/calendar" className="text-white hover:text-blue-700">
+              My Calendar
             </Link>
           </li>
           <li>

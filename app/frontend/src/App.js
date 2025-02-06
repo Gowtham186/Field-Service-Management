@@ -20,6 +20,9 @@ import ServiceRequest from './pages/ServiceRequest';
 import ExpertDashboard from './pages/ExpertDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ManageExperts from './pages/ManageExperts';
+import ExpertCalendar from './pages/Expertcalendar';
+import ManageBookings from './pages/NewBookings';
+import NewBookings from './pages/NewBookings';
 
 function App() {
   const dispatch = useDispatch()
@@ -70,6 +73,16 @@ function App() {
           <Route path="/experts/availability" element={ 
             <MainLayout> 
               <ExpertAvailability />
+            </MainLayout>
+          }/>
+          <Route path="/new-bookings" element={ 
+            <MainLayout> 
+              <NewBookings />
+            </MainLayout>
+          }/>
+          <Route path="/experts/calendar" element={ 
+            <MainLayout> 
+              <ExpertCalendar />
             </MainLayout>
           }/>
           <Route path="/experts/:id" element={<ExpertDetails />}/>

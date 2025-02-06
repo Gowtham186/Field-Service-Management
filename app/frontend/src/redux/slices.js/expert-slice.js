@@ -55,9 +55,20 @@ export const getExpertProfile = createAsyncThunk('expert/getExpertProfile', asyn
     }
 })
 
-export const updateAvailability = createAsyncThunk('expert/updateAvailability', async({availability})=>{
+export const updateAvailability = createAsyncThunk('expert/updateAvailability', async ({ availability }, { rejectWithValue }) => {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await axios.put('/api/experts/availability', { availability }, { headers: { Authorization: token } });
+        return response.data;
+    } catch (err) {
+        console.log("Update Availability Error:", err.response?.data || err.message);
+        return rejectWithValue(err.response?.data || "Failed to update availability");
+    }
+});
+
+export const expertCategoriesBySkills = createAsyncThunk('expert/expertCategoriesBySkills', async(id) => {
     try{
-        const response = await axios.put('/api/experts/availability', {availability}, { headers : { Authorization : localStorage.getItem('token')}})
+        const response = await axios.get(`/api/experts/${id}/categories`)
         console.log(response.data)
         return response.data
     }catch(err){
@@ -65,9 +76,22 @@ export const updateAvailability = createAsyncThunk('expert/updateAvailability', 
     }
 })
 
-export const expertCategoriesBySkills = createAsyncThunk('expert/expertCategoriesBySkills', async(id) => {
+export const getMyServices = createAsyncThunk('expert/getMyServices', async () => {
+    try {
+        const response = await axios.get('/api/experts/myservices', {
+            headers: { Authorization: localStorage.getItem('token') },
+        });
+        console.log(response.data);
+        return response.data; // Return the fetched services data
+    } catch (err) {
+        console.log(err);
+        throw new Error('Failed to fetch services');
+    }
+});
+
+export const updateBookingStatus = createAsyncThunk('expert/updateBookingStatus', async({id, body}) => {
     try{
-        const response = await axios.get(`/api/experts/${id}/categories`)
+        const response = await axios.put(`/api/service-requests/${id}/status`, body, { headers : { Authorization : localStorage.getItem('token')}})
         console.log(response.data)
         return response.data
     }catch(err){
@@ -130,6 +154,13 @@ const expertSlice = createSlice({
         })
         builder.addCase(expertCategoriesBySkills.fulfilled, (state,action)=>{
             state.categoriesBySkills = action.payload
+        })
+        builder.addCase(getMyServices.fulfilled, (state,action)=>{
+            state.myServices = action.payload
+        })
+        builder.addCase(updateBookingStatus.fulfilled, (state,action)=>{
+            const index = state.myServices.findIndex(ele => ele._id === action.payload._id)
+            state.myServices[index] = action.payload 
         })
     }
 })

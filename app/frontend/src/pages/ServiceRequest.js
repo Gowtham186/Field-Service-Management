@@ -1,8 +1,8 @@
 import { useDispatch, useSelector } from "react-redux";
 import { getAddress } from "../redux/slices.js/search-slice";
 import { useState, useEffect } from "react";
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css"; 
+// import DatePicker from 'react-datepicker';
+// import "react-datepicker/dist/react-datepicker.css"; 
 import { bookserviceRequest } from "../redux/slices.js/booking-slice";
 import { useNavigate } from "react-router-dom";
 
@@ -156,7 +156,7 @@ export default function ServiceRequest() {
                 </button>
                 <div>
                     <label>Choose Date : </label>
-                    <DatePicker
+                    {/* <DatePicker
                         selected={formData.scheduleDate}
                         className="mt-1 block p-1 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                         onChange={(date) => {
@@ -172,7 +172,7 @@ export default function ServiceRequest() {
                             )
                         }
                         placeholderText="Select an available date"
-                    />
+                    /> */}
                 </div>
                 <div>
                     <label htmlFor="serviceImages" className="block text-sm font-medium text-gray-700 mb-1">Service Images:</label>
@@ -272,7 +272,7 @@ export default function ServiceRequest() {
             </div>
             {greetCard && (
                 <div
-                className="absolute top-1/2 left-1/2 bg-opacity-50 bg-slate-600 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg p-6 w-96 text-center z-50"
+                className="absolute top-1/2 left-1/2 bg-opacity-50 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg p-6 w-96 text-center z-50"
                 >
                     <h1>Thank you!! </h1>
                     <button

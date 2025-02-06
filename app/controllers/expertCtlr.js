@@ -225,40 +225,106 @@ expertCtlr.verify = async(req,res)=>{
 //     }
 // }
 
+// expertCtlr.updateAvailability = async (req, res) => {
+//     try {
+//         const body = req.body;
 
-expertCtlr.updateAvailability =  async (req, res) => {
-        try {
-            const body = req.body;
-            
-            if (typeof body.availability === 'string') {
-                body.availability = JSON.parse(body.availability);
-            }
+//         if (typeof body.availability === 'string') {
+//             body.availability = JSON.parse(body.availability);
+//         }
+//         const expert = await Expert.findOne({ userId: req.currentUser.userId });
 
-            const expert = await Expert.findOne({ userId : req.currentUser.userId})
+//         let updatedAvailability;
 
-            let updatedAvailability
-            if(expert.availability.some(date => body.availability.includes(date))){
-                updatedAvailability = await Expert.findOneAndUpdate(
-                    { userId : req.currentUser.userId },
-                    { $pull : { availability : { $in : body.availability}}},
-                    { new : true}
-                )
-                return res.json(updatedAvailability.availability)
-            }
+//         if (datesToAdd.length > 0) {
+//             updatedAvailability = await Expert.findOneAndUpdate(
+//                 { userId: req.currentUser.userId },
+//                 { $addToSet: { availability: { $each: datesToAdd } } },
+//                 { new: true }
+//             );
+//         }
 
-            updatedAvailability = await Expert.findOneAndUpdate(
-                { userId : req.currentUser.userId},
-                { $push : { availability : { $each : body.availability}}},
-                { new : true }
-            )
+//         const datesToRemove = uniqueDates.filter(date => existingDates.includes(date));
+//         if (datesToRemove.length > 0) {
+//             updatedAvailability = await Expert.findOneAndUpdate(
+//                 { userId: req.currentUser.userId },
+//                 { $pull: { availability: { $in: datesToRemove } } },
+//                 { new: true }
+//             );
+//         }
 
-            return res.json(updatedAvailability.availability); 
-                
-        } catch (err) {
-            console.log(err);
-            return res.status(500).json({ errors: 'Something went wrong' });
+//         return res.json(updatedAvailability ? updatedAvailability.availability : expert.availability);
+//     } catch (err) {
+//         console.log(err);
+//         return res.status(500).json({ errors: 'Something went wrong' });
+//     }
+// };
+
+expertCtlr.updateAvailability = async (req, res) => {
+    try {
+        const { availability } = req.body;
+        
+        // Ensure availability is an array
+        if (!Array.isArray(availability)) {
+            return res.status(400).json({ error: "Availability must be an array of dates." });
         }
+
+        // Convert valid date strings to Date objects
+        const validDates = availability
+            .map(date => new Date(date))
+            .filter(date => !isNaN(date)); // Remove invalid dates
+
+        if (validDates.length === 0) {
+            return res.status(400).json({ error: "No valid dates provided." });
+        }
+
+        // Find expert by userId
+        const expert = await Expert.findOne({ userId: req.currentUser.userId });
+        if (!expert) {
+            return res.status(404).json({ error: "Expert not found" });
+        }
+
+        // Extract existing dates
+        const existingDates = expert.availability || [];
+
+        // Convert dates to ISO format for comparison
+        const formattedAvailability = validDates.map(date => date.toISOString().split("T")[0]);
+        const formattedExistingDates = existingDates.map(date => new Date(date).toISOString().split("T")[0]);
+
+        // Get dates to add
+        const datesToAdd = formattedAvailability.filter(date => !formattedExistingDates.includes(date));
+
+        // Get dates to remove
+        const datesToRemove = formattedExistingDates.filter(date => !formattedAvailability.includes(date));
+
+        let updatedAvailability = expert.availability;
+
+        // Add new dates
+        if (datesToAdd.length > 0) {
+            updatedAvailability = await Expert.findOneAndUpdate(
+                { userId: req.currentUser.userId },
+                { $addToSet: { availability: { $each: datesToAdd } } },
+                { new: true, projection: { availability: 1 } }
+            );
+        }
+
+        // Remove dates
+        if (datesToRemove.length > 0) {
+            updatedAvailability = await Expert.findOneAndUpdate(
+                { userId: req.currentUser.userId },
+                { $pull: { availability: { $in: datesToRemove } } },
+                { new: true, projection: { availability: 1 } }
+            );
+        }
+        console.log(updatedAvailability.availability)
+        return res.json(updatedAvailability ? updatedAvailability.availability : expert.availability);
+    } catch (err) {
+        console.log("Update Availability Error:", err);
+        return res.status(500).json({ error: "Something went wrong" });
     }
+};
+
+
 
     expertCtlr.expertCategoriesBySkills = async (req,res)=>{
         try{
@@ -288,5 +354,27 @@ expertCtlr.updateAvailability =  async (req, res) => {
             console.log(err)
         }
     }
+
+    expertCtlr.getMyServices = async (req, res) => {
+        try {
+            const expert = await ServiceRequest.find({expertId : req.currentUser.userId})
+                .populate('customerId')
+                .populate({
+                    path: "serviceType.category",
+                    model: "Category", // Ensure this matches your category model name
+                    select: "name", // Adjust fields as needed
+                })
+                .populate({
+                    path: "serviceType.servicesChoosen",
+                    model: "Service", // Ensure this matches your service model name
+                    select: "serviceName price", // Adjust fields as needed
+                });
+            res.json(expert)
+        } catch (err) {
+            console.log("Error fetching services:", err);
+            return res.status(500).json({ error: "Something went wrong" });
+        }
+    };    
+    
 
 export default expertCtlr

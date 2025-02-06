@@ -30,3 +30,9 @@ body::-webkit-scrollbar {
     border: none;
     color: black;
   }
+
+  .custom-datepicker {
+    width: 400px !important;  /* Adjust width */
+    height: 400px !important; /* Adjust height */
+  }
+  

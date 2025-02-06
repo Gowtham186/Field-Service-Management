@@ -1,4 +1,13 @@
+import { useEffect, useState } from "react"
+import { useDispatch } from "react-redux"
+import { getMyServices } from "../redux/slices.js/expert-slice"
+
 export default function ExpertDashboard(){
+    const dispatch = useDispatch()
+
+    useEffect(()=>{
+        dispatch(getMyServices())
+    },[dispatch])
     
     return(
         <>

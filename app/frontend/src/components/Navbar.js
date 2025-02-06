@@ -23,8 +23,8 @@ const handleLogout = ()=>{
 }
 
   return (
-    <div>
-      <div className="bg-orange-500 h-11 ">
+    <div className={isLoginOpen ? "relative overflow-hidden" : ""}>
+      <div  className= 'bg-orange-500 h-11'>
         <ul className="flex space-x-4 text-right">
           {isLoggedIn && user.role === "customer" ? (
             <>
@@ -63,10 +63,8 @@ const handleLogout = ()=>{
       </div>
 
       {isLoginOpen && (
-        <div className="fixed top-0 left-0 right-0 bottom-0 bg-gray-800 bg-opacity-50 z-50 flex items-center justify-center">
-          <div className="relative z-50 bg-white shadow-lg rounded-lg w-96 p-6">
+        <div className="fixed top-1/2 left-1/2 right-0 bottom-0 z-50 flex items-center justify-center">
             <CustomerLogin closeLogin={closeLogin} />
-          </div>
         </div>
       )}
     </div>

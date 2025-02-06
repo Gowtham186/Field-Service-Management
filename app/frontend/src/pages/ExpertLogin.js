@@ -46,15 +46,17 @@ export default function ExpertLogin() {
       try {
         setClientErrors({});
         await dispatch(expertLogin({ formData, resetForm })).unwrap();
-        await dispatch(getUserProfile()).unwrap()
-        console.log(user)
-        if(user.role === 'expert'){
-          navigate('/expert-dashboard')
-        }else{
-          navigate('/admin-dashboard')
+        const userProfile = await dispatch(getUserProfile()).unwrap();
+      
+        if (userProfile && userProfile.role) {
+          if (userProfile.role === 'expert') {
+            navigate('/expert-dashboard');
+          } else {
+            navigate('/admin-dashboard');
+          }
+        } else {
+          console.log("Error: User profile not loaded correctly.");
         }
-        //localStorage.removeItem('expertLogin')
-        //navigate('/dashboard');
       } catch (err) {
         console.log('Error login expert', err);
       }

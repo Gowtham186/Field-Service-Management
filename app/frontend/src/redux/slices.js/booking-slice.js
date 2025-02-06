@@ -30,6 +30,7 @@ const bookingSlice = createSlice({
         builder.addCase(bookserviceRequest.rejected, (state,action) => {
             state.serverError = action.payload
         })
+        
     }
 })
 export default bookingSlice.reducer

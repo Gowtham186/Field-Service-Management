@@ -15,8 +15,4 @@ router.put('/service-requests/:id/status', authenticateUser, authorizeUser(['exp
 router.get('/service-requests/customer/:customerId', authenticateUser, serviceRequestCtlr.getByCustomer)
 router.get('/service-requests/expert/:expertId', authenticateUser, serviceRequestCtlr.getByExpert)
 
-// router.get('/service-requests/my-services', authenticateUser, authorizeUser(['expert']), serviceRequestCtlr.getMyServices)
-
-//querying
-
 export default router

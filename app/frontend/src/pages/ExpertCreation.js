@@ -104,7 +104,7 @@ export default function ExpertCreation() {
                 }
                 
                 await dispatch(createExpertProfile({formData, resetForm})).unwrap()
-                navigate('/dashboard')
+                navigate('/expert-dashboard')
 
             }catch(err){
                 console.log(err)

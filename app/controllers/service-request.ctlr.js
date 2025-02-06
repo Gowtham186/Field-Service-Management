@@ -309,58 +309,12 @@ serviceRequestCtlr.updateStatus = async (req,res)=>{
     const id = req.params.id
     const body = req.body
     try{
-        let serviceRequest = await ServiceRequest.findById(id)
+        const serviceRequest = await ServiceRequest.findByIdAndUpdate(id, body, { new : true})
         if(!serviceRequest){
             return res.status(404).json({errors : 'service request is not found'})
         }
 
-        const expert = await Expert.findOne({userId : req.currentUser.userId})
-        if(!expert){
-            return res.status(404).json({errors : 'something went wrong'})
-        }
-
-        if(body.status == 'assigned'){
-            if(expert.isVerified == false){
-                return res.status(401).json({errors : 'sorry your account should be verified before select a service'})
-            }
-    
-            const serviceDate = new Date(serviceRequest.scheduleDate)
-            serviceDate.setHours(0,0,0,0)
-    
-            const isAvailableDate = !expert.availability.some(ele => {
-                const singleDateObj = new Date(ele.date)
-                singleDateObj.setHours(0,0,0,0)
-                return singleDateObj.getTime() === serviceDate.getTime()
-            })
-    
-            console.log(isAvailableDate)
-            if(!isAvailableDate){
-                return res.status(400).json({errors : 'you have scheduled service on this date'})
-            }
-        }
-        
-        serviceRequest = await ServiceRequest.findOneAndUpdate(
-            {_id : id},
-            { $set : { status : body.status, expertId : req.currentUser.userId}},   
-            {new : true}
-        )
-        const updateExpert = await Expert.findOneAndUpdate(
-            {userId : req.currentUser.userId},
-            {
-                $addToSet: {
-                  availability: {
-                    $each: [
-                      {
-                        date: serviceRequest.scheduleDate,
-                        serviceId: serviceRequest
-                      }
-                    ]
-                  }
-                }
-              },
-            {new : true}
-        )
-        //console.log(updateExpert)
+        console.log(serviceRequest)
         res.json(serviceRequest)
 
     }catch(err){
@@ -405,13 +359,5 @@ serviceRequestCtlr.getByExpert = async(req,res)=>{
         res.status(500).json({errors : 'something went wrong'})
     }
 }
-
-// serviceRequestCtlr.getMyServices = async (req,res) => {
-//     try{
-
-//     }catch(err){
-
-//     }
-// }
   
 export default serviceRequestCtlr

@@ -4,10 +4,7 @@ import validator from "validator";
 import { customerLogin, getUserProfile, verifyOtpApi } from "../redux/slices.js/user-slice";
 import { useNavigate } from "react-router-dom";
 
-export default function CustomerLogin({ closeLogin }) {
-  if (!closeLogin) {
-    console.error("closeLogin function is not passed to CustomerLogin");
-  }
+export default function CustomerLogin({closeLogin}) {
   const [phone_number, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [openOtpForm, setOpenOtpForm] = useState(false);
@@ -19,7 +16,6 @@ export default function CustomerLogin({ closeLogin }) {
   const formRef = useRef(null); 
   const { isLoggedIn } = useSelector((state) => state.user)
 
-  // Close the login form if clicked outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (formRef.current && !formRef.current.contains(event.target)) {
@@ -58,10 +54,11 @@ export default function CustomerLogin({ closeLogin }) {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
+    console.log('sekjfn')
     runClientValidations();
-
+    
     if (Object.keys(errors).length !== 0) {
       setClientErrors(errors);
     } else {
@@ -75,11 +72,11 @@ export default function CustomerLogin({ closeLogin }) {
       }
     }
   };
-
-  const verifyOtp = async (e) => {
-    e.preventDefault();
+  const verifyOtp = async (e)=>{
+    e.preventDefault()
+    console.log('sdjf')
     otpClientValidations();
-
+    
     const verifyOtpData = { 
         identifier : phone_number,
         otp : otp
@@ -95,24 +92,21 @@ export default function CustomerLogin({ closeLogin }) {
             setClientErrors({});
             await dispatch(verifyOtpApi({verifyOtpData, resetForm})).unwrap();
             await dispatch(getUserProfile()).unwrap();
-            // console.log('closing login')
-            // closeLogin()
-            // navigate("/");
             
-              closeLogin(); // Close the modal if the user is successfully logged in
-              navigate("/"); // Navigate to the homepage or any other page
+            closeLogin(); 
+            navigate("/"); 
             
         }catch(err){
             console.log(err)
         }
       
     }
-  };
+  }
 
   return (
     <div
       ref={formRef}
-      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg p-6 w-96 text-center z-50"
+      className="absolute top-1 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg p-6 w-96 text-center z-50"
     >
       <h2 className="text-2xl font-semibold mb-4">Customer Login</h2>
 
@@ -132,12 +126,10 @@ export default function CustomerLogin({ closeLogin }) {
             <p className="text-red-500 text-xs text-left">{clientErrors.phone_number}</p>
           )}
         </div>
-        <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
-          Send OTP
-        </button>
+        <input type="submit" value="Send OTP" className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"/>  
       </form>
-
       {openOtpForm && (
+
         <form onSubmit={verifyOtp} className="space-y-4 mt-4">
           <div>
             <label className="block text-left text-gray-700 font-medium">Enter OTP</label>
@@ -153,11 +145,10 @@ export default function CustomerLogin({ closeLogin }) {
             {clientErrors.otp && <p className="text-red-500 text-xs text-left">{clientErrors.otp}</p>}
           </div>
           {serverError && <p className="text-red-500">{serverError}</p>}
-          <button type="submit" className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">
-            Verify OTP
-          </button>
+          <input type="submit" value="Verify OTP" className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"/>
         </form>
       )}
     </div>
+
   );
 }
