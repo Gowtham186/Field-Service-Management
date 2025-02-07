@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
 import { getMyServices } from "../redux/slices.js/expert-slice"
+import UpcomingService from "../components/UpcomingService"
+import OngoingService from "../components/OngoingService"
 
 export default function ExpertDashboard(){
     const dispatch = useDispatch()
@@ -11,13 +13,13 @@ export default function ExpertDashboard(){
     
     return(
         <>
-            <h2>Expert dashboard component</h2>
             <div>
-                <h2>On-going service</h2>
+                <OngoingService />
             </div>
             <div>
-                <h2>Upcoming Service</h2>
+                <UpcomingService />
             </div>
+            
         </>
     )
 }

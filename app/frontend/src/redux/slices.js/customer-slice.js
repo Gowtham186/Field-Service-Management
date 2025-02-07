@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "../../config/axios";
 
-export const bookserviceRequest = createAsyncThunk('booking/bookServiceRequest', async({newFormData, resetForm}, {rejectWithValue}) => {
+export const bookserviceRequest = createAsyncThunk('customer/bookServiceRequest', async({newFormData, resetForm}, {rejectWithValue}) => {
     try{
         const response = await axios.post('/api/service-requests', newFormData, { headers : { Authorization : localStorage.getItem('token')}})
         console.log(response.data)
@@ -13,12 +13,23 @@ export const bookserviceRequest = createAsyncThunk('booking/bookServiceRequest',
     }
 })
 
-const bookingSlice = createSlice({
-    name : 'booking',
+export const getMyBookings = createAsyncThunk('customer/getMyBookings', async()=>{
+    try{
+        const response = await axios.get('/api/customer/my-bookings', { headers : {  Authorization : localStorage.getItem('token')}})
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+    }
+})
+
+const customerSlice = createSlice({
+    name : 'customer',
     initialState : { 
         currentBooking : null,
         loading : false,
-        serverError : null
+        serverError : null,
+        myBookings : null
     },
     extraReducers : (builder) =>{
         builder.addCase(bookserviceRequest.pending, (state, action)=>{
@@ -30,7 +41,10 @@ const bookingSlice = createSlice({
         builder.addCase(bookserviceRequest.rejected, (state,action) => {
             state.serverError = action.payload
         })
+        builder.addCase(getMyBookings.fulfilled, (state,action)=>{
+            state.myBookings = action.payload
+        })
         
     }
 })
-export default bookingSlice.reducer
+export default customerSlice.reducer

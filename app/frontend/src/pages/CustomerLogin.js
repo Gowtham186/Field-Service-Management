@@ -106,7 +106,7 @@ export default function CustomerLogin({closeLogin}) {
   return (
     <div
       ref={formRef}
-      className="absolute top-1 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg p-6 w-96 text-center z-50"
+      className="absolute top-5 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg p-6 w-96 text-center z-50"
     >
       <h2 className="text-2xl font-semibold mb-4">Customer Login</h2>
 

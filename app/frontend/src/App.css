@@ -25,10 +25,10 @@ body::-webkit-scrollbar {
   }
 
   .custom-event {
-    height: 25px;
-    background-color: lightblue;
+    height: 45px;
+    background-color: rgb(77, 231, 100);
     border: none;
-    color: black;
+    color: rgb(240, 11, 11);
   }
 
   .custom-datepicker {

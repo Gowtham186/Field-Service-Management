@@ -38,7 +38,7 @@ export default function NewBookings() {
 
                             <p><strong>Price :</strong> ${service.budget.servicesPrice}</p>
                             <p><strong>Location :</strong> {service.location.address}</p>
-                            <p><strong>Schedule Date :</strong> {new Date(service.scheduleDate).toLocaleDateString()}</p>
+                            <p><strong>Schedule Date :</strong> {new Date(service.scheduleDate).toLocaleDateString('en-GB')}</p>
 
                             <div className="mt-2 flex space-x-2">
                                 <button 
@@ -48,7 +48,7 @@ export default function NewBookings() {
                                     Accept
                                 </button>
                                 <button 
-                                    //onClick={() => handleAction(service._id, "cancelled")}
+                                    onClick={() => handleAction(service._id, "cancelled")}
                                     className="px-4 py-2 bg-red-500 text-white rounded-md"
                                 >
                                     Reject

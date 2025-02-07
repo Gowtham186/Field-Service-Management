@@ -1,5 +1,6 @@
 import axios from "axios"
 import Customer from "../models/customer-model.js"
+import ServiceRequest from '../models/serviceRequest-model.js'
 
 const customerCtlr = {}
 customerCtlr.create = async(req,res)=>{
@@ -60,5 +61,25 @@ customerCtlr.update = async(req,res)=>{
     }
 }
 
+customerCtlr.myBookings = async(req,res)=>{
+    try{
+        const myBookings = await ServiceRequest.find({customerId : req.currentUser.userId})
+            .populate('expertId')
+            .populate({
+                path: "serviceType.category",
+                model: "Category", 
+                select: "name",
+            })
+            .populate({
+            path: "serviceType.servicesChoosen",
+            model: "Service", 
+            select: "serviceName price", 
+            })
+        res.json(myBookings)
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors : 'something went wrong'})
+    }
+}
 
 export default customerCtlr

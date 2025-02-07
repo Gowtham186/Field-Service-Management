@@ -34,6 +34,11 @@ const handleLogout = ()=>{
                 </Link>
               </li>
               <li>
+                <Link to="/my-bookings" className="text-black-500 hover:text-blue-700">
+                  My Bookings
+                </Link>
+              </li>
+              <li>
                 <Link to="/profile" className="text-black-500 hover:text-blue-700">
                   Profile
                 </Link>
@@ -63,7 +68,7 @@ const handleLogout = ()=>{
       </div>
 
       {isLoginOpen && (
-        <div className="fixed top-1/2 left-1/2 right-0 bottom-0 z-50 flex items-center justify-center">
+        <div className="fixed top-40 right-1 bottom-0 z-50 flex items-center justify-center">
             <CustomerLogin closeLogin={closeLogin} />
         </div>
       )}

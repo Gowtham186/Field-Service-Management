@@ -7,4 +7,6 @@ router.post('/customers', authenticateUser, customerCtlr.create)
 router.get('/customers/:id', authenticateUser, customerCtlr.profile)
 router.put('/customers/:id', authenticateUser, customerCtlr.update)
 
+router.get('/customer/my-bookings', authenticateUser, customerCtlr.myBookings)
+
 export default router

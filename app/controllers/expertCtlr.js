@@ -92,7 +92,7 @@ expertCtlr.getAllExperts = async (req, res) => {
     try {
         const search = req.query.search || '';  
         
-        const experts = await Expert.find({})
+        const experts = await Expert.find()
             .populate('userId', 'name')  
             .exec();
 
@@ -213,18 +213,6 @@ expertCtlr.verify = async(req,res)=>{
     }
  }
 
-// expertCtlr.availability = async (req,res)=>{
-//     try{
-//         const expert = await Expert.findOne({userId : req.currentUser.userId})
-//             .populate('availability.serviceId')
-
-//         res.json(expert.availability)
-//     }catch(err){
-//         console.log(err)
-//         return res.status(500).json({errors : 'something went wrong'})
-//     }
-// }
-
 // expertCtlr.updateAvailability = async (req, res) => {
 //     try {
 //         const body = req.body;
@@ -325,56 +313,55 @@ expertCtlr.updateAvailability = async (req, res) => {
 };
 
 
+expertCtlr.expertCategoriesBySkills = async (req,res)=>{
+    try{
+        const id = req.params.id
+        const expert = await Expert.findOne({userId : id}).populate('skills')
 
-    expertCtlr.expertCategoriesBySkills = async (req,res)=>{
-        try{
-            const id = req.params.id
-            const expert = await Expert.findOne({userId : id}).populate('skills')
-
-            if (!expert) {
-                return res.status(404).json({ message: "Expert not found" });
-            }
-
-            if (!expert.skills || expert.skills.length === 0) {
-                return res.status(400).json({ message: "Expert has no skills assigned" });
-            }
-
-            const expertCategories = await Promise.all(
-                expert.skills.map(async (ele) => {
-                   const category =  await Category.findOne({ skill: ele._id })
-                   if(!category) return null
-                
-                   const services = await Service.find({category : category._id})
-                   return { ...category.toObject(), services}
-                })       
-            );
-            console.log(expertCategories)   
-            res.json(expertCategories)         
-        }catch(err){
-            console.log(err)
+        if (!expert) {
+            return res.status(404).json({ message: "Expert not found" });
         }
+
+        if (!expert.skills || expert.skills.length === 0) {
+            return res.status(400).json({ message: "Expert has no skills assigned" });
+        }
+
+        const expertCategories = await Promise.all(
+            expert.skills.map(async (ele) => {
+                const category =  await Category.findOne({ skill: ele._id })
+                if(!category) return null
+            
+                const services = await Service.find({category : category._id})
+                return { ...category.toObject(), services}
+            })       
+        );
+        console.log(expertCategories)   
+        res.json(expertCategories)         
+    }catch(err){
+        console.log(err)
     }
+}
 
-    expertCtlr.getMyServices = async (req, res) => {
-        try {
-            const expert = await ServiceRequest.find({expertId : req.currentUser.userId})
-                .populate('customerId')
-                .populate({
-                    path: "serviceType.category",
-                    model: "Category", // Ensure this matches your category model name
-                    select: "name", // Adjust fields as needed
-                })
-                .populate({
-                    path: "serviceType.servicesChoosen",
-                    model: "Service", // Ensure this matches your service model name
-                    select: "serviceName price", // Adjust fields as needed
-                });
-            res.json(expert)
-        } catch (err) {
-            console.log("Error fetching services:", err);
-            return res.status(500).json({ error: "Something went wrong" });
-        }
-    };    
+expertCtlr.getMyServices = async (req, res) => {
+    try {
+        const expert = await ServiceRequest.find({expertId : req.currentUser.userId})
+            .populate('customerId')
+            .populate({
+                path: "serviceType.category",
+                model: "Category", 
+                select: "name",
+            })
+            .populate({
+                path: "serviceType.servicesChoosen",
+                model: "Service", 
+                select: "serviceName price", 
+            });
+        res.json(expert)
+    } catch (err) {
+        console.log("Error fetching services:", err);
+        return res.status(500).json({ error: "Something went wrong" });
+    }
+};    
     
 
 export default expertCtlr

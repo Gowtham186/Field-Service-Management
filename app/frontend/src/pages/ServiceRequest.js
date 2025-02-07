@@ -1,9 +1,9 @@
 import { useDispatch, useSelector } from "react-redux";
 import { getAddress } from "../redux/slices.js/search-slice";
 import { useState, useEffect } from "react";
-// import DatePicker from 'react-datepicker';
-// import "react-datepicker/dist/react-datepicker.css"; 
-import { bookserviceRequest } from "../redux/slices.js/booking-slice";
+import DatePicker from 'react-datepicker'
+import "react-datepicker/dist/react-datepicker.css";
+import { bookserviceRequest } from "../redux/slices.js/customer-slice";
 import { useNavigate } from "react-router-dom";
 
 const formInitialState = {
@@ -70,7 +70,9 @@ export default function ServiceRequest() {
         e.preventDefault();
         console.log("Form Data:", formData);
         const resetForm = ()=> setFormData(formInitialState)
+
         const newFormData = new FormData()
+        newFormData.append('name', formData.name)
         newFormData.append('serviceType', JSON.stringify(choosenServices))
         newFormData.append('description', formData.description)
         newFormData.append('location', JSON.stringify(formData.location))
@@ -101,14 +103,14 @@ export default function ServiceRequest() {
 
     return (
         <div className="grid grid-cols-2 gap-8 w-full max-w-5xl mx-auto p-6 shadow-lg rounded-lg">
-            {/* Left Column: Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label htmlFor="name" className="text-sm font-medium text-gray-700 mb-1">Name:</label>
                     <input
                         type="text"
                         id="name"
-                        value={formData.name}
+                        value={user?.name || formData.name}
+                        disabled={user.name}
                         onChange={(e) =>
                             setFormData((prevForm) => ({
                                 ...prevForm,
@@ -137,7 +139,6 @@ export default function ServiceRequest() {
                         onChange={handleLocationChange}
                         className="mt-1 block p-1 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-96"
                     />
-                    {/* Clear button inside the input field */}
                     {formData.location.address && (
                         <button
                             type="button"
@@ -156,23 +157,24 @@ export default function ServiceRequest() {
                 </button>
                 <div>
                     <label>Choose Date : </label>
-                    {/* <DatePicker
-                        selected={formData.scheduleDate}
-                        className="mt-1 block p-1 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-                        onChange={(date) => {
-                            const formattedDate = date.toISOString().split('T')[0];
-                            setFormData((prevForm) => ({
-                                ...prevForm,
-                                scheduleDate: formattedDate
-                            }))
-                        }}
-                        filterDate={(date) =>
-                            selectedExpert?.availability?.some(
-                                (availableDate) => new Date(availableDate).toLocaleDateString("en-GB") === date.toLocaleDateString("en-GB")
-                            )
-                        }
-                        placeholderText="Select an available date"
-                    /> */}
+                    <DatePicker
+    selected={formData.scheduleDate}
+    className="mt-1 block p-1 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+    onChange={(date) => {
+        const formattedDate = date.toLocaleDateString("en-CA"); // Fix timezone issue
+        setFormData((prevForm) => ({
+            ...prevForm,
+            scheduleDate: formattedDate
+        }));
+    }}
+    dateFormat="dd-MM-yyyy"
+    filterDate={(date) =>
+        selectedExpert?.availability?.some(
+            (availableDate) => new Date(availableDate).toLocaleDateString("en-GB") === date.toLocaleDateString("en-GB")
+        )
+    }
+    placeholderText="Select an available date"
+/>
                 </div>
                 <div>
                     <label htmlFor="serviceImages" className="block text-sm font-medium text-gray-700 mb-1">Service Images:</label>
@@ -256,11 +258,11 @@ export default function ServiceRequest() {
                             <p className="text-md">
                                 {choosenServices.reduce(
                                     (total, item) =>
-                                       50 + total + item.servicesChoosen.reduce(
+                                        total + item.servicesChoosen.reduce(
                                             (subtotal, service) => subtotal + parseFloat(service.price || 0),
                                             0
                                         ),
-                                    0
+                                    50
                                 ).toFixed(2)}
                             </p>
                         </div>

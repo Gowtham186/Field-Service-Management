@@ -2,6 +2,7 @@ import Customer from "../models/customer-model.js"
 import ServiceRequest from "../models/serviceRequest-model.js"
 import Service from "../models/service-model.js"
 import Expert from "../models/expert-model.js"
+import User from '../models/user-model.js'
 import axios from "axios"
 //import { io } from "../../index.js"
 
@@ -162,16 +163,24 @@ serviceRequestCtlr.create = async (req, res) => {
         const servicePrices = await Promise.all(selectedServices.map(id => Service.findById(id)));
         serviceRequest.budget.servicesPrice = servicePrices.reduce((sum, cv) => sum + cv.price, 0);
 
-            const customerFind = await Customer.findOne({userId : req.currentUser.userId})
-            if(!customerFind){
-                const newCustomerDoc = new Customer();
-                newCustomerDoc.location = updateLocation;
-                newCustomerDoc.userId = req.currentUser.userId
-                await newCustomerDoc.save();
-            }
-            else {
-            customerFind.location = updateLocation;
-            await customerFind.save();
+        let user = await User.findById(req.currentUser.userId);
+    
+        if (!user.name) {
+            user.name = body.name;
+            await user.save();
+        }
+        console.log(user)
+
+        const customerFind = await Customer.findOne({userId : req.currentUser.userId})
+        if(!customerFind){
+            const newCustomerDoc = new Customer();
+            newCustomerDoc.location = updateLocation;
+            newCustomerDoc.userId = req.currentUser.userId
+            await newCustomerDoc.save();
+        }
+        else {
+        customerFind.location = updateLocation;
+        await customerFind.save();
         }
 
         // Emit notification to experts if needed
@@ -313,8 +322,27 @@ serviceRequestCtlr.updateStatus = async (req,res)=>{
         if(!serviceRequest){
             return res.status(404).json({errors : 'service request is not found'})
         }
+        if(body.status === 'assigned'){
+            const expert = await Expert.findOne({userId : req.currentUser.userId})
 
-        console.log(serviceRequest)
+            if (expert) {
+                const scheduleDateFormatted = new Date(serviceRequest.scheduleDate)
+                    .toISOString()
+                    .split("T")[0];
+            
+                console.log("Formatted Schedule Date:", scheduleDateFormatted);
+                
+                expert.availability = expert.availability.filter(
+                    (date) => date.split("T")[0] !== scheduleDateFormatted
+                );
+            
+                await expert.save(); 
+            }
+            console.log("Updated Availability:", expert.availability);
+            console.log("Service Request Date:", serviceRequest.scheduleDate);
+        }
+
+        //console.log(serviceRequest)
         res.json(serviceRequest)
 
     }catch(err){

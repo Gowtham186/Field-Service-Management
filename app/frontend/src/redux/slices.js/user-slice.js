@@ -27,8 +27,8 @@ export const getUserProfile = createAsyncThunk('user/getUserProfile', async(_, {
     try{
         const userProfile = await axios.get('/api/users/profile', { headers : { Authorization : localStorage.getItem('token')}})
         //const userData = lodash._.pick(userProfile.data, ['_id', 'phone_number', 'role', 'email'])
-        const { _id, phone_number, role, email } = userProfile.data;
-        const userData = { _id, phone_number, role, email };
+        const { _id, name, phone_number, role, email } = userProfile.data;
+        const userData = { _id, name, phone_number, role, email };
         //console.log(userData)
         return userData
     }catch(err){        

@@ -111,7 +111,13 @@ const expertSlice = createSlice({
         categoriesBySkills : [],
         loading : false,
         myServices : [],
-        allExperts : []
+        allExperts : [],
+        serviceRequestId : null
+    },
+    reducers : {
+        setServiceRequestId : (state,action)=>{
+            state.serviceRequestId = action.payload
+        }
     },
     extraReducers : (builder)=>{
         builder.addCase(fetchSkills.fulfilled, (state,action)=> {
@@ -164,4 +170,5 @@ const expertSlice = createSlice({
         })
     }
 })
+export const { setServiceRequestId } = expertSlice.actions
 export default expertSlice.reducer
