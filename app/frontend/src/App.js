@@ -25,10 +25,14 @@ import ExpertCalendar from './pages/Expertcalendar';
 import NewBookings from './pages/NewBookings';
 import ServiceDetails from './pages/ServiceDetails';
 import MyBookings from './pages/MyBookings';
+import LiveTracking from './pages/LiveTracking';
+import CustomerTracking from './pages/CustomerTracking';
+import { ToastContainer } from 'react-toastify';
+import NotificationComponent from './components/NotificationComponent';
 
 function App() {
   const dispatch = useDispatch()
-  const user = useSelector((state) => state.user)
+  const { user } = useSelector((state) => state?.user)
 
   useEffect(()=>{
     if(localStorage.getItem('token')){
@@ -36,12 +40,22 @@ function App() {
     }
   },[dispatch])
 
-  if(localStorage.getItem('token') && !user.user){
-    return <p>...loading</p>
+  // if(localStorage.getItem('token') && !user?.user){
+  //   return <p>...loading</p>
+  // }
+  if (!user || !user._id || !user.role) {
+    return <p>User data is not available.</p>;
   }
+
+  console.log(user._id, user.role); 
   return (
-    <div>
-        <Routes>
+    <>
+      <ToastContainer position="top-right" autoClose={5000} />    
+      {user && user._id && user.role && (
+      <NotificationComponent userId={user._id} role={user.role} />
+    )}
+
+      <Routes>
           <Route path='/' element={<Home />}/>
           <Route path='/customerlogin' element={<CustomerLogin />}/>
           <Route path='/expertlogin' element={<ExpertLogin />}/>
@@ -96,9 +110,11 @@ function App() {
           <Route path="/experts/:id" element={<ExpertDetails />}/>
           <Route path="/experts/:id/categories" element={<CategoryDetails />}/>
           <Route path="/service-requests" element={<ServiceRequest />}/>
+          <Route path="/live-tracking/:serviceId" element={<LiveTracking />}/>
+          <Route path="/track-expert/:expertId" element={<CustomerTracking />}/>
           
         </Routes>
-    </div>
+    </>
   );
 }
 

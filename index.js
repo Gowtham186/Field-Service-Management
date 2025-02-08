@@ -11,36 +11,30 @@ import serviceRequestRoutes from './app/routes.js/serviceRequest-routes.js'
 import reviewRoutes from './app/routes.js/review-routes.js'
 import skillRoutes from './app/routes.js/skill-routes.js'
 import queryRoutes from './app/routes.js/query-routes.js'
-// import { Server } from 'socket.io'
-// import http from 'http'
+import { Server } from 'socket.io'
+import http from 'http'
+import trackLocation from './app/sockets/trackLocation.js'
+import Location from './app/models/location-model.js'
+import { socketHandler } from './app/sockets/socketIndex.js'
 
 const app = express()
 dotenv.config()
 configureDb()
 
 //socket code 
-/* const server = http.createServer(app)
+const server = http.createServer(app)
 
 const io = new Server(server, {
     cors : {
-        origin : '*',
+        origin : 'http://localhost:3000',
         methods : ['GET', 'POST'],
     },
 })
 
-io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
-
-    socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
-    });
-}); */
-
-
+socketHandler(io)
 
 app.use(express.json())
 app.use(cors())
-
 
 
 app.use('/api', userRoutes)
@@ -56,7 +50,7 @@ app.use('/api', queryRoutes)
 //export { io }
 
 //server
-app.listen(4500, () => {
+server.listen(4500, () => {
     console.log('server is running');
     //console.log('WebSocket server is running on ws://localhost:4500');
 });

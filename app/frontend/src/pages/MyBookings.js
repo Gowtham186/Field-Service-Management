@@ -34,6 +34,13 @@ export default function MyBookings(){
         >
           Rejected
         </button>
+        <button
+        className={`btn ${filter === "scheduledToday" ? "bg-yellow-500 text-white" : "bg-gray-200"} p-2`}
+        onClick={() => setFilter("scheduledToday")}
+      >
+        Scheduled Today
+      </button>
+
       </div>
 
       <Suspense fallback={<p>Loading bookings...</p>}>

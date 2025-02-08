@@ -79,6 +79,9 @@ const userSlice = createSlice({
             state.isLoggedIn = true
             state.serverError = null
         })
+        builder.addCase(getUserProfile.pending, (state) => {
+            state.loading = true;
+        })
         builder.addCase(getUserProfile.rejected, (state, action)=>{
             state.serverError = action.payload
         })
