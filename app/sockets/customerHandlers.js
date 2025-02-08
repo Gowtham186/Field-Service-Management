@@ -3,12 +3,16 @@
 const customers = {}; // Store customer socket IDs
 
 export const customerHandlers = (io, socket) => {
-    console.log("👤 Customer Connected:", socket.id);
+    //console.log("👤 Customer Connected:", socket.id);
 
     // ✅ Store customer socket ID when they join
     socket.on("joinCustomer", ({ userId }) => {
-        customers[userId] = socket.id;
-        console.log("✅ Customer Registered:", userId, socket.id); // Log customer registration
+        if (!customers[userId]) {
+            customers[userId] = socket.id;
+            console.log("✅ Customer Registered:", userId, socket.id);
+        } else {
+            console.log("⚠️ Customer already connected:", userId);
+        }
     });
 
     // ✅ Handle disconnection (remove from tracking)
@@ -16,10 +20,10 @@ export const customerHandlers = (io, socket) => {
         Object.keys(customers).forEach((key) => {
             if (customers[key] === socket.id) {
                 delete customers[key];
-                console.log("⚠️ Customer disconnected:", key); // Log disconnection
+                console.log("⚠️ Customer disconnected:", key);
             }
         });
-    });
+    });;
 };
 
 export { customers }; // Export customers so experts can access it

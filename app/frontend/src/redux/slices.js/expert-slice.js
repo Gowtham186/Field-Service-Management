@@ -82,7 +82,7 @@ export const getMyServices = createAsyncThunk('expert/getMyServices', async () =
             headers: { Authorization: localStorage.getItem('token') },
         });
         console.log(response.data);
-        return response.data; // Return the fetched services data
+        return response.data; 
     } catch (err) {
         console.log(err);
         throw new Error('Failed to fetch services');
@@ -92,6 +92,16 @@ export const getMyServices = createAsyncThunk('expert/getMyServices', async () =
 export const updateBookingStatus = createAsyncThunk('expert/updateBookingStatus', async({id, body}) => {
     try{
         const response = await axios.put(`/api/service-requests/${id}/status`, body, { headers : { Authorization : localStorage.getItem('token')}})
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+    }
+})
+
+export const getServiceRequest = createAsyncThunk('expert/getServiceRequest', async(id) => {
+    try{
+        const response = await axios.get(`/api/service-requests/${id}`, { headers : { Authorization : localStorage.getItem('token')}})
         console.log(response.data)
         return response.data
     }catch(err){
@@ -112,11 +122,15 @@ const expertSlice = createSlice({
         loading : false,
         myServices : [],
         allExperts : [],
-        serviceRequestId : null
+        serviceRequestId : null,
+        workingService : null
     },
     reducers : {
         setServiceRequestId : (state,action)=>{
             state.serviceRequestId = action.payload
+        },
+        setWorkingService : (state,action) => {
+            state.workingService = action.payload
         }
     },
     extraReducers : (builder)=>{
@@ -168,7 +182,10 @@ const expertSlice = createSlice({
             const index = state.myServices.findIndex(ele => ele._id === action.payload._id)
             state.myServices[index] = action.payload 
         })
+        builder.addCase(getServiceRequest.pending, (state,action) => {
+            state.loading = true
+        })
     }
 })
-export const { setServiceRequestId } = expertSlice.actions
+export const { setServiceRequestId, setWorkingService } = expertSlice.actions
 export default expertSlice.reducer

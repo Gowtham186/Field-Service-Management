@@ -228,6 +228,7 @@ serviceRequestCtlr.getServiceRequest = async(req,res)=>{
 
         res.json(serviceRequest)
     }catch(err){
+        console.log(err)
         return res.status(500).json({errors : 'something went wrong'})
     }
 }

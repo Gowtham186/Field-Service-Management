@@ -2,7 +2,7 @@ import trackLocation from "./trackLocation.js";
 import { customers } from "./customerHandlers.js"; 
 
 export const expertHandlers = (io, socket) => {
-    console.log("🛠️ Expert connected:", socket.id);
+    //console.log("🛠️ Expert connected:", socket.id);
 
     trackLocation(io, socket);
 

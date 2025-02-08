@@ -29,6 +29,7 @@ import LiveTracking from './pages/LiveTracking';
 import CustomerTracking from './pages/CustomerTracking';
 import { ToastContainer } from 'react-toastify';
 import NotificationComponent from './components/NotificationComponent';
+import WorkTracking from './pages/WorkTracking';
 
 function App() {
   const dispatch = useDispatch()
@@ -44,46 +45,33 @@ function App() {
   //   return <p>...loading</p>
   // }
   if (!user || !user._id || !user.role) {
-    return <p>User data is not available.</p>;
+    return <p>...loading</p>;
   }
 
-  console.log(user._id, user.role); 
   return (
     <>
       <ToastContainer position="top-right" autoClose={5000} />    
-      {user && user._id && user.role && (
+      {user && user?._id && user?.role && (
       <NotificationComponent userId={user._id} role={user.role} />
     )}
 
       <Routes>
           <Route path='/' element={<Home />}/>
+          {/* customer */}
           <Route path='/customerlogin' element={<CustomerLogin />}/>
+          <Route path="/my-bookings" element={<MyBookings />}/>
+          <Route path="/experts/:id" element={<ExpertDetails />}/>
+          <Route path="/experts/:id/categories" element={<CategoryDetails />}/>
+          <Route path="/service-requests" element={<ServiceRequest />}/>
+          <Route path="/track-expert/:expertId" element={<CustomerTracking />}/>
+
+          {/* expert */}
           <Route path='/expertlogin' element={<ExpertLogin />}/>
           <Route path='/expertregister' element={<ExpertRegister />}/>
           <Route path='/create-expert' element={<ExpertCreation />}/>
           <Route path="/expert-dashboard" element={ 
             <MainLayout> 
               <ExpertDashboard />
-            </MainLayout>
-          }/>
-          <Route path="/admin-dashboard" element={ 
-            <MainLayout> 
-              <AdminDashboard />
-            </MainLayout>
-          }/>
-          <Route path="/verify-experts" element={ 
-            <MainLayout> 
-              <VerifyExperts />
-            </MainLayout>
-          }/>
-          <Route path="/manage-experts" element={ 
-            <MainLayout> 
-              <ManageExperts />
-            </MainLayout>
-          }/>
-          <Route path="/manage-categories" element={ 
-            <MainLayout> 
-              <ManageCategories />
             </MainLayout>
           }/>
           <Route path="/experts/availability" element={ 
@@ -106,12 +94,30 @@ function App() {
               <ServiceDetails />
             </MainLayout>
           }/>
-          <Route path="/my-bookings" element={<MyBookings />}/>
-          <Route path="/experts/:id" element={<ExpertDetails />}/>
-          <Route path="/experts/:id/categories" element={<CategoryDetails />}/>
-          <Route path="/service-requests" element={<ServiceRequest />}/>
           <Route path="/live-tracking/:serviceId" element={<LiveTracking />}/>
-          <Route path="/track-expert/:expertId" element={<CustomerTracking />}/>
+          <Route path="/working-service" element={ <WorkTracking />}/>
+
+          {/* admin */}
+          <Route path="/admin-dashboard" element={ 
+            <MainLayout> 
+              <AdminDashboard />
+            </MainLayout>
+          }/>
+          <Route path="/verify-experts" element={ 
+            <MainLayout> 
+              <VerifyExperts />
+            </MainLayout>
+          }/>
+          <Route path="/manage-experts" element={ 
+            <MainLayout> 
+              <ManageExperts />
+            </MainLayout>
+          }/>
+          <Route path="/manage-categories" element={ 
+            <MainLayout> 
+              <ManageCategories />
+            </MainLayout>
+          }/>
           
         </Routes>
     </>
