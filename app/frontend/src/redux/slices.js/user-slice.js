@@ -63,7 +63,11 @@ export const expertRegister = createAsyncThunk('user/expertRegister', async({for
 
 const userSlice = createSlice({
     name : 'user',
-    initialState : { isLoggedIn : false, user : null, serverError : null},
+    initialState : { 
+        isLoggedIn : false, 
+        user : null, 
+        loading : false,
+        serverError : null},
     reducers : {
         logout : (state,action)=>{
             state.isLoggedIn = false
@@ -75,6 +79,7 @@ const userSlice = createSlice({
             state.serverError = action.payload
         })
         builder.addCase(getUserProfile.fulfilled, (state,action)=>{
+            state.loading = false
             state.user = action.payload
             state.isLoggedIn = true
             state.serverError = null

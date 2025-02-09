@@ -4,6 +4,7 @@ import Service from "../models/service-model.js"
 import Expert from "../models/expert-model.js"
 import User from '../models/user-model.js'
 import axios from "axios"
+import mongoose from "mongoose"
 //import { io } from "../../index.js"
 
 const serviceRequestCtlr = {}
@@ -216,16 +217,25 @@ serviceRequestCtlr.getAllServiceRequests = async (req,res)=>{
 }
 
 serviceRequestCtlr.getServiceRequest = async(req,res)=>{
-    const id = req.params.id
+    const {id} = req.params
+    console.log(id)
     try{
         const serviceRequest = await ServiceRequest.findById(id)
-        .populate('serviceType.category', 'name')
-        .populate('serviceType.servicesChoosen', 'serviceName')
+            .populate({
+                path: "serviceType.category",
+                model: "Category", 
+                select: "name",
+            })
+            .populate({
+                path: "serviceType.servicesChoosen",
+                model: "Service", 
+                select: "serviceName price", 
+            });
         
         if(!serviceRequest){
             return res.status(404).json({errors : 'no service request is found'})
         }
-
+        console.log(serviceRequest)
         res.json(serviceRequest)
     }catch(err){
         console.log(err)
@@ -388,5 +398,53 @@ serviceRequestCtlr.getByExpert = async(req,res)=>{
         res.status(500).json({errors : 'something went wrong'})
     }
 }
-  
+
+serviceRequestCtlr.onSiteService = async(req,res)=>{
+    const { serviceRequestId, newService } = req.body
+    console.log(serviceRequestId)
+    try{
+        const serviceRequest = await ServiceRequest.findById(serviceRequestId)
+
+        if(!serviceRequest){
+            return res.status(404).json({errors : 'service request not found'})
+        }
+
+        const newServiceEntry = {
+            serviceName : newService.serviceName,
+            price : newService.price
+        }
+
+        serviceRequest.onSiteServices.push(newServiceEntry)
+        await serviceRequest.save()
+
+        res.json(newServiceEntry)
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors : 'something went wrong'})
+    }
+}
+
+serviceRequestCtlr.deleteOnSiteService = async(req,res)=>{
+    const serviceId = req.params.serviceId
+    try{
+        const serviceRequest = await ServiceRequest.findOne({"onSiteServices._id" : serviceId})
+
+        if(!serviceRequest){
+            return res.status(404).json({errors : 'on-site service not found'})
+        }
+
+        serviceRequest.onSiteServices = serviceRequest.onSiteServices.filter(
+            (service) => service._id.toString() !== serviceId
+        )
+
+        await serviceRequest.save()
+
+        return res.json(serviceId)
+
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors : 'something went wrong'})
+    }
+}   
+    
 export default serviceRequestCtlr

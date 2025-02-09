@@ -39,7 +39,7 @@ export default function OngoingService() {
     const handleStartWork = (id)=>{
         console.log(id)
         dispatch(setWorkingService(ongoingService))
-        navigate('/working-service')
+        navigate(`/service-requests/${id}`)
     }
 
 

@@ -30,10 +30,11 @@ import CustomerTracking from './pages/CustomerTracking';
 import { ToastContainer } from 'react-toastify';
 import NotificationComponent from './components/NotificationComponent';
 import WorkTracking from './pages/WorkTracking';
+import TrackWork from './pages/TrackWork';
 
 function App() {
   const dispatch = useDispatch()
-  const { user } = useSelector((state) => state?.user)
+  const { user, loading } = useSelector((state) => state?.user)
 
   useEffect(()=>{
     if(localStorage.getItem('token')){
@@ -44,9 +45,12 @@ function App() {
   // if(localStorage.getItem('token') && !user?.user){
   //   return <p>...loading</p>
   // }
-  if (!user || !user._id || !user.role) {
-    return <p>...loading</p>;
+  if(loading){
+    return <p>loading...</p>
   }
+  // if (!user || !user._id || !user.role) {
+  //   return <p>...loading</p>;
+  // }
 
   return (
     <>
@@ -64,6 +68,7 @@ function App() {
           <Route path="/experts/:id/categories" element={<CategoryDetails />}/>
           <Route path="/service-requests" element={<ServiceRequest />}/>
           <Route path="/track-expert/:expertId" element={<CustomerTracking />}/>
+          <Route path="/track-work/:bookingId" element={<TrackWork />}/>
 
           {/* expert */}
           <Route path='/expertlogin' element={<ExpertLogin />}/>
@@ -95,8 +100,12 @@ function App() {
             </MainLayout>
           }/>
           <Route path="/live-tracking/:serviceId" element={<LiveTracking />}/>
-          <Route path="/working-service" element={ <WorkTracking />}/>
 
+          <Route path="/service-requests/:id" element={ 
+            <MainLayout>
+              <WorkTracking />
+            </MainLayout>
+          }/>
           {/* admin */}
           <Route path="/admin-dashboard" element={ 
             <MainLayout> 

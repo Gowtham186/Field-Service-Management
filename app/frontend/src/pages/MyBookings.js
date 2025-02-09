@@ -16,6 +16,12 @@ export default function MyBookings(){
     <div>
         <Navbar />
       <div className="flex gap-4 p-4">
+      <button
+        className={`btn ${filter === "scheduledToday" ? "bg-yellow-500 text-white" : "bg-gray-200"} p-2`}
+        onClick={() => setFilter("scheduledToday")}
+      >
+        Scheduled Today
+      </button>
         <button
           className={`btn ${filter === "requested" ? "bg-blue-500 text-white" : "bg-gray-200"} p-2`}
           onClick={() => setFilter("requested")}
@@ -34,13 +40,6 @@ export default function MyBookings(){
         >
           Rejected
         </button>
-        <button
-        className={`btn ${filter === "scheduledToday" ? "bg-yellow-500 text-white" : "bg-gray-200"} p-2`}
-        onClick={() => setFilter("scheduledToday")}
-      >
-        Scheduled Today
-      </button>
-
       </div>
 
       <Suspense fallback={<p>Loading bookings...</p>}>

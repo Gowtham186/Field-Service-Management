@@ -101,6 +101,7 @@ export const updateBookingStatus = createAsyncThunk('expert/updateBookingStatus'
 
 export const getServiceRequest = createAsyncThunk('expert/getServiceRequest', async(id) => {
     try{
+        console.log(id)
         const response = await axios.get(`/api/service-requests/${id}`, { headers : { Authorization : localStorage.getItem('token')}})
         console.log(response.data)
         return response.data
@@ -108,6 +109,35 @@ export const getServiceRequest = createAsyncThunk('expert/getServiceRequest', as
         console.log(err)
     }
 })
+
+export const onSiteService = createAsyncThunk(
+    "expert/onSiteService",
+    async ({ serviceRequestId, newService }, { rejectWithValue }) => {
+      try {
+        const response = await axios.put("/api/service-requests/add-service",
+          { serviceRequestId, newService }, 
+          { headers: { Authorization: localStorage.getItem("token") } } 
+        );
+  
+        console.log(response.data);
+        return response.data;
+      } catch (err) {
+        console.log(err)
+        return rejectWithValue(err.response?.data || "Something went wrong");
+      }
+    }
+  );
+
+  export const deleteOnSiteService = createAsyncThunk('expert/deleteOnSiteService', async(serviceId) => {
+    try{
+        const response = await axios.delete(`/api/service-requests/delete-service/${serviceId}`,{ headers : { Authorization : localStorage.getItem('token')}})
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+    }
+  })
+  
 
 
 
@@ -185,6 +215,23 @@ const expertSlice = createSlice({
         builder.addCase(getServiceRequest.pending, (state,action) => {
             state.loading = true
         })
+        builder.addCase(getServiceRequest.fulfilled, (state,action) => {
+            state.loading = false
+            state.workingService = action.payload
+        })
+        builder.addCase(onSiteService.fulfilled, (state, action) => {
+            if (state.workingService) {
+                state.workingService.onSiteServices = [...state.workingService.onSiteServices, action.payload];
+            }
+        });        
+        builder.addCase(deleteOnSiteService.fulfilled, (state, action)=>{
+            if(state.workingService){
+                state.workingService.onSiteServices = state.workingService.onSiteServices.filter(
+                    (service) => service._id !== action.payload
+                )
+            }
+        })
+
     }
 })
 export const { setServiceRequestId, setWorkingService } = expertSlice.actions

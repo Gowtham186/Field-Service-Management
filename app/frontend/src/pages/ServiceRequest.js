@@ -5,6 +5,7 @@ import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css";
 import { bookserviceRequest } from "../redux/slices.js/customer-slice";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 const formInitialState = {
     name: '',
@@ -103,6 +104,7 @@ export default function ServiceRequest() {
 
     return (
         <div className="grid grid-cols-2 gap-8 w-full max-w-5xl mx-auto p-6 shadow-lg rounded-lg">
+            <Navbar />
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label htmlFor="name" className="text-sm font-medium text-gray-700 mb-1">Name:</label>

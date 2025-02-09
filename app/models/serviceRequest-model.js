@@ -38,6 +38,15 @@ const serviceRequestSchema = new Schema({
         enum : ['requested', 'assigned', 'in-progress', 'completed', 'cancelled'],
         default : 'requested'
     },
+    onSiteServices : {
+        type: [
+            { 
+                serviceName : String,
+                price : Number
+            }
+        ],
+        default : []
+    },
     completionDate : { type : Date }
 }, { timestamps : true})
 const ServiceRequest = model('ServiceRequest', serviceRequestSchema)

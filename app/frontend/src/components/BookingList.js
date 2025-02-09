@@ -10,13 +10,14 @@ export default function BookingList({ filter }) {
     useEffect(() => {
         if (filter === "scheduledToday") {
             const today = new Date();
-            today.setHours(0, 0, 0, 0); 
+            today.setHours(0, 0, 0, 0);
 
             const scheduledToday = myBookings?.filter(service => {
-                if (service.status !== "assigned") return false;
+                const isValidStatus = service.status === "assigned" || service.status === "in-progress";
+                if (!isValidStatus) return false;
 
                 const serviceDate = new Date(service.scheduleDate);
-                serviceDate.setHours(0, 0, 0, 0); 
+                serviceDate.setHours(0, 0, 0, 0);
 
                 return serviceDate.getTime() === today.getTime();
             });
@@ -26,6 +27,10 @@ export default function BookingList({ filter }) {
             setFilteredBookings(myBookings?.filter(ele => ele.status === filter));
         }
     }, [filter, myBookings]);
+
+    const handleServiceProgress = (bookingId)=>{
+        navigate(`/track-work/${bookingId}`)
+    }
 
     return (
         <div className="p-4">
@@ -51,7 +56,7 @@ export default function BookingList({ filter }) {
                             <p><strong>Coordinates:</strong> lat: {booking.location?.coords.lat}, lng: {booking.location?.coords.lng}</p>
 
                             {/* Show Track Expert Button if Assigned and Scheduled Today */}
-                            {filter === "scheduledToday" && booking.expertId?._id && (
+                            {(filter === "scheduledToday" || booking.status === "in-progress") && booking.expertId?._id && (
                                 <button
                                     className="bg-blue-500 text-white p-2 mt-2 rounded"
                                     onClick={() => {
@@ -63,13 +68,19 @@ export default function BookingList({ filter }) {
                                                     longitude: booking.location?.coords.lng
                                                 }
                                             }
-                                        })
-
+                                        });
                                     }}
                                 >
                                     Track Expert
                                 </button>
                             )}
+                            <button
+                                className="bg-blue-500 text-white p-2 ml-3 mt-2 rounded"
+                                onClick={()=> handleServiceProgress(booking._id) }
+
+                            >
+                                Track Work
+                                </button>
                         </li>
                     ))}
                 </ul>
