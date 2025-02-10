@@ -4,6 +4,7 @@ import categoryReducer from './slices.js/category-slice'
 import expertReducer from './slices.js/expert-slice'
 import searchReducer from './slices.js/search-slice'
 import customerReducer from './slices.js/customer-slice'
+import serviceRequestReducer from './slices.js/service-request-slice'
 
 const store = configureStore({
     reducer : {
@@ -11,7 +12,8 @@ const store = configureStore({
         category : categoryReducer,
         expert : expertReducer,
         search : searchReducer,
-        customer : customerReducer
+        customer : customerReducer,
+        serviceRequest : serviceRequestReducer
     }
 })
 export default store

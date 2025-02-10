@@ -1,10 +1,12 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { logout } from "../redux/slices.js/user-slice";
 
 export default function Sidebar({ role }) {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+
+  const { user } = useSelector((state) => state.user)
 
   const handleLogout = ()=>{
     dispatch(logout())
@@ -16,6 +18,15 @@ export default function Sidebar({ role }) {
       <ul className="space-y-4">
         {role === "expert" && (
           <>
+          <div>
+            <h1 className="text-2xl text-white mb-1">{user && user.name}</h1>
+            <button className="mb-3 text-white"
+              onClick={()=> {
+                navigate(`/expert/profile/${user._id}`)
+              }}
+            >view profile</button>
+            <hr />
+          </div>
           <li>
             <Link to="/expert-dashboard" className="text-white hover:text-blue-700">
               Dashboard
@@ -43,6 +54,15 @@ export default function Sidebar({ role }) {
         )}
         {role === "admin" && (
           <>
+          <div>
+            <h1 className="text-2xl text-white mb-1">{user && user.name}</h1>
+            <button className="mb-3 text-white"
+              onClick={()=> {
+                navigate(`/expert/profile/${user._id}`)
+              }}
+            >view profile</button>
+            <hr />
+          </div>
           <li>
             <Link to="/admin-dashboard" className="text-white hover:text-blue-700">
               Admin Dashboard
@@ -61,6 +81,11 @@ export default function Sidebar({ role }) {
           <li>
             <Link to="/manage-categories" className="text-white hover:text-blue-700">
               Manage Categories & Services
+            </Link>
+          </li>
+          <li>
+            <Link to="/manage-bookings" className="text-white hover:text-blue-700">
+              Manage Bookings
             </Link>
           </li>
           <li>

@@ -31,6 +31,8 @@ import { ToastContainer } from 'react-toastify';
 import NotificationComponent from './components/NotificationComponent';
 import WorkTracking from './pages/WorkTracking';
 import TrackWork from './pages/TrackWork';
+import ManageBookings from './pages/ManageBookings';
+import ExpertProfile from './pages/ExpertProfile';
 
 function App() {
   const dispatch = useDispatch()
@@ -106,6 +108,13 @@ function App() {
               <WorkTracking />
             </MainLayout>
           }/>
+          <Route path="/expert/profile/:id" element={ 
+            <MainLayout>
+              <ExpertProfile />
+            </MainLayout>
+          }/>
+
+          
           {/* admin */}
           <Route path="/admin-dashboard" element={ 
             <MainLayout> 
@@ -125,6 +134,11 @@ function App() {
           <Route path="/manage-categories" element={ 
             <MainLayout> 
               <ManageCategories />
+            </MainLayout>
+          }/>
+          <Route path="/manage-bookings" element={ 
+            <MainLayout> 
+              <ManageBookings />
             </MainLayout>
           }/>
           

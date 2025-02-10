@@ -8,7 +8,7 @@ import { fetchSkills } from "../redux/slices.js/expert-slice";
 
 export default function ManageCategories() {
   const dispatch = useDispatch();
-  const { categoriesWithServices } = useSelector((state) => state.category);
+  const { categoriesWithServices, loading } = useSelector((state) => state.category);
   const [editItem, setEditItem] = useState(null);
   const [deletedServices, setDeletedServices] = useState([]);
   const [newServices, setNewServices] = useState([]);
@@ -54,6 +54,10 @@ const handleSelectSkills = (selectedOption) => {
     }));
 };
 
+if(loading){
+  return <p>fetching categories</p>
+}
+
   
   const errors = {
     serviceName :[], price:[]
@@ -72,8 +76,11 @@ const handleSelectSkills = (selectedOption) => {
       errors.category = "Category skill should not contain numbers";
     }
 
-      updateItem.services.map((ele, i) => {
+      updateItem.services.forEach((ele, i) => {
       if(ele.serviceName === "" ){
+        if(!errors.serviceName){
+          errors.serviceName = []
+        }
         errors.serviceName.push(ele._id || ele.id)
       }
 
@@ -175,17 +182,6 @@ const handleSelectSkills = (selectedOption) => {
     );
     setEditItem({ ...editItem, services: [...updatedServices] });
   };
-
-  // const handleSaveService = async (serviceId) => {
-  //   const updatedService = editItem.services.find(service => service.id === serviceId || service._id === serviceId);
-  //   try {
-  //     // You could dispatch an action to save the individual service here
-  //     // await dispatch(updateService(updatedService)).unwrap();
-  //     console.log("Saving service", updatedService);
-  //   } catch (err) {
-  //     console.log("Error saving service", err);
-  //   }
-  // };
 
   const handleCancel = () => {
     setEditItem(null);
@@ -290,33 +286,19 @@ const handleSelectSkills = (selectedOption) => {
                 />
                 {clientErrors && <p className="relative text-red-500 text-xs left-56 bottom-4">{clientErrors.category}</p>}
               </div>
-
-              {/* <div className="grid grid-cols-2 items-center gap-4">
-                <label className="text-gray-900 font-medium">Skill:</label>
-                <input
-                  type="text"
-                  value={editItem.skill?.name}
-                  onChange={(e) => {
-                    setEditItem({ ...editItem, skill: e.target.value })
-                    setClientErrors({...clientErrors, skill : null})
-                  }}
-                  className="border-gray-300 p-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {clientErrors && <p className="relative text-red-500 text-xs left-56 bottom-4">{clientErrors.skill}</p>}
-              </div> */}
-
-                    <div  className="grid grid-cols-2 items-center gap-4">
-                        <label htmlFor="skills" className=" text-sm font-medium text-gray-700 mb-1">Skills :</label>
-                        <CreatableSelect
-                            options={options}
-                            onCreateOption={handleCreate}
-                            id="skills"
-                            onChange={handleSelectSkills}
-                            className="w-full "
-                            value={editItem.skill ? { label: editItem.skill.label, value: editItem.skill.value } : null}
-                        />
-                        {clientErrors && ( <p className="text-red-500 text-xs">{clientErrors.skills}</p>)}
-                    </div>
+              
+              <div  className="grid grid-cols-2 items-center gap-4">
+                  <label htmlFor="skills" className=" text-sm font-medium text-gray-700 mb-1">Skills :</label>
+                  <CreatableSelect
+                      options={options}
+                      onCreateOption={handleCreate}
+                      id="skills"
+                      onChange={handleSelectSkills}
+                      className="w-full "
+                      value={editItem.skill ? { label: editItem.skill.label, value: editItem.skill.value } : null}
+                  />
+                  {clientErrors && ( <p className="text-red-500 text-xs">{clientErrors.skills}</p>)}
+              </div>
 
               <label className="text-gray-900 font-medium block">Services:</label>
               {editItem.services?.map((ele, i) => (

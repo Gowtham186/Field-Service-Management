@@ -3,10 +3,11 @@ import Skill from "../models/skill-model.js"
 const skillCtlr = {}
 
 skillCtlr.create = async(req, res)=>{
-    const body = req.body
+    const { skill } = req.body
     try{
-        const skill = await Skill.create(body)
-        res.status(201).json(skill)
+        const newSkill = await Skill.create({name : skill})
+        res.status(201).json(newSkill)
+        console.log(newSkill)
     }catch(err){
         console.log(err)
         return res.status(500).json({errors : 'something went wrong'})

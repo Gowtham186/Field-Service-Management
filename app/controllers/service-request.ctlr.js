@@ -9,108 +9,6 @@ import mongoose from "mongoose"
 
 const serviceRequestCtlr = {}
 
-// serviceRequestCtlr.create = async (req, res) => {
-//     const body = req.body;
-
-//     try {   
-//         if (body.serviceType && typeof body.serviceType === 'string') {
-//             body.serviceType = JSON.parse(body.serviceType);
-//         }
-//         if(body.location && typeof body.location == 'string'){
-//             body.location = JSON.parse(body.location)
-//         }
-
-//         console.log(req.files);
-//         console.log(body);
-//         const customerDoc = await Customer.findOne({userId : req.currentUser.userId}).populate('userId')
-//         //console.log(customerDoc)
-        
-//         if (req.files && req.files.length > 0) {
-//             const uploadImages = req.files.map(file => ({
-//                 pathName: file.path,
-//                 originalName: file.originalname, 
-//             }));
-//             body.serviceImages = uploadImages;
-//         }
-        
-//         let lat, lng
-//         const customerLocation = await Customer.findOne({ 'location.address' : body.location.address})
-//         if(!customerLocation){
-//             const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
-//                 params :{ q : body.location.address,  key : process.env.OPENCAGE_API_KEY }
-//             })
-//             //console.log(resource.data.results[0].geometry)
-//             const geometry = resource.data.results[0].geometry
-//             lat = geometry.lat
-//             lng = geometry.lng
-//             console.log({lat, lng})
-//         }else{
-//             const geometry = customerLocation.location.coords
-//             lat = geometry.lat
-//             lng = geometry.lng
-//             //console.log('old', {lat, lng})
-//         }
-
-        
-//         const updateLocation = { address : body.location.address, coords : { lat, lng }}
-        
-//         const serviceRequest = new ServiceRequest({
-//             ...body,
-//             customerId : req.currentUser.userId,
-//             location : updateLocation,
-//             budget : { bookingFee : 50 },
-//         })
-        
-//         const selectedServices = body.serviceType.flatMap(({servicesChoosen}) => servicesChoosen)
-//         const servicePrices = await Promise.all(selectedServices.map(id => Service.findById(id)))
-        
-//         serviceRequest.budget.servicesPrice = servicePrices.reduce((sum, cv) => sum + cv.price, 0)
-//         //serviceRequest.budget.finalPrice = serviceRequest.budget.servicesPrice + serviceRequest.budget.bookingFee
-        
-//         if(!customerDoc){
-//             const newCustomerDoc = new Customer()
-//             newCustomerDoc.location = updateLocation
-//             await newCustomerDoc.save()
-//             //console.log('new')
-//         }else{
-//             customerDoc.location = updateLocation
-//             await customerDoc.save()
-//             //console.log('old')
-//         }
-
-//         // filteredExperts.forEach(expert => {
-//         //     if(expert.socketId){
-//         //         io.to(expert.socketId).emit('new-service-request', {
-//         //             requestedId : serviceRequest._id,
-//         //             customerLocation : { lat, lng },
-//         //             serviceCategory : body.serviceType
-//         //         })
-//         //     }
-//         // })
-
-//         /* console.log('Notification sent to filtered experts.')
-
-//             io.emit('new-service-request', { message: 'New service request received!' }, (ack) => {
-//                 if (ack) {
-//                     console.log('Client acknowledged receipt of event');
-//                 } else {
-//                     console.error('Client did not acknowledge event');
-//                 }
-//             });
-            
-//              */console.log('Event emitted: new-service-request');
-            
-
-//         //console.log(serviceRequest)
-//         //await serviceRequest.save();
-        
-//         res.status(201).json(serviceRequest);
-//     } catch (err) {
-//         console.error("Error creating service request:", err);
-//         res.status(500).json({ errors: "Something went wrong" });
-//     }
-// };
-
 serviceRequestCtlr.create = async (req, res) => {
     const body = req.body;
 
@@ -196,25 +94,66 @@ serviceRequestCtlr.create = async (req, res) => {
     }
 };
 
+serviceRequestCtlr.getAllServiceRequests = async (req, res) => {
+    try {
+        const search = req.query.search || '';
+        const categorySearch = req.query.category || '';
+        const status = req.query.status || '';
+        const sort = req.query.sort || '';
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 5
+        const skip = (page - 1) * limit 
 
-serviceRequestCtlr.getAllServiceRequests = async (req,res)=>{
-    try{
-        let allServiceRequests = await ServiceRequest.find()
-        if(req.currentUser.role == 'expert'){
-            const expert = await Expert.findOne({userId : req.currentUser.userId})
-            //allServiceRequests = allServiceRequests.map(serviceRequest => serviceRequest.serviceType).flat().filter(serviceType => expert.categories.includes(serviceType.category))
-            
-            allServiceRequests = allServiceRequests.filter(serviceRequest =>
-                serviceRequest.serviceType.some(serviceType => expert.categories.includes(serviceType.category)
-                )
-            );
+        const pipeline = [
+            { $lookup: { from: "users", localField: "customerId", foreignField: "_id", as: "customer"}},
+            { $unwind: { path: "$customer", preserveNullAndEmptyArrays: true } },
+
+            {$lookup: {from: "users",localField: "expertId", foreignField: "_id",as: "expert" }},
+            { $unwind: { path: "$expert", preserveNullAndEmptyArrays: true } },
+
+            {$lookup: { from: "categories", localField: "serviceType.category", foreignField: "_id", as: "categoryDetails"}},
+
+            {$lookup: { from: "services", localField: "serviceType.servicesChoosen", foreignField: "_id", as: "servicesChoosenDetails"}}
+        ];
+
+        const matchStage = {};
+
+        if (status)  matchStage.status = status;
+        if (search) {
+            matchStage.$or = [
+                { "customer.name": { $regex: search, $options: "i" } },
+                { "expert.name": { $regex: search, $options: "i" } }
+            ];
         }
-        
-        res.json(allServiceRequests)
-    }catch(err){
-        
+
+        if (categorySearch) matchStage["categoryDetails.name"] = { $regex: categorySearch, $options: "i" };
+
+        if (Object.keys(matchStage).length > 0) {
+            pipeline.push({ $match: matchStage });
+        }
+
+        let sortOrder = {}
+        if(sort === 'asc') sortOrder = { "budget.finalPrice" : 1}
+        if(sort === 'desc') sortOrder = { "budget.finalPrice" : -1}
+
+        if(sort) pipeline.push({ $sort : sortOrder})
+
+        const totalDocuments = await ServiceRequest.countDocuments(matchStage);
+        pipeline.push({ $skip : skip}, { $limit : limit})
+
+        const serviceRequests = await ServiceRequest.aggregate(pipeline);
+        console.log(serviceRequests)
+        res.json({
+            data : serviceRequests,
+            totalPages : Math.ceil(totalDocuments / limit),
+            currentPage : page,
+            totalItems : totalDocuments,
+
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-}
+};
 
 serviceRequestCtlr.getServiceRequest = async(req,res)=>{
     const {id} = req.params

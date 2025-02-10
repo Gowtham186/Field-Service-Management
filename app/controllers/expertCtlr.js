@@ -93,7 +93,8 @@ expertCtlr.getAllExperts = async (req, res) => {
         const search = req.query.search || '';  
         
         const experts = await Expert.find()
-            .populate('userId', 'name')  
+            .populate('userId', 'name') 
+            .populate('skills', 'name') 
             .exec();
 
             console.log(experts)
@@ -104,8 +105,6 @@ expertCtlr.getAllExperts = async (req, res) => {
         res.status(500).json({ errors: 'Something went wrong' });
     }
 };
-
-
 
 expertCtlr.unVerifiedExperts = async (req,res) => {
     try{
@@ -134,65 +133,6 @@ expertCtlr.getProfile = async(req,res)=>{
     }
 }
 
-expertCtlr.profileUpdate = async(req,res)=>{
-    const id = req.currentUser.userId
-    const body  = req.body
-    try{
-        const expert = await Expert.findOne({userId : id})
-            .populate('categories', 'name')
-
-        if(!expert){
-            return res.status(404).json({errors : 'record not found'})
-        }
-        console.log(body.location.address)
-        if(body.location.address){
-            const existAddress = await Expert.findOne({'location.address' : body.location.address})
-            console.log(existAddress)
-            if(!existAddress){
-                const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
-                    params :{ q : body.location.address,  key : process.env.OPENCAGE_API_KEY }
-                })
-                console.log(resource.data)
-                if(resource.data.results.length > 0){
-                    expert.location.coords = resource.data.results[0].geometry
-                    expert.location.address = body.location.address
-                }else{
-                    return res.status(400).json({errors : 'try other address'})
-                }
-            }else{
-                expert.location.coords = existAddress.location.coords
-                expert.location.address = body.location.address
-            }
-        }
-
-        if(body.categories){
-            const newCategories = body.categories.map(category => category._id || category)
-            
-            await Expert.findOneAndUpdate(
-                {userId : id},
-                { 
-                    $addToSet : { categories : { $each : newCategories } },  //it adds unique/new category
-                    $set : { location : body.location, experience : body.experience} //updating
-                },
-                { new : true}
-            )
-        }else{
-            await Expert.findOneAndUpdate(
-                {userId : id},
-                { $set : { location : body.location, experience : body.experience}}, 
-                {new : true}
-            )
-        }
-        await expert.save()
-        console.log(expert)
-        return res.json(expert)
-
-    }catch(err){
-        console.log(err)
-        res.status(500).json({errors : 'something went wrong'})
-    }
-}
-
 expertCtlr.verify = async(req,res)=>{
     const id = req.params.id
     const { isVerified } = req.body
@@ -212,41 +152,6 @@ expertCtlr.verify = async(req,res)=>{
         res.status(500).json({errors : 'something went wrong'})
     }
  }
-
-// expertCtlr.updateAvailability = async (req, res) => {
-//     try {
-//         const body = req.body;
-
-//         if (typeof body.availability === 'string') {
-//             body.availability = JSON.parse(body.availability);
-//         }
-//         const expert = await Expert.findOne({ userId: req.currentUser.userId });
-
-//         let updatedAvailability;
-
-//         if (datesToAdd.length > 0) {
-//             updatedAvailability = await Expert.findOneAndUpdate(
-//                 { userId: req.currentUser.userId },
-//                 { $addToSet: { availability: { $each: datesToAdd } } },
-//                 { new: true }
-//             );
-//         }
-
-//         const datesToRemove = uniqueDates.filter(date => existingDates.includes(date));
-//         if (datesToRemove.length > 0) {
-//             updatedAvailability = await Expert.findOneAndUpdate(
-//                 { userId: req.currentUser.userId },
-//                 { $pull: { availability: { $in: datesToRemove } } },
-//                 { new: true }
-//             );
-//         }
-
-//         return res.json(updatedAvailability ? updatedAvailability.availability : expert.availability);
-//     } catch (err) {
-//         console.log(err);
-//         return res.status(500).json({ errors: 'Something went wrong' });
-//     }
-// };
 
 expertCtlr.updateAvailability = async (req, res) => {
     try {
@@ -312,7 +217,6 @@ expertCtlr.updateAvailability = async (req, res) => {
     }
 };
 
-
 expertCtlr.expertCategoriesBySkills = async (req,res)=>{
     try{
         const id = req.params.id
@@ -361,7 +265,59 @@ expertCtlr.getMyServices = async (req, res) => {
         console.log("Error fetching services:", err);
         return res.status(500).json({ error: "Something went wrong" });
     }
-};    
-    
+};   
 
+expertCtlr.updateProfile = async(req,res)=>{
+    const { id } = req.params
+    console.log(req.body)
+    const { userId, skills, experience, location } = req.body
+    try{
+        const { name, email, phone_number } = userId
+        const user = await User.findByIdAndUpdate(id, 
+            { name, email, phone_number},
+            {new : true})
+        console.log(user)
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        let expert = await Expert.findOne({userId : id}).populate('skills')
+            .populate('userId')
+        if (!expert) {
+            return res.status(404).json({ error: "Expert profile not found" });
+        }
+
+        expert.experience = experience
+        if (skills && skills.length > 0) {
+            expert.skills = skills.map(skill => skill);
+        }
+
+        if (location?.address) {
+            try {
+                const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
+                    params: { q: location.address, key: process.env.OPENCAGE_API_KEY },
+                });
+
+                if (resource.data.results.length > 0) {
+                    expert.location.coords = resource.data.results[0].geometry;
+                    expert.location.address = location.address;
+                } else {
+                    return res.status(400).json({ error: "Invalid address. Try another one." });
+                }
+            } catch (error) {
+                console.error("Error fetching address coordinates:", error);
+                return res.status(500).json({ error: "Failed to fetch location data." });
+            }
+        }
+        await expert.save()
+        console.log(expert)
+        return res.json(expert)
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors : 'something went wrong'})
+    }
+
+}
+    
 export default expertCtlr

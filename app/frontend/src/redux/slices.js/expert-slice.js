@@ -26,7 +26,6 @@ export const fetchSkills = createAsyncThunk('/expert/fetchSkills', async()=>{
 export const getAllExperts = createAsyncThunk('expert/getAllExperts', async()=>{
     try{
         const allExperts = await axios.get('/api/experts', { headers : { Authorization : localStorage.getItem('token')}})
-        console.log(allExperts)
         return allExperts.data
     }catch(err){
         console.log(err)
@@ -128,17 +127,34 @@ export const onSiteService = createAsyncThunk(
     }
   );
 
-  export const deleteOnSiteService = createAsyncThunk('expert/deleteOnSiteService', async(serviceId) => {
-    try{
-        const response = await axios.delete(`/api/service-requests/delete-service/${serviceId}`,{ headers : { Authorization : localStorage.getItem('token')}})
-        console.log(response.data)
-        return response.data
-    }catch(err){
-        console.log(err)
-    }
-  })
-  
+export const deleteOnSiteService = createAsyncThunk('expert/deleteOnSiteService', async(serviceId) => {
+try{
+    const response = await axios.delete(`/api/service-requests/delete-service/${serviceId}`,{ headers : { Authorization : localStorage.getItem('token')}})
+    console.log(response.data)
+    return response.data
+}catch(err){
+    console.log(err)
+}
+})
 
+export const updateProfile = createAsyncThunk('expert/updateProfile', async({id, body})=>{
+try{
+    const response = await axios.put(`/api/experts/${id}`, body, { headers : { Authorization : localStorage.getItem('token')}})
+    console.log(response.data)
+    // return response.data
+}catch(err){
+    console.log(err.response.data.errors)
+}
+})
+  
+export const addNewSkill = createAsyncThunk('expert/addNewSkill', async({ skill }) => {
+try{
+    const response = await axios.post('/api/skills', { skill }, { headers : { Authorization : localStorage.getItem('token')}})
+    return response.data
+}catch(err){
+    console.log(err)
+}
+})
 
 
 const expertSlice = createSlice({
@@ -151,7 +167,6 @@ const expertSlice = createSlice({
         categoriesBySkills : [],
         loading : false,
         myServices : [],
-        allExperts : [],
         serviceRequestId : null,
         workingService : null
     },
@@ -164,7 +179,11 @@ const expertSlice = createSlice({
         }
     },
     extraReducers : (builder)=>{
+        builder.addCase(fetchSkills.pending, (state,action)=>{
+            state.loading = true
+        })
         builder.addCase(fetchSkills.fulfilled, (state,action)=> {
+            state.loading = false
             state.allSkills = action.payload
         })
         builder.addCase(createExpertProfile.rejected, (state,action)=>{
@@ -230,6 +249,9 @@ const expertSlice = createSlice({
                     (service) => service._id !== action.payload
                 )
             }
+        })
+        builder.addCase(addNewSkill.fulfilled, (state,action)=>{
+            state.allSkills.push(action.payload)
         })
 
     }
