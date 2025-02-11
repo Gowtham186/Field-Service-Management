@@ -50,11 +50,8 @@ export default function CategoryDetails() {
 
   const handleBook = () => {
     console.log(selectedServices);
-    if (!isLoggedIn) {
-      navigate("/customerlogin");
-    } else {
-      navigate("/service-requests");
-    }
+    navigate("/service-requests");
+    
   };
 
   return (

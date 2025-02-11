@@ -21,6 +21,7 @@ export default function ServiceRequest() {
     const dispatch = useDispatch();
     const [greetCard, setGreetCard] = useState(false)
     const navigate = useNavigate()
+    const [isBooked, setIsBooked] = useState(false)
 
     const [formData, setFormData] = useState(formInitialState);
 
@@ -69,6 +70,12 @@ export default function ServiceRequest() {
 
     const handleSubmit = async(e) => {
         e.preventDefault();
+
+        if(!user){
+            navigate('/customerlogin')
+            return
+        }
+
         console.log("Form Data:", formData);
         const resetForm = ()=> setFormData(formInitialState)
 
@@ -78,7 +85,7 @@ export default function ServiceRequest() {
         newFormData.append('description', formData.description)
         newFormData.append('location', JSON.stringify(formData.location))
         newFormData.append('scheduleDate', formData.scheduleDate)
-        newFormData.append('expertId', selectedExpert.userId._id)
+        newFormData.append('expertId', selectedExpert.userId?._id)
 
         formData.serviceImages.forEach((file, index) => {
             newFormData.append('serviceImages', file); 
@@ -104,15 +111,15 @@ export default function ServiceRequest() {
 
     return (
         <div className="grid grid-cols-2 gap-8 w-full max-w-5xl mx-auto p-6 shadow-lg rounded-lg">
-            <Navbar />
+            {/* <Navbar /> */}
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label htmlFor="name" className="text-sm font-medium text-gray-700 mb-1">Name:</label>
                     <input
                         type="text"
                         id="name"
-                        value={user?.name || formData.name}
-                        disabled={user.name}
+                        value={formData.name || user?.name}
+                        // disabled={user.name}
                         onChange={(e) =>
                             setFormData((prevForm) => ({
                                 ...prevForm,
@@ -200,9 +207,13 @@ export default function ServiceRequest() {
                         className="mt-1 block p-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                     />
                 </div>
-                <button type="submit" className="py-2 px-4 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
-                    Confirm Booking
-                </button>
+                {!isBooked && (
+                    <button type="submit"
+                    className="py-2 px-4 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                        >
+                        Confirm Booking
+                    </button>
+                )}
             </form>
 
             <div className="p-4 bg-gray-100 rounded-lg flex flex-col justify-between h-full">
@@ -211,15 +222,19 @@ export default function ServiceRequest() {
                 <div className="flex flex-col gap-2">
                     <div className="flex justify-between">
                         <p className="font-medium text-sm">Name:</p>
-                        <p className="text-sm">{formData.name || "-"}</p>
+                        <p className="text-sm">{formData.name || user?.name || "-"}</p>
                     </div>
                     <div className="flex justify-between">
                         <p className="font-medium text-sm">Phone Number:</p>
                         <p className="text-sm">{user?.phone_number || "-"}</p>
                     </div>
                     <div className="flex justify-between">
-                        <p className="font-medium text-sm">Location:</p>
+                        <p className="font-medium text-sm">Location: </p>
                         <p className="text-right text-sm">{formData.location.address || "-"}</p>
+                    </div>
+                    <div className="flex justify-between">
+                        <p className="font-medium text-sm">Service Date: </p>
+                        <p className="text-right text-sm">{new Date(formData.scheduleDate).toLocaleDateString("en-GB") || "-"}</p>
                     </div>
                     <div className="flex justify-between">
                         <p className="font-medium text-sm">Description:</p>
@@ -270,11 +285,16 @@ export default function ServiceRequest() {
                         </div>
                     </div>
                 )}
-                {/* <button type="submit" className="py-2 px-4 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
-                    Pay 50 to Confirm The Booking
-                </button> */}
+                {isBooked && (
+                    <button type="submit" 
+                    
+                    className="py-2 px-4 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                        Pay Booking Fee
+                    </button>
+                )}
+                
             </div>
-            {greetCard && (
+            {/* {greetCard && (
                 <div
                 className="absolute top-1/2 left-1/2 bg-opacity-50 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg p-6 w-96 text-center z-50"
                 >
@@ -283,7 +303,7 @@ export default function ServiceRequest() {
                         onClick={()=> navigate('/')}
                     >Home</button>
                 </div>
-            )}
+            )} */}
         </div>
     );
 }

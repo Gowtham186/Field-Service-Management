@@ -22,7 +22,7 @@ export default function ManageBookings() {
     }
 
     return (
-        <div className="p-6 bg-white shadow-lg rounded-lg">
+        <div >
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">Manage Bookings</h2>
 
             {/* Filters */}

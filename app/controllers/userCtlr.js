@@ -128,7 +128,7 @@ userCtlr.adminLogin = async(req,res)=>{
 userCtlr.profile = async (req,res)=>{
     try{
         const user = await User.findById(req.currentUser.userId)
-        console.log(req.currentUser.userId)
+        //console.log(req.currentUser.userId)
         if(!user){
             return res.status(404).json({errors : 'record not found'})
         }

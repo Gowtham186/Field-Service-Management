@@ -1,21 +1,15 @@
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { getAllExperts, toggledIsVerified } from "../redux/slices.js/expert-slice"
+import { getAllExperts, getUnverifiedExperts, toggledIsVerified } from "../redux/slices.js/expert-slice"
 
 export default function VerifyExperts(){
     const dispatch = useDispatch()
-    const { experts } = useSelector((state)=> state.expert)
+    const { unVerifiedExperts } = useSelector((state)=> state.expert)
 
-    const [unVerifiedExperts, setUnVerifiedExperts] = useState([])
     useEffect(()=>{
-        dispatch(getAllExperts())
+        dispatch(getUnverifiedExperts())
+        
     },[dispatch])
-
-    useEffect(()=>{
-        if(experts?.length){
-            setUnVerifiedExperts(experts.filter(expert => !expert.isVerified))
-        }
-    },[experts])
 
     const handleVerify = async(expert)=>{
         const updateVerify = !expert.isVerified
@@ -23,13 +17,14 @@ export default function VerifyExperts(){
         const getConfirm = window.confirm("Are you sure?")
         if(getConfirm){
             await dispatch(toggledIsVerified({ id : expert.userId._id, body : { isVerified : updateVerify}})).unwrap()
+            dispatch(getUnverifiedExperts());
         }
     }
 
     return(
         <>
             <h1 className="text-2xl font-semibold mb-4">Verify Experts</h1> 
-            {experts?.length === 0 ? (
+            {unVerifiedExperts?.length === 0 ? (
                 <p>No verify experts found</p>
             ) : (
                 <div>

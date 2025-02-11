@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import "../App.css";
 
 export default function ExpertAvailability() {
-  const [selectedDates, setSelectedDates] = useState([]); 
+  const [selectedDates, setSelectedDates] = useState([]);
   const { user } = useSelector((state) => state.user);
   const { profile } = useSelector((state) => state.expert);
   const dispatch = useDispatch();
@@ -18,20 +18,29 @@ export default function ExpertAvailability() {
 
   useEffect(() => {
     if (profile?.availability?.length) {
-        const parsedDates = profile.availability.map(dateStr => new Date(dateStr));
-        setSelectedDates(parsedDates);
+      const parsedDates = profile.availability.map(dateStr => new Date(dateStr));
+      setSelectedDates(parsedDates);
     }
-}, [profile]);
+  }, [profile]);
 
-    const handleSaveAvailability = () => {
-        console.log("Selected Dates (Raw):", selectedDates);
-        const formattedDates = selectedDates.map((date) => format(date, "yyyy-MM-dd"));
-        console.log("Formatted Dates:", formattedDates);
-        dispatch(updateAvailability({ availability: formattedDates })).unwrap();
-    };
+  const handleSaveAvailability = () => {
+    console.log("Selected Dates (Raw):", selectedDates);
+    const formattedDates = selectedDates.map((date) => format(date, "yyyy-MM-dd"));
+    console.log("Formatted Dates:", formattedDates);
+    dispatch(updateAvailability({ availability: formattedDates }))
+    .unwrap()
+    .then(() => console.log("Availability updated successfully"))
+    .catch((error) => console.error("Error updating availability:", error));  
+  };
 
   const handleDateChange = (dates) => {
-    setSelectedDates(Array.isArray(dates) ? dates : [dates]); 
+    console.log("Raw Selected Dates:", dates);
+    const normalizedDates = (Array.isArray(dates) ? dates : [dates]).map(d => new Date(d));
+    
+    setSelectedDates(prevDates => {
+      console.log("Updated Selected Dates:", normalizedDates);
+      return normalizedDates;
+    });
   };
 
   return (
@@ -39,7 +48,6 @@ export default function ExpertAvailability() {
       <h2 className="text-3xl font-semibold mb-4">Select Available Dates</h2>
 
       <DatePicker
-        
         multiple
         value={selectedDates}
         onChange={handleDateChange}
@@ -47,8 +55,9 @@ export default function ExpertAvailability() {
         inline
         format="DD-MM-YYYY"
         mapDays={({ date }) => {
+          const normalizedDate = new Date(date.toDate().setHours(0, 0, 0, 0));
           let isSelected = selectedDates.some(
-            (d) => d instanceof Date && d.getTime() === date.toDate().getTime()
+            (d) => d instanceof Date && d.setHours(0, 0, 0, 0) === normalizedDate.getTime()
           );
           return {
             style: isSelected ? { backgroundColor: "green", color: "white" } : {},

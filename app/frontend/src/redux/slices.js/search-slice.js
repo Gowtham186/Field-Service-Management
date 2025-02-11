@@ -22,6 +22,17 @@ export const getAddress = createAsyncThunk('search/getAddress', async({lat, lng}
     }
 })
 
+export const getCoords = createAsyncThunk('search/getCoords', async ({ address }) => {
+    try {
+        const response = await axios.get(`/api/getCoords?address=${address}`);
+        return response.data;  // Ensure the lat/lng is returned
+    } catch (err) {
+        console.log(err);
+        throw err;
+    }
+});
+
+
 
 const searchSlice = createSlice({
     name : 'search',

@@ -1,20 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addNewSkill, fetchSkills, getExpertProfile, updateProfile } from "../redux/slices.js/expert-slice";
+import { addNewSkill, changeProfilePic, fetchSkills, getExpertProfile, updateProfile } from "../redux/slices.js/expert-slice";
 import { useParams } from "react-router-dom";
 import CreatableSelect from 'react-select/creatable';
 import { getUserProfile } from "../redux/slices.js/user-slice";
+import { ImagePlus } from 'lucide-react'
 
 export default function ExpertProfile() {
     const { id } = useParams();
     const dispatch = useDispatch();
-    const { profile, allSkills } = useSelector((state) => state.expert);
+    const { profile, allSkills, loading } = useSelector((state) => state.expert);
     const [editProfile, setEditProfile] = useState(null);
     const [selectedSkills, setSelectedSkills] = useState([]);
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         if (id) {
-            dispatch(getExpertProfile({ id }));
+            dispatch(getExpertProfile(id));
         }
     }, [dispatch, id]);
 
@@ -26,7 +28,7 @@ export default function ExpertProfile() {
         }
     }, [profile?.skills]);
 
-    if (!profile) {
+    if (!profile || loading) {
         return <p className="text-center text-gray-500">Loading...</p>;
     }
 
@@ -93,6 +95,28 @@ export default function ExpertProfile() {
         }));
     };
 
+    const handleImageUpload = () => {
+        fileInputRef.current.click();
+    };
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            console.log("Selected file:", file);
+            const profilePicData = new FormData()
+            profilePicData.append('profilePic', file)
+
+            dispatch(changeProfilePic({ id, profilePicData }))
+            .unwrap()
+            .then(() => {
+                console.log("Profile picture updated successfully!");
+                dispatch(getExpertProfile(id)); // Fetch updated profile data
+            })
+            .catch((error) => {
+                console.error("Failed to update profile picture:", error);
+            });        }
+    };
+
     return (
         <div className="relative">
             <button
@@ -104,12 +128,25 @@ export default function ExpertProfile() {
 
             <h2 className="text-2xl font-semibold mb-6 text-gray-800">Expert Profile</h2>
 
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={handleFileChange}
+            />
+
             <div className="flex gap-2">
                 {/* Left Column */}
                 <div className="w-1/2 border p-6 rounded-lg shadow-sm bg-gray-50">
                     <div className="flex flex-col mb-4">
                         <img src={profile.profilePic} alt="Profile" className="w-32 h-32 rounded-full border-2 border-gray-300" />
                     </div>
+                        <button 
+                            className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 flex items-center"
+                            onClick={handleImageUpload}
+                        >
+                            <ImagePlus size={20} />
+                        </button>
                     <div className="mb-2">
                         <p className="text-gray-500 uppercase text-sm">Name</p>
                         <p className="text-lg font-semibold">{profile?.userId?.name || "N/A"}</p>

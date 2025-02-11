@@ -6,7 +6,10 @@ export const getAllServiceRequests = createAsyncThunk('serviceRequest',
     try{
         const params = { search, status, category, sort, page, limit}
         
-        const response = await axios.get(`/api/service-requests`, { params})
+        const response = await axios.get(`/api/service-requests`, { 
+            params,
+            headers : { Authorization : localStorage.getItem('token')}
+        })
         console.log(response.data)
         return response.data
     }catch(err){

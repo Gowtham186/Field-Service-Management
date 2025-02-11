@@ -44,15 +44,9 @@ function App() {
     }
   },[dispatch])
 
-  // if(localStorage.getItem('token') && !user?.user){
-  //   return <p>...loading</p>
-  // }
   if(loading){
     return <p>loading...</p>
   }
-  // if (!user || !user._id || !user.role) {
-  //   return <p>...loading</p>;
-  // }
 
   return (
     <>

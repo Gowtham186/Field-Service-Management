@@ -23,9 +23,15 @@ export const fetchSkills = createAsyncThunk('/expert/fetchSkills', async()=>{
     }
 })
 
-export const getAllExperts = createAsyncThunk('expert/getAllExperts', async()=>{
+export const getAllExperts = createAsyncThunk('expert/getAllExperts', 
+    async({search = "", skill = "", verified = "", page = 1, limit} = {})=>{
     try{
-        const allExperts = await axios.get('/api/experts', { headers : { Authorization : localStorage.getItem('token')}})
+        const params = { search, skill, verified, page, limit}
+
+        const allExperts = await axios.get('/api/experts', { 
+            params ,
+            headers : { Authorization : localStorage.getItem('token')}
+        })
         return allExperts.data
     }catch(err){
         console.log(err)
@@ -43,7 +49,7 @@ export const toggledIsVerified = createAsyncThunk('expert/editExpert', async({id
     }
 })
 
-export const getExpertProfile = createAsyncThunk('expert/getExpertProfile', async({id}, {rejectWithValue}) => {
+export const getExpertProfile = createAsyncThunk('expert/getExpertProfile', async(id, {rejectWithValue}) => {
     try{
         const response = await axios.get(`/api/experts/${id}`)
         console.log(response.data)
@@ -56,6 +62,7 @@ export const getExpertProfile = createAsyncThunk('expert/getExpertProfile', asyn
 
 export const updateAvailability = createAsyncThunk('expert/updateAvailability', async ({ availability }, { rejectWithValue }) => {
     try {
+        console.log(availability)
         const token = localStorage.getItem('token');
         const response = await axios.put('/api/experts/availability', { availability }, { headers: { Authorization: token } });
         return response.data;
@@ -156,6 +163,25 @@ try{
 }
 })
 
+export const changeProfilePic = createAsyncThunk('expert/changeProfilePic', async({id, profilePicData})=>{
+    try{
+        const response = await axios.put(`/api/experts/${id}/profilePic`, profilePicData, { headers : { Authorization : localStorage.getItem('token')}})
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+    }
+})
+
+export const getUnverifiedExperts = createAsyncThunk('expert/getUnverifiedExperts', async()=>{
+    try{
+        const response = await axios.get('/api/experts/unverified', { headers : { Authorization : localStorage.getItem('token')}})
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+    }
+})
 
 const expertSlice = createSlice({
     name : 'expert',
@@ -168,7 +194,8 @@ const expertSlice = createSlice({
         loading : false,
         myServices : [],
         serviceRequestId : null,
-        workingService : null
+        workingService : null,
+        unVerifiedExperts : null
     },
     reducers : {
         setServiceRequestId : (state,action)=>{
@@ -181,6 +208,13 @@ const expertSlice = createSlice({
     extraReducers : (builder)=>{
         builder.addCase(fetchSkills.pending, (state,action)=>{
             state.loading = true
+        })
+        builder.addCase(getUnverifiedExperts.pending, (state,action)=>{
+            state.loading = true
+        })
+        builder.addCase(getUnverifiedExperts.fulfilled, (state,action)=> {
+            state.loading = false
+            state.unVerifiedExperts = action.payload
         })
         builder.addCase(fetchSkills.fulfilled, (state,action)=> {
             state.loading = false
@@ -200,15 +234,20 @@ const expertSlice = createSlice({
         builder.addCase(getAllExperts.rejected, (state,action)=>{
             state.serverError = null
         })
-        builder.addCase(toggledIsVerified.fulfilled, (state,action)=>{
-            const index = state.experts.findIndex(ele => ele._id === action.payload._id)
-            state.experts[index] = action.payload
-            state.serverError = null
-        })
+        builder.addCase(toggledIsVerified.fulfilled, (state, action) => {
+            state.unVerifiedExperts = state.unVerifiedExperts.filter(
+                (expert) => expert.userId._id !== action.payload.userId._id
+            );
+            state.serverError = null;
+        });        
         builder.addCase(toggledIsVerified.rejected, (state,action)=>{
             state.serverError = action.payload
         })
+        builder.addCase(getExpertProfile.pending, (state,action)=>{
+            state.loading = true
+        })
         builder.addCase(getExpertProfile.fulfilled, (state,action)=>{
+            state.loading = false
             state.profile = action.payload
             state.serverError = null
         })
@@ -252,6 +291,13 @@ const expertSlice = createSlice({
         })
         builder.addCase(addNewSkill.fulfilled, (state,action)=>{
             state.allSkills.push(action.payload)
+        })
+        builder.addCase(changeProfilePic.pending, (state,action)=>{
+            state.loading = true
+        })
+        builder.addCase(changeProfilePic.fulfilled, (state,action)=>{
+            state.loading = false
+            state.profile = {...state.profile, profilePic : action.payload}
         })
 
     }
