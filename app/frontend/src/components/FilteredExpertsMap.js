@@ -24,7 +24,7 @@ export default function FilteredExpertsMap({ resultsExperts, searchLocation, coo
 
     const handleViewDetails = (expert) => {
         dispatch(setSelectedExpert(expert));
-        navigate(`/experts/${expert.userId._id}`);
+        navigate(`/experts/${expert?.userId?._id}`);
     };
 
     const defaultCenter = [13.5937, 77.9629];

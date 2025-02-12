@@ -10,7 +10,7 @@ export default function ExpertDetails() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(getExpertProfile({ id }));
+    dispatch(getExpertProfile(id));
   }, [dispatch, id]);
 
   const handleBookExpert = (id) => {

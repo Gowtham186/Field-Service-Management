@@ -8,6 +8,9 @@ import Service from "../models/service-model.js";
 import User from "../models/user-model.js";
 import nodemailer from 'nodemailer'
 
+import Stripe from "stripe"
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+
 const transporter = nodemailer.createTransport({
     service :"Gmail",
     auth : {
@@ -218,6 +221,7 @@ expertCtlr.unVerifiedExperts = async (req,res) => {
 
 expertCtlr.getProfile = async(req,res)=>{
     const id = req.params.id
+    console.log(id)
     try{
         const expert = await Expert.findOne({userId : id})
             .populate('skills')
@@ -225,6 +229,7 @@ expertCtlr.getProfile = async(req,res)=>{
         if(!expert){
             return res.status(404).json({errors : 'expert not found'})
         }
+        
         return res.json(expert)
     }catch(err){
         console.log(err)
@@ -232,26 +237,108 @@ expertCtlr.getProfile = async(req,res)=>{
     }
 }
 
-expertCtlr.verify = async(req,res)=>{
-    const id = req.params.id
-    const { isVerified } = req.body
-    try{
+// expertCtlr.verify = async(req,res)=>{
+//     const id = req.params.id
+//     const { isVerified } = req.body
+//     try{
 
+//         const verifyExpert = await Expert.findOneAndUpdate(
+//             { userId : id }, 
+//             { $set : { isVerified }},
+//             { new: true }
+//         );
+//         if(!verifyExpert){
+//             return res.status(404).json({errors : 'expert record not found'})
+//         }
+//         console.log(verifyExpert)
+//         res.json(verifyExpert)
+//     }catch(err){
+//         console.log(err)
+//         res.status(500).json({errors : 'something went wrong'})
+//     }
+//  }
+
+expertCtlr.verify = async (req, res) => {
+    const id = req.params.id;
+    const { isVerified } = req.body;
+
+    try {
+        // 1️⃣ Update verification status
         const verifyExpert = await Expert.findOneAndUpdate(
-            { userId : id }, 
-            { $set : { isVerified }},
+            { userId: id },
+            { $set: { isVerified } },
             { new: true }
         );
-        if(!verifyExpert){
-            return res.status(404).json({errors : 'expert record not found'})
+
+        if (!verifyExpert) {
+            return res.status(404).json({ error: "Expert record not found" });
         }
-        console.log(verifyExpert)
+
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // 2️⃣ Check if expert already has a Stripe account
+        if (verifyExpert.stripeAccountId) {
+            return res.status(400).json({ error: "Expert already has a Stripe account" });
+        }
+
+        // 3️⃣ Create a Stripe Express account for the expert
+        const stripeAccount = await stripe.accounts.create({
+            type: "express",
+            country: "US", // Change based on the expert's country
+            email: user.email, 
+            capabilities: {
+                card_payments: { requested: true },
+                transfers: { requested: true },
+            },
+        });
+
+        // 4️⃣ Save the Stripe account ID in the database
+        verifyExpert.stripeAccountId = stripeAccount.id;
+        await verifyExpert.save();
+
+        // 5️⃣ Generate an onboarding link
+        const accountLink = await stripe.accountLinks.create({
+            account: stripeAccount.id,
+            refresh_url: "http://localhost:3000/stripe-onboarding",
+            return_url: "http://localhost:3000/dashboard",
+            type: "account_onboarding",
+        });
+
+        // 6️⃣ Send an email with the onboarding link
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: user.email,
+            subject: "You're Verified! Complete Your Stripe Account Setup",
+            html: `
+                <h3>Congratulations, ${user.name}!</h3>
+                <p>Your expert account has been verified.</p>
+                <p>Please complete your Stripe verification by clicking the link below:</p>
+                <a href="${accountLink.url}" target="_blank">Complete Stripe Setup</a>
+                <p>Once completed, you'll be ready to receive payments.</p>
+            `,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        // res.status(200).json({
+        //     message: "Expert verified, Stripe account created, and onboarding email sent!",
+        //     stripeAccountId: stripeAccount.id,
+        //     onboardingLink: accountLink.url,
+        // });
+        console.log("Expert verified, Stripe account created, and onboarding email sent!")
         res.json(verifyExpert)
-    }catch(err){
-        console.log(err)
-        res.status(500).json({errors : 'something went wrong'})
+
+    } catch (err) {
+        console.error("Stripe onboarding error:", err);
+        res.status(500).json({ error: "Something went wrong" });
     }
- }
+};
+
+
+
 
 expertCtlr.updateAvailability = async (req, res) => {
     try {

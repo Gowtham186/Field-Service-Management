@@ -17,7 +17,7 @@ export default function VerifyExperts(){
         const getConfirm = window.confirm("Are you sure?")
         if(getConfirm){
             await dispatch(toggledIsVerified({ id : expert.userId._id, body : { isVerified : updateVerify}})).unwrap()
-            dispatch(getUnverifiedExperts());
+            await dispatch(getUnverifiedExperts()).unwrap()
         }
     }
 

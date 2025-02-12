@@ -17,6 +17,16 @@ export const getAllServiceRequests = createAsyncThunk('serviceRequest',
     }
 })
 
+export const payBookingFee = createAsyncThunk('serviceRequest/payBookingFee', async(body)=>{
+    try{
+        const response = await axios.post('/api/bookingfee', body)
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+    }
+})
+
 
 const serviceRequestSlice = createSlice({
     name : 'serviceRequest',

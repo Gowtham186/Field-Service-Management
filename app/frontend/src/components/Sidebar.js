@@ -5,22 +5,29 @@ import { logout } from "../redux/slices.js/user-slice";
 export default function Sidebar({ role }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation(); // Get the current route
+  const location = useLocation(); 
 
   const { user } = useSelector((state) => state.user);
 
   const handleLogout = () => {
-    dispatch(logout());
-    localStorage.removeItem("token");
-    navigate("/");
-  };
+    localStorage.setItem("isLoggingOut", "true"); // Flag to prevent unwanted redirects
+    navigate("/"); // Navigate first
+
+    setTimeout(() => {
+        dispatch(logout());  
+        localStorage.removeItem("token");
+    }, 100); // Delay Redux state update slightly
+};
+
+
+
 
   // Function to check if a link is active
   const isActive = (path) => location.pathname === path;
 
   return (
     <div className="bg-blue-950 h-screen p-4 shadow-md fixed transition-all duration-300 w-24 md:w-48">
-      <ul className="space-y-4">
+      <ul className="space-y-4 relative">
         <div>
           <h1 className="text-2xl text-white mb-1">{user && user.name}</h1>
           <button
@@ -34,43 +41,47 @@ export default function Sidebar({ role }) {
 
         {role === "expert" && (
           <>
-            <li>
+            <li className="relative">
               <Link
                 to="/expert-dashboard"
-                className={`block text-white hover:text-blue-700 pl-4 border-l-4 ${
-                  isActive("/expert-dashboard") ? "border-white" : "border-transparent"
-                }`}
+                className={`block text-white hover:text-blue-700 pl-4 relative`}
               >
+                {isActive("/expert-dashboard") && (
+                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
+                )}
                 Dashboard
               </Link>
             </li>
-            <li>
+            <li className="relative">
               <Link
                 to="/new-bookings"
-                className={`block text-white hover:text-blue-700 pl-4 border-l-4 ${
-                  isActive("/new-bookings") ? "border-white" : "border-transparent"
-                }`}
+                className={`block text-white hover:text-blue-700 pl-4 relative`}
               >
+                {isActive("/new-bookings") && (
+                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
+                )}
                 New Bookings
               </Link>
             </li>
-            <li>
+            <li className="relative">
               <Link
                 to="/experts/calendar"
-                className={`block text-white hover:text-blue-700 pl-4 border-l-4 ${
-                  isActive("/experts/calendar") ? "border-white" : "border-transparent"
-                }`}
+                className={`block text-white hover:text-blue-700 pl-4 relative`}
               >
+                {isActive("/experts/calendar") && (
+                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
+                )}
                 My Calendar
               </Link>
             </li>
-            <li>
+            <li className="relative">
               <Link
                 to="/experts/availability"
-                className={`block text-white hover:text-blue-700 pl-4 border-l-4 ${
-                  isActive("/experts/availability") ? "border-white" : "border-transparent"
-                }`}
+                className={`block text-white hover:text-blue-700 pl-4 relative`}
               >
+                {isActive("/experts/availability") && (
+                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
+                )}
                 Manage Availability
               </Link>
             </li>
@@ -79,56 +90,62 @@ export default function Sidebar({ role }) {
 
         {role === "admin" && (
           <>
-            <li>
+            <li className="relative">
               <Link
                 to="/admin-dashboard"
-                className={`block text-white hover:text-blue-700 pl-4 border-l-4 ${
-                  isActive("/admin-dashboard") ? "border-white" : "border-transparent"
-                }`}
+                className={`block text-white hover:text-blue-700 pl-4 relative`}
               >
+                {isActive("/admin-dashboard") && (
+                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
+                )}
                 Admin Dashboard
               </Link>
             </li>
-            <li>
+            <li className="relative">
               <Link
                 to="/verify-experts"
-                className={`block text-white hover:text-blue-700 pl-4 border-l-4 ${
-                  isActive("/verify-experts") ? "border-white" : "border-transparent"
-                }`}
+                className={`block text-white hover:text-blue-700 pl-4 relative`}
               >
+                {isActive("/verify-experts") && (
+                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
+                )}
                 Verify Experts
               </Link>
             </li>
-            <li>
+            <li className="relative">
               <Link
                 to="/manage-experts"
-                className={`block text-white hover:text-blue-700 pl-4 border-l-4 ${
-                  isActive("/manage-experts") ? "border-white" : "border-transparent"
-                }`}
+                className={`block text-white hover:text-blue-700 pl-4 relative`}
               >
+                {isActive("/manage-experts") && (
+                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
+                )}
                 Manage Experts
               </Link>
             </li>
-            <li>
+            <li className="relative">
               <Link
                 to="/manage-categories"
-                className={`block text-white hover:text-blue-700 pl-4 border-l-4 ${
-                  isActive("/manage-categories") ? "border-white" : "border-transparent"
-                }`}
+                className={`block text-white hover:text-blue-700 pl-4 relative`}
               >
+                {isActive("/manage-categories") && (
+                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
+                )}
                 Manage Categories & Services
               </Link>
             </li>
-            <li>
+            <li className="relative">
               <Link
                 to="/manage-bookings"
-                className={`block text-white hover:text-blue-700 pl-4 border-l-4 ${
-                  isActive("/manage-bookings") ? "border-white" : "border-transparent"
-                }`}
+                className={`block text-white hover:text-blue-700 pl-4 relative`}
               >
+                {isActive("/manage-bookings") && (
+                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
+                )}
                 Manage Bookings
               </Link>
             </li>
+            
           </>
         )}
 

@@ -46,7 +46,8 @@ const epxertSchema = new Schema({
     isVerified:{
         type:Boolean,
         default:false
-    }
+    },
+    stripeAccountId : String
 }, {timestamps: true})
 
 const Expert = model('Expert', epxertSchema)

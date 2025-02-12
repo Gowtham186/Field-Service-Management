@@ -72,7 +72,7 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
 
       {isLoginOpen && (
         <div className="fixed top-40 right-1 bottom-0 z-50 flex items-center justify-center">
-          <CustomerLogin closeLogin={closeLogin} />
+          <CustomerLogin closeLogin={() => setIsLoginOpen(false)}  />
         </div>
       )}
     </div>

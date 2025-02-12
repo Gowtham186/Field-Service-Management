@@ -1,11 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "../../config/axios";
 
-export const bookserviceRequest = createAsyncThunk('customer/bookServiceRequest', async({newFormData, resetForm}, {rejectWithValue}) => {
+export const bookserviceRequest = createAsyncThunk('customer/bookServiceRequest', async({newFormData}, {rejectWithValue}) => {
     try{
         const response = await axios.post('/api/service-requests', newFormData, { headers : { Authorization : localStorage.getItem('token')}})
         console.log(response.data)
-        resetForm()
+        // resetForm()
         return response.data
     }catch(err){
         console.log(err)

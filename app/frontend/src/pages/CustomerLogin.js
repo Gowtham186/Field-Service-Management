@@ -4,7 +4,7 @@ import validator from "validator";
 import { customerLogin, getUserProfile, verifyOtpApi } from "../redux/slices.js/user-slice";
 import { useNavigate } from "react-router-dom";
 
-export default function CustomerLogin({closeLogin}) {
+export default function CustomerLogin({ closeLogin }) {
   const [phone_number, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [openOtpForm, setOpenOtpForm] = useState(false);
@@ -92,10 +92,16 @@ export default function CustomerLogin({closeLogin}) {
             setClientErrors({});
             await dispatch(verifyOtpApi({verifyOtpData, resetForm})).unwrap();
             await dispatch(getUserProfile()).unwrap();
-            
-            closeLogin(); 
-            navigate("/"); 
-            
+              
+            if (closeLogin) closeLogin(); // Close login modal if function exists
+
+            // Redirect to the stored path after login
+            setTimeout(() => {
+                const prevPath = localStorage.getItem("prevPath") || "/";
+                localStorage.removeItem("prevPath"); // Remove it after using
+                navigate(prevPath);
+            }, 200);
+
         }catch(err){
             console.log(err)
         }

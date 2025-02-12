@@ -6,6 +6,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import { bookserviceRequest } from "../redux/slices.js/customer-slice";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import CustomerLogin from "./CustomerLogin";
+import { payBookingFee } from "../redux/slices.js/service-request-slice";
 
 const formInitialState = {
     name: '',
@@ -22,6 +24,9 @@ export default function ServiceRequest() {
     const [greetCard, setGreetCard] = useState(false)
     const navigate = useNavigate()
     const [isBooked, setIsBooked] = useState(false)
+    const [ showLogin, setShowLogin] = useState(false)
+    const [bookedData, setBookedData] = useState(null)
+    const { currentBooking } = useSelector((state) => state.customer)
 
     const [formData, setFormData] = useState(formInitialState);
 
@@ -71,9 +76,10 @@ export default function ServiceRequest() {
     const handleSubmit = async(e) => {
         e.preventDefault();
 
-        if(!user){
-            navigate('/customerlogin')
-            return
+        if (!user) {
+            localStorage.setItem("prevPath", window.location.pathname); // Store the current path
+            navigate("/customerlogin");
+            return;
         }
 
         console.log("Form Data:", formData);
@@ -85,7 +91,7 @@ export default function ServiceRequest() {
         newFormData.append('description', formData.description)
         newFormData.append('location', JSON.stringify(formData.location))
         newFormData.append('scheduleDate', formData.scheduleDate)
-        newFormData.append('expertId', selectedExpert.userId?._id)
+        newFormData.append('expertId', selectedExpert?.userId?._id)
 
         formData.serviceImages.forEach((file, index) => {
             newFormData.append('serviceImages', file); 
@@ -95,10 +101,15 @@ export default function ServiceRequest() {
             console.log(`${key}:`, value)
         }
 
-        await dispatch(bookserviceRequest({newFormData, resetForm})).unwrap()
-        console.log('kjnknklljlsd')
-        setGreetCard(true)
-
+        await dispatch(bookserviceRequest({newFormData}))
+            .unwrap()
+            .then(()=>{
+                setIsBooked(true)
+            })
+            .catch((err)=>{
+                console.log(err)
+            })
+        // setGreetCard(true)
     };
 
     const handleDocumentChange = (e) => {
@@ -109,9 +120,35 @@ export default function ServiceRequest() {
         }));
     };
 
+    const makePayment = async () => {
+        console.log(currentBooking)
+        try{
+            const body = {
+                serviceRequestId : currentBooking?._id,
+                amount : currentBooking?.budget.bookingFee
+            }
+            const response =  await dispatch(payBookingFee(body)).unwrap()
+
+            if(!response){
+                console.error("Invalid response from API:", response);
+                return;
+            }
+
+            localStorage.setItem('stripeId', response?.id)
+
+            window.location = response?.url
+        }catch(err){
+            console.log(err)
+        }
+    }
+
     return (
+        <>
+        
+        
+            <Navbar />
+            {showLogin && <CustomerLogin closeLogin={() => setShowLogin(false)} />}
         <div className="grid grid-cols-2 gap-8 w-full max-w-5xl mx-auto p-6 shadow-lg rounded-lg">
-            {/* <Navbar /> */}
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label htmlFor="name" className="text-sm font-medium text-gray-700 mb-1">Name:</label>
@@ -161,29 +198,29 @@ export default function ServiceRequest() {
                 <button
                     type="button"
                     onClick={handleGetAddress}
-                    className="mt-2 p-1 bg-slate-500 text-white font-semibold focus:outline-none">
+                    className="p-1 bg-slate-500 text-white font-semibold  text-xs focus:outline-none">
                     Get Current Address
                 </button>
                 <div>
                     <label>Choose Date : </label>
                     <DatePicker
-    selected={formData.scheduleDate}
-    className="mt-1 block p-1 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-    onChange={(date) => {
-        const formattedDate = date.toLocaleDateString("en-CA"); // Fix timezone issue
-        setFormData((prevForm) => ({
-            ...prevForm,
-            scheduleDate: formattedDate
-        }));
-    }}
-    dateFormat="dd-MM-yyyy"
-    filterDate={(date) =>
-        selectedExpert?.availability?.some(
-            (availableDate) => new Date(availableDate).toLocaleDateString("en-GB") === date.toLocaleDateString("en-GB")
-        )
-    }
-    placeholderText="Select an available date"
-/>
+                        selected={formData.scheduleDate}
+                        className="mt-1 block p-1 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                        onChange={(date) => {
+                            const formattedDate = date.toLocaleDateString("en-CA"); // Fix timezone issue
+                            setFormData((prevForm) => ({
+                                ...prevForm,
+                                scheduleDate: formattedDate
+                            }));
+                        }}
+                        dateFormat="dd-MM-yyyy"
+                        filterDate={(date) =>
+                            selectedExpert?.availability?.some(
+                                (availableDate) => new Date(availableDate).toLocaleDateString("en-GB") === date.toLocaleDateString("en-GB")
+                            )
+                        }
+                        placeholderText="Select an available date"
+                    />
                 </div>
                 <div>
                     <label htmlFor="serviceImages" className="block text-sm font-medium text-gray-700 mb-1">Service Images:</label>
@@ -287,7 +324,7 @@ export default function ServiceRequest() {
                 )}
                 {isBooked && (
                     <button type="submit" 
-                    
+                    onClick={makePayment}
                     className="py-2 px-4 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
                         Pay Booking Fee
                     </button>
@@ -305,5 +342,6 @@ export default function ServiceRequest() {
                 </div>
             )} */}
         </div>
+        </>
     );
 }
