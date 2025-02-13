@@ -97,7 +97,7 @@ export default function CustomerLogin({ closeLogin }) {
 
             // Redirect to the stored path after login
             setTimeout(() => {
-                const prevPath = localStorage.getItem("prevPath") || "/";
+                const prevPath =  "/";
                 localStorage.removeItem("prevPath"); // Remove it after using
                 navigate(prevPath);
             }, 200);
@@ -112,7 +112,7 @@ export default function CustomerLogin({ closeLogin }) {
   return (
     <div
       ref={formRef}
-      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg p-6 w-96 text-center z-50"
+      className="absolute top-72 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg p-6 w-96 text-center z-50"
     >
       <h2 className="text-2xl font-semibold mb-4">Customer Login</h2>
 
@@ -149,8 +149,8 @@ export default function CustomerLogin({ closeLogin }) {
               }}
             />
             {clientErrors.otp && <p className="text-red-500 text-xs text-left">{clientErrors.otp}</p>}
+            {serverError && <p className="text-red-500 text-xs text-left">{serverError}</p>}
           </div>
-          {serverError && <p className="text-red-500">{serverError}</p>}
           <input type="submit" value="Verify OTP" className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"/>
         </form>
       )}

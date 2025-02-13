@@ -30,6 +30,8 @@ export default function LiveTracking() {
 
     const destinationAddress = location.state?.destinationAddress || "Unknown Address";
     const destinationCoords = location.state?.destinationCoords || { latitude: 12.9716, longitude: 77.5946 };
+    console.log("destinationAddress",destinationAddress)
+    console.log("destinationCoords", destinationCoords)
     const customerId = location.state?.customerId
 
     const [expertLocation, setExpertLocation] = useState(null);

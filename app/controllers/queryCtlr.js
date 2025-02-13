@@ -73,7 +73,9 @@ queryCtlr.search = async (req, res) => {
         console.log(`Filtered Experts by location & skill: ${filteredExperts.length}`);
         //console.log(filteredExperts)
             
-        res.json({filteredExperts});
+        const verifiedExperts = filteredExperts.filter(expert => expert.isVerified === true)
+        console.log('verifiedExperts', verifiedExperts.length)
+        res.json({verifiedExperts});
             
         } catch (err) {
             console.error(err);

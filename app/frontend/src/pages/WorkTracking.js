@@ -85,29 +85,29 @@ export default function WorkTracking() {
         ))}
 
         {workingService?.onSiteServices.length > 0 && (
-  <div className="mt-4 bg-white shadow-lg rounded-lg p-4">
-    <h3 className="font-semibold text-lg mb-3 text-gray-700">On-Site Services</h3>
+          <div className="mt-4 bg-white shadow-lg rounded-lg p-4">
+            <h3 className="font-semibold text-lg mb-3 text-gray-700">On-Site Services</h3>
 
-    <div className="grid grid-cols-3 gap-4 border-b pb-2 text-gray-600 font-medium">
-      <p>Service Name</p>
-      <p className="text-center">Price</p>
-      <p className="text-right">Action</p>
-    </div>
+            <div className="grid grid-cols-3 gap-4 border-b pb-2 text-gray-600 font-medium">
+              <p>Service Name</p>
+              <p className="text-center">Price</p>
+              <p className="text-right">Action</p>
+            </div>
 
-    {workingService?.onSiteServices?.map((service) => (
-      <div key={service?._id} className="grid grid-cols-3 gap-4 py-2 border-b items-center">
-        <p className="text-gray-800">{service?.serviceName}</p>
-        <p className="text-center font-semibold text-green-600">₹{service?.price}</p>
-        <button
-          onClick={() => handleDelete(service?._id)}
-          className="text-red-600 hover:text-red-800 text-sm font-medium px-1 py-1 bg-red-100 hover:bg-red-200 rounded"
-        >
-          Delete
-        </button>
-      </div>
-    ))}
+            {workingService?.onSiteServices?.map((service) => (
+              <div key={service?._id} className="grid grid-cols-3 gap-4 py-2 border-b items-center">
+                <p className="text-gray-800">{service?.serviceName}</p>
+                <p className="text-center font-semibold text-green-600">₹{service?.price}</p>
+                <button
+                  onClick={() => handleDelete(service?._id)}
+                  className="text-red-600 hover:text-red-800 text-sm font-medium px-1 py-1 bg-red-100 hover:bg-red-200 rounded"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
   </div>
-)}
+        )}
 
 
 

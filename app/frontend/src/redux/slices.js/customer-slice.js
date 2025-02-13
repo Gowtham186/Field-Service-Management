@@ -23,13 +23,39 @@ export const getMyBookings = createAsyncThunk('customer/getMyBookings', async()=
     }
 })
 
+export const getWorkingService = createAsyncThunk('customer/getWorkingService', async(id)=>{
+    try{
+        const response = await axios.get(`/service-requests/${id}`, { headers : { Authorization  : localStorage.getItem('token')}})
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+    }
+})
+
+export const payServicefee = createAsyncThunk('customer/payServiceFee', async(body)=>{
+    try{
+        const response = await axios.post('/api/servicefee', body)
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+    }
+})
+
 const customerSlice = createSlice({
     name : 'customer',
     initialState : { 
         currentBooking : null,
         loading : false,
         serverError : null,
-        myBookings : null
+        myBookings : null,
+        workingService : null
+    },
+    reducers : {
+        setCurrentService : (state,action)=>{
+            state.workingService = action.payload
+        }
     },
     extraReducers : (builder) =>{
         builder.addCase(bookserviceRequest.pending, (state, action)=>{
@@ -44,7 +70,13 @@ const customerSlice = createSlice({
         builder.addCase(getMyBookings.fulfilled, (state,action)=>{
             state.myBookings = action.payload
         })
-        
+        builder.addCase(getWorkingService.pending, (state,action)=>{
+            state.loading = false
+        })
+        builder.addCase(getWorkingService.fulfilled, (state,action)=>{
+            state.workingService = action.payload
+        })
     }
 })
+export const { setCurrentService } = customerSlice.actions
 export default customerSlice.reducer

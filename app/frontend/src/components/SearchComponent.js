@@ -124,7 +124,7 @@ export default function SearchComponent() {
       )}
 
       {/* Show HeroSection only on the first render (before search) */}
-      {/* {(!resultsExperts || resultsExperts.length === 0) && !serverError && <HeroSection />} */}
+      {(!resultsExperts || resultsExperts.length === 0) && !serverError && <HeroSection />}
 
       {/* Map Section (Replaces HeroSection after search) */}
       {resultsExperts?.length > 0 && (

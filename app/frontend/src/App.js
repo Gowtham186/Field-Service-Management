@@ -30,12 +30,12 @@ import CustomerTracking from './pages/CustomerTracking';
 import { ToastContainer } from 'react-toastify';
 import NotificationComponent from './components/NotificationComponent';
 import WorkTracking from './pages/WorkTracking';
-import TrackWork from './pages/TrackWork';
 import ManageBookings from './pages/ManageBookings';
 import ExpertProfile from './pages/ExpertProfile';
 import ProtectedRoute from './components/ProtectedRoute';
 import Success from './components/Success';
 import Failed from './components/Failed';
+import ServiceInvoice from './pages/ServiceInvoice';
 
 function App() {
   const dispatch = useDispatch()
@@ -71,7 +71,7 @@ function App() {
             
             }/>
           <Route path="/track-expert/:expertId" element={<CustomerTracking />}/>
-          <Route path="/track-work/:bookingId" element={<TrackWork />}/>
+          <Route path="/track-work/:bookingId" element={<ServiceInvoice />}/>
 
           {/* expert */}
           <Route path='/expertlogin' element={<ExpertLogin />}/>
@@ -174,8 +174,9 @@ function App() {
             </ProtectedRoute>
           }/>
           
-          <Route path='/success' element={<Success />}/>
-          <Route path='/failed' element={<Failed />}/>
+          {/* payment */}
+          <Route path='/payment/success' element={<Success />}/>
+          <Route path='/payment/failed' element={<Failed />}/>
 
         </Routes>
     </>

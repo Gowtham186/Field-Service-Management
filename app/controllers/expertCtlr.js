@@ -237,27 +237,6 @@ expertCtlr.getProfile = async(req,res)=>{
     }
 }
 
-// expertCtlr.verify = async(req,res)=>{
-//     const id = req.params.id
-//     const { isVerified } = req.body
-//     try{
-
-//         const verifyExpert = await Expert.findOneAndUpdate(
-//             { userId : id }, 
-//             { $set : { isVerified }},
-//             { new: true }
-//         );
-//         if(!verifyExpert){
-//             return res.status(404).json({errors : 'expert record not found'})
-//         }
-//         console.log(verifyExpert)
-//         res.json(verifyExpert)
-//     }catch(err){
-//         console.log(err)
-//         res.status(500).json({errors : 'something went wrong'})
-//     }
-//  }
-
 expertCtlr.verify = async (req, res) => {
     const id = req.params.id;
     const { isVerified } = req.body;
@@ -303,7 +282,7 @@ expertCtlr.verify = async (req, res) => {
         const accountLink = await stripe.accountLinks.create({
             account: stripeAccount.id,
             refresh_url: "http://localhost:3000/stripe-onboarding",
-            return_url: "http://localhost:3000/dashboard",
+            return_url: "http://localhost:3000/",
             type: "account_onboarding",
         });
 

@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom"; 
+import { setCurrentService } from "../redux/slices.js/customer-slice";
 
 export default function BookingList({ filter }) {
     const { myBookings } = useSelector((state) => state.customer);
     const [filteredBookings, setFilteredBookings] = useState([]);
     const navigate = useNavigate(); 
+    const dispatch = useDispatch()
 
     useEffect(() => {
         if (filter === "scheduledToday") {
@@ -29,7 +31,8 @@ export default function BookingList({ filter }) {
     }, [filter, myBookings]);
 
     const handleServiceProgress = (bookingId)=>{
-        navigate(`/track-work/${bookingId}`)
+        navigate(`/track-work/${bookingId._id}`)
+        dispatch(setCurrentService(bookingId))
     }
 
     return (
@@ -57,13 +60,14 @@ export default function BookingList({ filter }) {
 
                             {/* Show Track Expert Button if Assigned and Scheduled Today */}
                             {(filter === "scheduledToday" || booking.status === "in-progress") && booking.expertId?._id && (
+                                <>
                                 <button
                                     className="bg-blue-500 text-white p-2 mt-2 rounded"
                                     onClick={() => {
                                         navigate(`/track-expert/${booking.expertId._id}`, {
                                             state: {
-                                                destinationAddress: booking.location?.address,
-                                                destinationCoords: {
+                                                serviceAddress: booking.location?.address,
+                                                serviceCoords: {
                                                     latitude: booking.location?.coords.lat,
                                                     longitude: booking.location?.coords.lng
                                                 }
@@ -73,14 +77,15 @@ export default function BookingList({ filter }) {
                                 >
                                     Track Expert
                                 </button>
+                                    <button
+                                        className="bg-blue-500 text-white p-2 ml-3 mt-2 rounded"
+                                        onClick={()=> handleServiceProgress(booking) }
+                                        
+                                        >
+                                        Track Work
+                                        </button>
+                                </>
                             )}
-                            <button
-                                className="bg-blue-500 text-white p-2 ml-3 mt-2 rounded"
-                                onClick={()=> handleServiceProgress(booking._id) }
-
-                            >
-                                Track Work
-                                </button>
                         </li>
                     ))}
                 </ul>

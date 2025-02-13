@@ -58,7 +58,7 @@ const searchSlice = createSlice({
     },
     extraReducers : (builder)=>{
         builder.addCase(querying.fulfilled, (state,action)=>{
-            state.resultsExperts = action.payload?.filteredExperts
+            state.resultsExperts = action.payload?.verifiedExperts
             //state.resultsCategories = action.payload.skills
             state.serverError = null
         })

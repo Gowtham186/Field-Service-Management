@@ -38,8 +38,10 @@ export default function CustomerTracking() {
     const location = useLocation();
 
 
-    const destinationAddress = location.state?.destinationAddress || "Unknown Address";
-    const destinationCoords = location.state?.destinationCoords || { latitude: 12.9716, longitude: 77.5946 };
+    const serviceAddress = location.state?.serviceAddress || "Unknown Address";
+    const serviceCoords = location.state?.serviceCoords 
+    console.log("serviceAddress",serviceAddress)
+    console.log("serviceCoords", serviceCoords)
 
     useEffect(() => {
         if (!expertId) {
@@ -106,9 +108,9 @@ export default function CustomerTracking() {
                     </Marker>
 
                     {/* Destination Location */}
-                    <Marker position={[destinationCoords.latitude, destinationCoords.longitude]} icon={destinationIcon}>
+                    <Marker position={[serviceCoords.latitude, serviceCoords.longitude]} icon={destinationIcon}>
                         <Popup>
-                            <strong>My location :</strong> {destinationAddress}
+                            <strong>My location :</strong> {serviceAddress}
                         </Popup>
                     </Marker>
                 </MapContainer>

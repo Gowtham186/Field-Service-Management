@@ -26,10 +26,16 @@ const paymentSchema = new Schema({
         type: Number,
         required: true
     },
+    systemAmount : Number,
+    expertAmount : Number,
     paymentType: {
         type: String,
         enum: ['card', 'upi', 'wallet', 'net banking'],
         required: true
+    },
+    expertId : { 
+        type : Schema.Types.ObjectId,
+        ref : 'Expert'
     }
 }, { timestamps: true });
 
