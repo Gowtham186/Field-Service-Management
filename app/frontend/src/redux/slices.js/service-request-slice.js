@@ -27,6 +27,16 @@ export const payBookingFee = createAsyncThunk('serviceRequest/payBookingFee', as
     }
 })
 
+export const submitReview = createAsyncThunk('serviceRequest/submitReview', async({reviewData})=>{
+    try{
+        const response = await axios.post('/api/reviews', reviewData, { headers : { Authorization : localStorage.getItem('token')}})
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+    }
+})
+
 
 const serviceRequestSlice = createSlice({
     name : 'serviceRequest',

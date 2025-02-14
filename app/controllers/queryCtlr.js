@@ -2,6 +2,7 @@ import Expert from "../models/expert-model.js";
 import Customer from "../models/customer-model.js";
 import axios from 'axios'
 import geolib, { getDistance } from 'geolib'
+import Review from "../models/review-model.js";
 
 const queryCtlr = {}
 
@@ -75,7 +76,19 @@ queryCtlr.search = async (req, res) => {
             
         const verifiedExperts = filteredExperts.filter(expert => expert.isVerified === true)
         console.log('verifiedExperts', verifiedExperts.length)
-        res.json({verifiedExperts});
+
+        // const expertsWithReviews = await Promise.all(
+        //     verifiedExperts.map(async expert => {
+        //         const reviews = await Review.find({ reviewee : expert.userId})
+        //             .populate({
+        //                 path: 'reviewer',   
+        //                 select: 'name'  
+        //             });                
+        //         return { ...expert.toObject(), reviews}
+        //     })
+        // )
+        // console.log(expertsWithReviews)
+        res.json({verifiedExperts : verifiedExperts});
             
         } catch (err) {
             console.error(err);

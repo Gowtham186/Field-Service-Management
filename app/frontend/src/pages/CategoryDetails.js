@@ -3,14 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { expertCategoriesBySkills } from "../redux/slices.js/expert-slice";
 import Navbar from "../components/Navbar";
-import { selectService } from "../redux/slices.js/search-slice";
+import { selectService, setSelectedExpert } from "../redux/slices.js/search-slice";
 
 export default function CategoryDetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
   const { loading, categoriesBySkills } = useSelector((state) => state.expert);
-  const { choosenServices } = useSelector((state) => state.search);
+  const { choosenServices, selectedExpert } = useSelector((state) => state.search);
   const { isLoggedIn } = useSelector((state) => state.user);
   const [selectedServices, setSelectedServices] = useState([]);
 
@@ -50,8 +50,9 @@ export default function CategoryDetails() {
 
   const handleBook = () => {
     console.log(selectedServices);
-    navigate("/service-requests");
-    
+    dispatch(setSelectedExpert(selectedExpert))
+    dispatch(selectService(selectedServices));
+    navigate("/service-requests")
   };
 
   return (
@@ -156,7 +157,7 @@ export default function CategoryDetails() {
               </div>
               <button
                 className="mt-8 py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-700"
-                onClick={handleBook}
+                onClick={() => handleBook(choosenServices)}
               >
                 Proceed
               </button>

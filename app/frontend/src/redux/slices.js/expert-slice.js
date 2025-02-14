@@ -183,6 +183,17 @@ export const getUnverifiedExperts = createAsyncThunk('expert/getUnverifiedExpert
     }
 })
 
+export const getExpertReviews = createAsyncThunk('expert/getExpertReviews', async (id) => {
+    try {
+        const response = await axios.get(`/api/reviews/${id}`);  // Ensure correct API call
+        return response.data; 
+    } catch (err) {
+        console.error(err);
+        throw err;  // Throw error for better error handling
+    }
+});
+
+
 const expertSlice = createSlice({
     name : 'expert',
     initialState : { 

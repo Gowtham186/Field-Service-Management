@@ -43,6 +43,19 @@ export const payServicefee = createAsyncThunk('customer/payServiceFee', async(bo
     }
 })
 
+export const fetchPaymentDetails = createAsyncThunk(
+    "customer/fetchPaymentDetails",
+    async (sessionId, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`/api/payment/details?session_id=${sessionId}`);
+            return response.data;
+        } catch (err) {
+            console.error(err);
+            return rejectWithValue(err.response?.data?.error || "Failed to fetch payment details");
+        }
+    }
+)
+
 const customerSlice = createSlice({
     name : 'customer',
     initialState : { 
@@ -50,7 +63,8 @@ const customerSlice = createSlice({
         loading : false,
         serverError : null,
         myBookings : null,
-        workingService : null
+        workingService : null,
+        paymentDetails : null
     },
     reducers : {
         setCurrentService : (state,action)=>{
@@ -76,6 +90,18 @@ const customerSlice = createSlice({
         builder.addCase(getWorkingService.fulfilled, (state,action)=>{
             state.workingService = action.payload
         })
+        builder.addCase(fetchPaymentDetails.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        builder.addCase(fetchPaymentDetails.fulfilled, (state, action) => {
+            state.loading = false;
+            state.paymentDetails = action.payload;
+        })
+        builder.addCase(fetchPaymentDetails.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        });
     }
 })
 export const { setCurrentService } = customerSlice.actions

@@ -57,7 +57,8 @@ export default function OngoingService() {
                     <p><strong>Location:</strong> {ongoingService.customerId?._id}</p>
                     {/* <p><strong>Coordinates:</strong> lat: {ongoingService.location?.coords.lat}, lng: {ongoingService.location?.coords.lng}</p> */}
 
-                    {!inProgress && (
+                    
+                    {/* make conditional render if want */}
                         <button
                         className="mt-3 py-2 px-4 mr-4 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         onClick={() => {
@@ -76,7 +77,7 @@ export default function OngoingService() {
                         Take Drive
                     </button>
 
-                    )}
+                    
                     <button
                         className="mt-3 py-2 px-4 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         onClick={()=> handleStartWork(ongoingService._id)}

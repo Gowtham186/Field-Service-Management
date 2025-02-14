@@ -5,7 +5,7 @@ import reviewCtlr from '../controllers/reviewCtlr.js'
 const router = express.Router()
 
 router.post('/reviews', authenticateUser, reviewCtlr.create)
-router.get('/reviews', authenticateUser, reviewCtlr.getReviews)
+router.get('/reviews/:id', reviewCtlr.getReviews)
 
 
 export default router

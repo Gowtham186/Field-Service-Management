@@ -6,20 +6,22 @@ const reviewCtlr = {}
 
 reviewCtlr.create = async (req,res)=>{
     const { body } = req
+    console.log(body)
     try{
         const review = new Review({
             ...body,
             reviewer : req.currentUser.userId,
-            reviewerModel : req.currentUser.role == 'customer' ? 'Customer' : 'Expert', 
         })
+        
+        const reviewerModel = req.currentUser.role == 'customer' ? 'Customer' : 'Expert' 
+        const revieweeModel = reviewerModel === 'Customer' ? 'Expert' : 'Customer'
 
-        review.revieweeModel = review.reviewerModel == 'Customer' ? 'Expert' : 'Customer'
+        const service = await ServiceRequest.findOne({_id : review.serviceRequestId})
+        // console.log(service)
 
-        const service = await ServiceRequest.findOne({_id : review.serviceId})
-        //console.log(service)
-
-        review.reviewee = review.revieweeModel == 'Expert' ? service.expertId : service.customerId
+        review.reviewee = revieweeModel == 'Expert' ? service.expertId : service.customerId
     
+        console.log(review)
         await review.save()
         
         res.status(201).json(review)
@@ -29,26 +31,38 @@ reviewCtlr.create = async (req,res)=>{
     }
 }
 
-reviewCtlr.getReviews = async (req,res)=>{
+// reviewCtlr.getReviews = async (req,res)=>{
+//     try{
+//         const id = req.params
+//         const { type, serviceId } = req.query
+
+//         if(!type || (type != 'submitted' && type !== 'received')){
+//             return res.status(400).json({errors : 'Invalid type'})
+//         }
+
+//         const query = type === 'submitted' ? { reviewer : id } : { reviewee : id }
+
+//         if(serviceId){
+//             query.serviceId = serviceId
+//         }
+
+//         const reviews = await Review.find(query)
+//         res.json(reviews)
+//     }catch(err){
+//         console.log(err)
+//         return res.status(500).json({errors : 'something went wrong'})
+//     }
+// }
+
+reviewCtlr.getReviews = async(req,res) => {
+    const id = req.params.id
+    console.log('sdkjfnm',id)
     try{
-        const id = req.currentUser.userId
-        const { type, serviceId } = req.query
-
-        if(!type || (type != 'submitted' && type !== 'received')){
-            return res.status(400).json({errors : 'Invalid type'})
-        }
-
-        const query = type === 'submitted' ? { reviewer : id } : { reviewee : id }
-
-        if(serviceId){
-            query.serviceId = serviceId
-        }
-
-        const reviews = await Review.find(query)
-        res.json(reviews)
+        const reviews = await Review.find({reviewee : id})
+        console.log(reviews)
+        return res.json(reviews)
     }catch(err){
-        console.log(err)
-        return res.status(500).json({errors : 'something went wrong'})
+        
     }
 }
 

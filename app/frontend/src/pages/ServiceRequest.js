@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { getAddress } from "../redux/slices.js/search-slice";
+import { getAddress, setSelectedExpert } from "../redux/slices.js/search-slice";
 import { useState, useEffect } from "react";
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css";
@@ -8,25 +8,34 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import CustomerLogin from "./CustomerLogin";
 import { payBookingFee } from "../redux/slices.js/service-request-slice";
+import { getExpertProfile } from "../redux/slices.js/expert-slice";
 
 const formInitialState = {
     name: '',
-        location : { address: '' },
-        scheduleDate: '',
-        serviceImages: [],
-        description: ''
+    location : { address: '' },
+    scheduleDate: '',
+    serviceImages: [],
+    description: ''
 }
 
 export default function ServiceRequest() {
     const { user } = useSelector((state) => state.user) || {}; 
     const { currentAddress, choosenServices, selectedExpert } = useSelector((state) => state.search);
+    
     const dispatch = useDispatch();
-    const [greetCard, setGreetCard] = useState(false)
+    // const [greetCard, setGreetCard] = useState(false)
     const navigate = useNavigate()
     const [isBooked, setIsBooked] = useState(false)
     const [ showLogin, setShowLogin] = useState(false)
     const [bookedData, setBookedData] = useState(null)
     const { currentBooking } = useSelector((state) => state.customer)
+    console.log(selectedExpert)
+    const { profile } = useSelector((state) => state.expert)
+
+    useEffect(()=>{
+        if(profile?.userId?._id)
+        dispatch(getExpertProfile(profile?.userId?._id))
+    },[dispatch])
 
     const [formData, setFormData] = useState(formInitialState);
 
@@ -215,7 +224,7 @@ export default function ServiceRequest() {
                         }}
                         dateFormat="dd-MM-yyyy"
                         filterDate={(date) =>
-                            selectedExpert?.availability?.some(
+                            profile?.availability?.some(
                                 (availableDate) => new Date(availableDate).toLocaleDateString("en-GB") === date.toLocaleDateString("en-GB")
                             )
                         }

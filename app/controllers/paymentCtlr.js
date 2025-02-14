@@ -57,119 +57,6 @@ paymentCtlr.payBookingFee = async(req,res)=>{
     }
 }
 
-// paymentCtlr.payServiceFee = async (req, res) => {
-//     const { serviceRequestId, expertId, amount } = req.body;
-//     try {
-//         const expert = await Expert.findById(expertId);
-//         if (!expert || !expert.stripeAccountId) {
-//             return res.status(400).json({ errors: "Expert Stripe account not found" });
-//         }
-
-//         // Split amounts
-//         const systemShare = Math.round(amount * 0.10); // 10%
-//         const expertShare = Math.round(amount * 0.90); // 90%
-
-//         // Create Stripe Checkout session
-//         const session = await stripe.checkout.sessions.create({
-//             payment_method_types: ["card"],
-//             line_items: [{
-//                 price_data: {
-//                     currency: "inr",
-//                     product_data: { name: "Service Fee" },
-//                     unit_amount: amount * 100
-//                 },
-//                 quantity: 1
-//             }],
-//             mode: "payment",
-//             success_url: "http://localhost:3000/success",
-//             cancel_url: "http://localhost:3000/failed",
-//         });
-
-//         console.log("Session ID:", session.id);
-//         console.log("Session URL:", session.url);
-
-//         // Save payment details
-//         const payment = new Payment({
-//             serviceRequestId,
-//             expertId,
-//             transactionId: session.id,
-//             paymentReason: "service",
-//             paymentType: "card",
-//             amount,
-//             systemAmount: systemShare,
-//             expertAmount: expertShare
-//         });
-
-//         await payment.save();
-//         console.log(payment);
-
-//         res.json({ id: session.id, url: session.url });
-
-//     } catch (err) {
-//         console.log(err);
-//         return res.status(500).json({ errors: "Something went wrong" });
-//     }
-// };
-
-// paymentCtlr.payServiceFee = async (req, res) => {
-//     const { serviceRequestId, expertId, amount } = req.body;
-//     console.log({serviceRequestId, expertId, amount})
-//     try {
-//         const expert = await Expert.findOne({ userId : expertId})
-//         console.log(expert)
-//         if (!expert || !expert.stripeAccountId) {
-//             return res.status(400).json({ errors: "Expert Stripe account not found" });
-//         }
-
-//         // Split amounts
-//         const systemShare = Math.round(amount * 0.10); // 10%
-//         const expertShare = Math.round(amount * 0.90); // 90%
-
-//         // Define success and failed URLs dynamically
-//         const BASE_URL = process.env.CLIENT_URL || "http://localhost:3000";
-
-//         // Create Stripe Checkout session
-//         const session = await stripe.checkout.sessions.create({
-//             payment_method_types: ["card"],
-//             line_items: [{
-//                 price_data: {
-//                     currency: "inr",
-//                     product_data: { name: "Service Fee" },
-//                     unit_amount: amount * 100
-//                 },
-//                 quantity: 1
-//             }],
-//             mode: "payment",
-//             success_url: `${BASE_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,  
-//             cancel_url: `${BASE_URL}/payment/failed`,
-//         });
-        
-
-//         console.log("Session ID:", session.id);
-//         console.log("Session URL:", session.url);
-
-//         // Save payment details
-//         const payment = new Payment({
-//             serviceRequestId,
-//             expertId,
-//             transactionId: session.id,
-//             paymentReason: "service",
-//             paymentType: "card",
-//             amount,
-//             systemAmount: systemShare,
-//             expertAmount: expertShare
-//         });
-
-//         await payment.save();
-//         console.log(payment);
-
-//         res.json({ id: session.id, url: session.url });
-
-//     } catch (err) {
-//         console.error(err);
-//         return res.status(500).json({ errors: "Something went wrong" });
-//     }
-// };
 paymentCtlr.payServiceFee = async (req, res) => {
     const { serviceRequestId, expertId, amount } = req.body;
     console.log({ serviceRequestId, expertId, amount });
@@ -183,43 +70,72 @@ paymentCtlr.payServiceFee = async (req, res) => {
             return res.status(400).json({ errors: "Expert Stripe account not found" });
         }
 
-        // Split amounts
-        const systemShare = Math.round(amount * 0.10); // 10% Platform fee
-        const expertShare = Math.round(amount * 0.90); // 90% Expert earnings
+        const systemShare = Math.round(amount * 0.10); 
+        const expertShare = Math.round(amount * 0.90); 
 
-        // Define success and failed URLs dynamically
         const BASE_URL = process.env.CLIENT_URL || "http://localhost:3000";
 
-        // Create Stripe Checkout session with automatic revenue sharing
+        // Create a Stripe customer (if not already created)
+        const customer = await stripe.customers.create({
+            name : 'Testing',
+            address : {
+                line1 : 'India',
+                postal_code : '639006',
+                city : 'Karur',
+                state : 'TN',
+                country : 'US'
+            }
+        });
+        console.log("Customer Created:", customer.id);
+
+        // Create a PaymentIntent with revenue sharing
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: amount * 100, 
+            currency: "inr",
+            payment_method_types: ["card"],
+            customer: customer.id, 
+            application_fee_amount: systemShare * 100,
+            transfer_data: {
+                destination: expert.stripeAccountId 
+            },
+            metadata: {
+                serviceRequestId,
+                expertId
+            }
+        });
+
+        console.log("Payment Intent ID:", paymentIntent.id);
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             mode: "payment",
             success_url: `${BASE_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${BASE_URL}/payment/failed`,
+            customer: customer.id, 
             line_items: [{
                 price_data: {
-                    currency: "inr", // Ensure payment is in INR
+                    currency: "inr",
                     product_data: { name: "Service Fee" },
-                    unit_amount: amount * 100 // Convert to paise
+                    unit_amount: amount * 100
                 },
                 quantity: 1
             }],
-            payment_intent_data: {  
-                // application_fee_amount: systemShare * 100, // 10% platform fee
-                transfer_data: {
-                    destination: expert.stripeAccountId,
-                    amount : expertShare * 100
+            payment_intent_data: {
+                metadata: {
+                    serviceRequestId,
+                    expertId
                 }
-            }
+            },
+            client_reference_id: paymentIntent.id 
         });
 
         console.log("Session ID:", session.id);
         console.log("Session URL:", session.url);
 
-        // Save payment details in the database
         const payment = new Payment({
             serviceRequestId,
             expertId,
+            customerId: customer.id,
             transactionId: session.id,
             paymentReason: "service",
             paymentType: "card",
@@ -240,8 +156,6 @@ paymentCtlr.payServiceFee = async (req, res) => {
     }
 };
 
-
-
 paymentCtlr.getPaymentDetails = async (req, res) => {
     const { session_id } = req.query;
 
@@ -250,25 +164,43 @@ paymentCtlr.getPaymentDetails = async (req, res) => {
             return res.status(400).json({ error: "Session ID is required" });
         }
 
-        // Retrieve session details from Stripe
-        const session = await stripe.checkout.sessions.retrieve(session_id);
+        const session = await stripe.checkout.sessions.retrieve(session_id, {
+            expand: ["payment_intent", "line_items"], 
+        });
 
         if (!session) {
             return res.status(404).json({ error: "Payment session not found" });
         }
 
-        // Return relevant payment details
+        const amount = session.amount_total || (session.line_items?.data[0]?.amount_total ?? 0);
+        const status = session.payment_status || session.payment_intent?.status || "unknown";
+
+        const paymentRecord = await Payment.findOneAndUpdate(
+            { transactionId : session_id},
+            { paymentStatus : status === 'paid' ? 'success' : 'failed'},
+            { new : true }
+        )
+        console.log(paymentRecord)
+
+        console.log({
+            transactionId: session.id,
+            amount: amount,
+            currency: session.currency,
+            status: status,
+            serviceRequestId : paymentRecord.serviceRequestId
+        })
+        
         res.json({
             transactionId: session.id,
-            amount: session.amount_total,
+            amount: amount,
             currency: session.currency,
-            status: session.payment_status,
+            status: status,
+            serviceRequestId : paymentRecord.serviceRequestId
         });
     } catch (err) {
         console.error("Error fetching session:", err);
         res.status(500).json({ error: "Something went wrong" });
     }
 };
-
 
 export default paymentCtlr

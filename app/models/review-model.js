@@ -6,24 +6,24 @@ const reviewSchema = new Schema({
         min : 1,
         max : 5
    },
-   comment : { type : String},
-   serviceId : { type : Schema.Types.ObjectId },
+   reviewText : { type : String},
+   serviceRequestId : { type : Schema.Types.ObjectId },
    reviewer : {
         type : Schema.Types.ObjectId,
         refPath : 'reviewerModel'
    },
-   reviewerModel : {
-        type : String,
-        enum : [ 'Customer', 'Expert']
-   },
+//    reviewerModel : {
+//         type : String,
+//         enum : [ 'Customer', 'Expert']
+//    },
    reviewee : {
         type : Schema.Types.ObjectId,
         refPath : 'revieweeModel'
    },
-   revieweeModel : {
-        type : String,
-        enum : ['Customer', 'Expert']
-   },
+//    revieweeModel : {
+//         type : String,
+//         enum : ['Customer', 'Expert']
+//    },
    reviewDate : { 
         type : Date, 
         default : Date.now
