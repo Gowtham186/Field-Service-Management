@@ -12,7 +12,13 @@ const customerSchema = new Schema({
         city : String,
         address:String,
         coords:Object
-    }
+    },
+    savedBookings : [
+        {
+            type : Schema.Types.ObjectId, 
+            ref : 'ServiceRequest',
+        }
+    ]
 }, { timestamps: true})
 const Customer = model('Customer', customerSchema)
 export default Customer

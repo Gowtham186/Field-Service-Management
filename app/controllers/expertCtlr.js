@@ -405,7 +405,7 @@ expertCtlr.expertCategoriesBySkills = async (req,res)=>{
                 return { ...category.toObject(), services}
             })       
         );
-        console.log(expertCategories)   
+        // console.log(expertCategories)   
         res.json(expertCategories)         
     }catch(err){
         console.log(err)

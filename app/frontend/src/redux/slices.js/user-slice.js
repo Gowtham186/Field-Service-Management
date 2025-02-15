@@ -61,6 +61,20 @@ export const expertRegister = createAsyncThunk('user/expertRegister', async({for
     }
 })
 
+export const updateUser = createAsyncThunk("user/updateuser", async (editData, { rejectWithValue }) => {
+      try {
+        const response = await axios.put("/api/users", editData, {
+          headers: { Authorization: localStorage.getItem("token") },
+        });
+        console.log("API Response:", response.data);
+        return response.data; 
+      } catch (error) {
+        console.error("API Error:", error.response?.data || error.message);
+        return rejectWithValue(error.response?.data || "Failed to update user");
+      }
+    }
+  );
+
 const userSlice = createSlice({
     name : 'user',
     initialState : { 
@@ -96,8 +110,13 @@ const userSlice = createSlice({
         builder.addCase(expertRegister.rejected, (state, action)=>{
             state.serverError = action.payload
         })
-
-
+        builder.addCase(updateUser.pending, (state,action)=>{
+            state.loading = true
+        })
+        builder.addCase(updateUser.fulfilled, (state,action)=>{
+            state.loading = false
+            state.user = action.payload
+        })
         
     }
 })

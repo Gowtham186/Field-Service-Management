@@ -27,16 +27,15 @@ export default function Success() {
             setOpenReviewForm(true); 
         }
     }, [paymentDetails]);
-
     const handleSubmitReview = async () => {
         try{
             const reviewData = {
                 rating,
                 reviewText,
-                serviceRequestId : paymentDetails.serviceRequestId
+                serviceRequestId : paymentDetails.serviceRequestId,
             };
             console.log("Review Submitted:", reviewData);
-            await dispatch(submitReview({reviewData})).unwrap()
+            await dispatch(submitReview({reviewData}))
             setOpenReviewForm(false);
         }catch(err){
             console.log(err)
@@ -76,7 +75,7 @@ export default function Success() {
                 </button>
             </div>
 
-            {/* Review Form Modal */}
+            {openReviewForm && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96">
                         <h2 className="text-xl font-bold mb-4">Rate Your Experience ⭐</h2>
@@ -117,8 +116,7 @@ export default function Success() {
                         </div>
                     </div>
                 </div>
-            {/* {openReviewForm && (
-            )} */}
+            )}
         </div>
     );
 }

@@ -35,8 +35,8 @@ paymentCtlr.payBookingFee = async(req,res)=>{
                 quantity : 1
             }],
             mode : 'payment',
-            success_url : 'http://localhost:3000/payment/success',
-            cancel_url : 'http://localhost:3000/paymentfailed',
+            success_url: 'http://localhost:3000/my-bookings?payment=success',
+            cancel_url : 'http://localhost:3000/payment/failed',
             customer : customer.id
         })
         console.log(session.id)
@@ -51,7 +51,7 @@ paymentCtlr.payBookingFee = async(req,res)=>{
 
         await payment.save()
         console.log(payment)
-        res.json({id: session.id, url : session.url})
+        res.json({id: session.id, url : session.url })
     }catch(err){
         console.log(err)
     }

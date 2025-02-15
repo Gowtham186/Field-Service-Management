@@ -8,3 +8,4 @@ const locationSchema = new Schema({
 });
 const Location = model("Location", locationSchema)
 export default Location
+    

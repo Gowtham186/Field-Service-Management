@@ -36,6 +36,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Success from './components/Success';
 import Failed from './components/Failed';
 import ServiceInvoice from './pages/ServiceInvoice';
+import CustomerCalendar from './pages/CustomerCalendar';
+import Cart from './pages/Cart';
 
 function App() {
   const dispatch = useDispatch()
@@ -63,8 +65,12 @@ function App() {
           {/* customer */}
           <Route path='/customerlogin' element={<CustomerLogin />}/>
           <Route path="/my-bookings" element={<MyBookings />}/>
+          <Route path="/cart" element={<Cart />}/>
+          <Route path="/my-calendar" element={<CustomerCalendar />}/>
           <Route path="/experts/:id" element={<ExpertDetails />}/>
           <Route path="/experts/:id/categories" element={<CategoryDetails />}/>
+    
+
           <Route path="/service-requests" element={
             
               <ServiceRequest />

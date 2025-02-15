@@ -82,4 +82,32 @@ customerCtlr.myBookings = async(req,res)=>{
     }
 }
 
+customerCtlr.saveBookings = async (req, res) => {
+    const { id } = req.params; // Customer user ID
+    const { expertId, selectedServices } = req.body;
+    console.log(req.body)
+    try {
+        const customer = await Customer.findOneAndUpdate(
+            { userId: id }, // Find by userId
+            {
+                $set: {
+                    "savedBookings.expertId": expertId,
+                    "savedBookings.selectedServices": selectedServices
+                }
+            },
+            { new: true, upsert: true } // Create new if not exists
+        );
+
+        if (!customer) {
+            return res.status(404).json({ message: "Customer not found" });
+        }
+        console.log(customer.savedBookings)
+        res.json(customer.savedBookings);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error. Could not save bookings." });
+    }
+};
+
+
 export default customerCtlr

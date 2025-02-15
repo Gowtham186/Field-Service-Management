@@ -35,7 +35,7 @@ const serviceRequestSchema = new Schema({
     },
     status : {
         type : String,
-        enum : ['requested', 'assigned', 'in-progress', 'completed', 'cancelled', 'rejected'],
+        enum : ['requested', 'accepted', 'assigned', 'in-progress', 'completed', 'cancelled', 'rejected'],
         default : 'requested'
     },
     onSiteServices : {

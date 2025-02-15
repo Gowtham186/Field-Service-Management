@@ -13,7 +13,7 @@ router.get('/service-requests', authenticateUser, authorizeUser(['admin']), serv
 router.put('/service-requests/:id', authenticateUser, authorizeUser(['customer']), upload.array("serviceImages", 6), serviceRequestCtlr.editServiceRequest)
 router.get('/service-requests/:id', authenticateUser, serviceRequestCtlr.getServiceRequest)
 
-router.put('/service-requests/:id/status', authenticateUser, authorizeUser(['expert']), serviceRequestCtlr.updateStatus)
+router.put('/service-requests/:id/status', authenticateUser, serviceRequestCtlr.updateStatus)
 router.get('/service-requests/customer/:customerId', authenticateUser, serviceRequestCtlr.getByCustomer)
 router.get('/service-requests/expert/:expertId', authenticateUser, serviceRequestCtlr.getByExpert)
 

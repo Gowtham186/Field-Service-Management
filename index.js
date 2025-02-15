@@ -17,6 +17,8 @@ import http from 'http'
 import trackLocation from './app/sockets/trackLocation.js'
 import Location from './app/models/location-model.js'
 import { socketHandler } from './app/sockets/socketIndex.js'
+import './app/utils.js/cronJobs.js'
+import './app/utils.js/expertAvailabilityCron.js'
 
 const app = express()
 dotenv.config()

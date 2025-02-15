@@ -43,8 +43,7 @@ export const payServicefee = createAsyncThunk('customer/payServiceFee', async(bo
     }
 })
 
-export const fetchPaymentDetails = createAsyncThunk(
-    "customer/fetchPaymentDetails",
+export const fetchPaymentDetails = createAsyncThunk("customer/fetchPaymentDetails",
     async (sessionId, { rejectWithValue }) => {
         try {
             const response = await axios.get(`/api/payment/details?session_id=${sessionId}`);
@@ -56,6 +55,20 @@ export const fetchPaymentDetails = createAsyncThunk(
     }
 )
 
+export const saveBookingToDb = createAsyncThunk(
+    "booking/saveBookingToDb",
+    async ({ id, expertId, selectedServices }, { rejectWithValue }) => {
+      try {
+        const response = await axios.post(`/api/customers/${id}/save-bookings`, {expertId, selectedServices },
+            { headers : { Authorization : localStorage.getItem("token")}}
+        );
+        return response.data;
+      } catch (error) {
+        return rejectWithValue(error.response?.data || "Error saving booking");
+      }
+    }
+  );
+
 const customerSlice = createSlice({
     name : 'customer',
     initialState : { 
@@ -64,7 +77,8 @@ const customerSlice = createSlice({
         serverError : null,
         myBookings : null,
         workingService : null,
-        paymentDetails : null
+        paymentDetails : null,
+        savedBookings : null
     },
     reducers : {
         setCurrentService : (state,action)=>{
@@ -102,7 +116,18 @@ const customerSlice = createSlice({
             state.loading = false;
             state.error = action.payload;
         });
+        builder.addCase(saveBookingToDb.pending, (state) => {
+            state.loading = true;
+        })
+        builder.addCase(saveBookingToDb.fulfilled, (state, action) => {
+            state.loading = false
+            state.savedBookings = action.payload;
+        })
+        builder.addCase(saveBookingToDb.rejected, (state, action) => {
+            state.serverError = action.payload;
+        });
     }
+  
 })
 export const { setCurrentService } = customerSlice.actions
 export default customerSlice.reducer

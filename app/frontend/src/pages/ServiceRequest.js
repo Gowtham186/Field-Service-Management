@@ -129,27 +129,27 @@ export default function ServiceRequest() {
         }));
     };
 
-    const makePayment = async () => {
-        console.log(currentBooking)
-        try{
-            const body = {
-                serviceRequestId : currentBooking?._id,
-                amount : currentBooking?.budget.bookingFee
-            }
-            const response =  await dispatch(payBookingFee(body)).unwrap()
+    // const makePayment = async () => {
+    //     console.log(currentBooking)
+    //     try{
+    //         const body = {
+    //             serviceRequestId : currentBooking?._id,
+    //             amount : currentBooking?.budget.bookingFee
+    //         }
+    //         const response =  await dispatch(payBookingFee(body)).unwrap()
 
-            if(!response){
-                console.error("Invalid response from API:", response);
-                return;
-            }
+    //         if(!response){
+    //             console.error("Invalid response from API:", response);
+    //             return;
+    //         }
 
-            localStorage.setItem('stripeId', response?.id)
+    //         localStorage.setItem('stripeId', response?.id)
 
-            window.location = response?.url
-        }catch(err){
-            console.log(err)
-        }
-    }
+    //         window.location = response?.url
+    //     }catch(err){
+    //         console.log(err)
+    //     }
+    // }
 
     return (
         <>
@@ -331,13 +331,13 @@ export default function ServiceRequest() {
                         </div>
                     </div>
                 )}
-                {isBooked && (
+                {/* {isBooked && (
                     <button type="submit" 
                     onClick={makePayment}
                     className="py-2 px-4 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
                         Pay Booking Fee
                     </button>
-                )}
+                )} */}
                 
             </div>
             {/* {greetCard && (

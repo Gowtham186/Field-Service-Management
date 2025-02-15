@@ -137,7 +137,22 @@ userCtlr.profile = async (req,res)=>{
         console.log(err)
         return res.status(500).json({errors : 'something went wrong'})
     }
+}
 
+userCtlr.updateUser = async(req,res)=>{
+    const body = req.body
+    try{
+        const userId = req.currentUser.userId
+        const updatedUser = await User.findByIdAndUpdate(userId, body , { new : true})
+        if (!updatedUser) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        console.log("User updated:", updatedUser);
+        return res.status(200).json(updatedUser);
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors : 'something went wrong'})
+    }
 }
 
 export default userCtlr

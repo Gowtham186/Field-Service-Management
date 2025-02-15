@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { deleteOnSiteService, getServiceRequest, onSiteService, updateBookingStatus } from "../redux/slices.js/expert-slice";
 import { v4 as uuidv4 } from 'uuid';
+import { Star } from 'lucide-react';
+import { submitReview } from "../redux/slices.js/service-request-slice";
 
 export default function WorkTracking() {
   const dispatch = useDispatch();
@@ -12,28 +14,34 @@ export default function WorkTracking() {
 
   const [isCompleted, setIsCompleted] = useState(false);
   const [newServices, setNewServices] = useState([]);
+  const [openReviewForm, setOpenReviewForm] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
 
   useEffect(() => {
     if (id) {
-      dispatch(getServiceRequest(id)); 
-    }
-  }, [dispatch, id]);
-  
-  useEffect(() => {
-    if (id) {
+      dispatch(getServiceRequest(id));
       dispatch(updateBookingStatus({ id, body: { status: "in-progress" } }));
     }
   }, [dispatch, id]);
-  
+
+  useEffect(() => {
+    if (isCompleted) {
+      setOpenReviewForm(true);
+    }
+  }, [isCompleted]);
 
   if (loading) return <p>...loading</p>;
 
-  const handleCompleted = () => {
-    if (!workingService?._id) return;
-    dispatch(updateBookingStatus({ id: workingService._id, body: { status: 'completed' } }))
-      .unwrap()
-      .then(() => setIsCompleted(true))
-      .catch((error) => console.error('Failed to update service status:', error));
+  const handleCompleted = async () => {
+    try {
+      if (!workingService?._id) return;
+      await dispatch(updateBookingStatus({ id: workingService._id, body: { status: 'completed' } })).unwrap();
+      setIsCompleted(true);
+      setOpenReviewForm(true);
+    } catch (error) {
+      console.error('Failed to update service status:', error);
+    }
   };
 
   const handleAddService = () => {
@@ -54,16 +62,34 @@ export default function WorkTracking() {
     dispatch(onSiteService({ serviceRequestId: id, newService: service }))
       .unwrap()
       .then(() => {
-        setNewServices([])
+        setNewServices([]);
       })
       .catch((err) => console.log(err));
   };
 
-  const handleDelete = (serviceId)=>{
+  const handleDelete = (serviceId) => {
     dispatch(deleteOnSiteService(serviceId))
       .unwrap()
-      .catch((err) => console.log(err))
-  }
+      .catch((err) => console.log(err));
+  };
+
+  const handleStarClick = (index) => {
+    setRating(index + 1);
+  };
+
+  const handleSubmitReview = async () => {
+    try {
+      const reviewData = {
+        rating,
+        reviewText,
+        serviceRequestId: id,
+      };
+      await dispatch(submitReview({ reviewData })).unwrap();
+      setOpenReviewForm(false);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <div className="p-2 px-4">
@@ -73,7 +99,6 @@ export default function WorkTracking() {
         {workingService?.serviceType?.map((type) => (
           <div key={type?._id || uuidv4()} className="border p-4 rounded-lg shadow-lg bg-white">
             <p className="font-bold">{type?.category?.name}: </p>
-
             <div className="mt-4 space-y-2">
               {type?.servicesChoosen?.map((service) => (
                 <div key={service?._id || uuidv4()} className="border p-2 rounded-md shadow-sm bg-gray-50">
@@ -84,7 +109,7 @@ export default function WorkTracking() {
           </div>
         ))}
 
-        {workingService?.onSiteServices.length > 0 && (
+        {workingService?.onSiteServices?.length > 0 && (
           <div className="mt-4 bg-white shadow-lg rounded-lg p-4">
             <h3 className="font-semibold text-lg mb-3 text-gray-700">On-Site Services</h3>
 
@@ -106,10 +131,8 @@ export default function WorkTracking() {
                 </button>
               </div>
             ))}
-  </div>
+          </div>
         )}
-
-
 
         <button
           className="mt-3 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
@@ -119,44 +142,73 @@ export default function WorkTracking() {
         </button>
       </div>
 
-      {newServices.length > 0 &&
-        newServices.map(service => (
-          <div key={service.id} className="mt-2">
-            <label className="text-gray-600">Service Name:</label>
-            <input 
-              type="text"
-              name="serviceName"
-              value={service.serviceName}
-              className="border p-1 rounded w-full"
-              onChange={(e) => handleServiceChange(e, service.id)}
-            />
-            <label className="text-gray-600">Price:</label>
-            <input 
-              type="number"
-              name="price"
-              value={service.price}
-              className="border p-1 rounded w-full"
-              onChange={(e) => handleServiceChange(e, service.id)}
-            />
-            <button
-              className="mt-3 py-2 px-4 bg-green-500 text-white font-semibold shadow-md hover:bg-blue-600"
-              onClick={() => handleSave(service)}
-            >
-              Save
-            </button>
-          </div>
-        ))
-      }
+      {newServices.length > 0 && newServices.map(service => (
+        <div key={service.id} className="mt-2">
+          <label className="text-gray-600">Service Name:</label>
+          <input
+            type="text"
+            name="serviceName"
+            value={service.serviceName}
+            className="border p-1 rounded w-full"
+            onChange={(e) => handleServiceChange(e, service.id)}
+          />
+          <label className="text-gray-600">Price:</label>
+          <input
+            type="number"
+            name="price"
+            value={service.price}
+            className="border p-1 rounded w-full"
+            onChange={(e) => handleServiceChange(e, service.id)}
+          />
+          <button
+            className="mt-3 py-2 px-4 bg-green-500 text-white font-semibold shadow-md hover:bg-blue-600"
+            onClick={() => handleSave(service)}
+          >
+            Save
+          </button>
+        </div>
+      ))}
 
       <button
         onClick={handleCompleted}
-        className={`mt-6 py-2 px-4 font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-          isCompleted ? "bg-green-500 hover:bg-green-600 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
-        } text-white`}
+        className={`mt-6 py-2 px-4 font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${isCompleted ? "bg-green-500 hover:bg-green-600 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"} text-white`}
         disabled={isCompleted}
       >
         Service Completed
       </button>
+
+      {openReviewForm && (
+        <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+          <h2 className="text-xl font-bold mb-4">Rate your experience</h2>
+          <div className="flex justify-center space-x-2">
+            {[...Array(5)].map((_, index) => (
+              <Star
+                key={index}
+                size={20}
+                className={`cursor-pointer ${index < rating ? "text-yellow-500 fill-yellow-500" : "text-gray-400"}`}
+                onClick={() => handleStarClick(index)}
+              />
+            ))}
+          </div>
+          <textarea
+            className="w-full border p-2 mt-3 rounded-lg"
+            placeholder="Write your review"
+            value={reviewText}
+            onChange={(e) => setReviewText(e.target.value)}
+          />
+          <div className="flex justify-end mt-4">
+            <button 
+              className="bg-gray-400 text-white px-4 py-2 rounded-lg mr-2"
+              onClick={() => setOpenReviewForm(false)}
+            >
+              Skip
+            </button>
+            <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600" onClick={handleSubmitReview}>
+              Submit Review
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
