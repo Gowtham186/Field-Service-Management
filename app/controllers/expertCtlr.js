@@ -9,6 +9,7 @@ import User from "../models/user-model.js";
 import nodemailer from 'nodemailer'
 
 import Stripe from "stripe"
+import Payment from "../models/payment-model.js";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const transporter = nodemailer.createTransport({
@@ -508,6 +509,73 @@ expertCtlr.changeProfilePic = async (req,res)=>{
         }
     }catch(err){
         console.log(err)
+    }
+}
+
+expertCtlr.expertRevenue = async(req,res)=>{
+    const { id } = req.params
+    try{
+        const expert = await Expert.findOne({userId : id})
+        //console.log(expert)
+
+        const transfers = await stripe.transfers.list({
+            destination : expert?.stripeAccountId
+        })
+        //console.log(transfers.data)
+
+        const expertPayments = await Payment.find({ expertId: id })
+    
+        const expertServiceRequests = await Payment.find({ expertId: id }).select("serviceRequestId");
+
+        const serviceRequestIds = expertServiceRequests.map(payment => payment.serviceRequestId);
+
+        // Fetch Service Requests and populate serviceType (Category)
+        const serviceRequests = await ServiceRequest.find({ _id: { $in: serviceRequestIds } })
+            .populate({
+                path: "serviceType.category",
+                model: "Category",
+                select: "name", // ✅ Get only category name
+            })
+            .populate({
+                path: "serviceType.servicesChoosen",
+                model: "Service",
+                select: "serviceName price", // ✅ Get service details
+            });
+        
+        console.log(JSON.stringify(serviceRequests, null, 2)); // ✅ Check structured output
+
+            // Calculate Revenue by Category
+        const revenueByCategory = {};
+
+        serviceRequests.forEach(request => {
+            request.serviceType.forEach(service => {
+                const categoryName = service.category.name;
+
+                service.servicesChoosen.forEach(serviceItem => {
+                    const price = serviceItem.price;
+
+                    if (!revenueByCategory[categoryName]) {
+                        revenueByCategory[categoryName] = 0;
+                    }
+                    revenueByCategory[categoryName] += price;
+                });
+            });
+        });
+
+        console.log(revenueByCategory); // ✅ Output the total revenue grouped by category
+
+        const totalRevenue  = expertPayments
+            .map(ele => ele.expertAmount)
+            .reduce((acc, cv)=> acc + cv ,0)
+        console.log(totalRevenue)
+
+        return res.json({
+            totalRevenue : totalRevenue,
+            payments : expertPayments
+        })
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({errors : 'something went wrong'})
     }
 }
     

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -23,30 +23,21 @@ const destinationIcon = new L.Icon({
 export default function LiveTracking() {
     const { serviceId } = useParams();
     const location = useLocation();
-    const navigate = useNavigate(); // For navigating away
+    const navigate = useNavigate();
 
-    const { user } = useSelector((state) => state.user); 
-    const userId = user?._id; 
+    const { user } = useSelector((state) => state.user);
+    const userId = user?._id;
 
     const destinationAddress = location.state?.destinationAddress || "Unknown Address";
     const destinationCoords = location.state?.destinationCoords || { latitude: 12.9716, longitude: 77.5946 };
-    console.log("destinationAddress",destinationAddress)
-    console.log("destinationCoords", destinationCoords)
-    const customerId = location.state?.customerId
+    const customerId = location.state?.customerId;
 
     const [expertLocation, setExpertLocation] = useState(null);
     const [socket, setSocket] = useState(null);
     const [watchId, setWatchId] = useState(null);
 
-
     useEffect(() => {
-        const customerId = location.state?.customerId;
-        console.log("Customer ID:", customerId);  // Add this to verify the customerId
-    }, [location]);
-    
-
-    useEffect(() => {
-        if (!userId) return; 
+        if (!userId) return;
 
         const newSocket = io("http://localhost:4500");
         setSocket(newSocket);
@@ -61,7 +52,6 @@ export default function LiveTracking() {
 
                     setExpertLocation(newLocation);
 
-                    // Emit expert location with userId
                     newSocket.emit("shareLocation", { 
                         userId, 
                         role: "expert", 
@@ -77,7 +67,6 @@ export default function LiveTracking() {
             setWatchId(id);
         }
 
-        // Listen for real-time location updates from backend
         newSocket.on("expertsLocationUpdate", ({ userId: expertId, latitude, longitude }) => {
             if (expertId === userId) {
                 setExpertLocation({ latitude, longitude });
@@ -96,14 +85,14 @@ export default function LiveTracking() {
 
         if (socket) {
             socket.emit("expertArrived", { serviceId, customerId });
-    
+
             console.log("📢 Emitting expertArrived:", { serviceId, customerId });
-    
+
             socket.disconnect();
         }
 
         console.log("✅ Tracking Stopped. Navigating away...");
-        navigate(-1); 
+        navigate(-1);
     };
 
     return (
@@ -118,6 +107,15 @@ export default function LiveTracking() {
                     style={{ height: "400px", width: "100%", borderRadius: "10px" }}
                 >
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+                    {/* Route Line */}
+                    <Polyline 
+                        positions={[
+                            [expertLocation.latitude, expertLocation.longitude],
+                            [destinationCoords.latitude, destinationCoords.longitude]
+                        ]}
+                        color="blue"
+                    />
 
                     {/* Expert Location */}
                     <Marker position={[expertLocation.latitude, expertLocation.longitude]} icon={expertIcon}>

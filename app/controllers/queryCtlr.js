@@ -71,11 +71,10 @@ queryCtlr.search = async (req, res) => {
             filteredExperts = filteredExperts.filter(expert => 
                 expert.skills.some(cat =>  cat._id.toString() === skill))
         }
-        console.log(`Filtered Experts by location & skill: ${filteredExperts.length}`);
-        //console.log(filteredExperts)
+        // console.log(`Filtered Experts by location & skill: ${filteredExperts.length}`);
+
             
         const verifiedExperts = filteredExperts.filter(expert => expert.isVerified === true)
-        console.log('verifiedExperts', verifiedExperts.length)
 
         // const expertsWithReviews = await Promise.all(
         //     verifiedExperts.map(async expert => {

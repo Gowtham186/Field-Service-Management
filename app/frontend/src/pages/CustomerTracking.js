@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import io from "socket.io-client";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
@@ -32,16 +32,16 @@ const RecenterMap = ({ location }) => {
 
 export default function CustomerTracking() {
     const { expertId } = useParams();
+    const navigate = useNavigate();
     const [expertLocation, setExpertLocation] = useState(null);
     const socketRef = useRef(null);
 
     const location = useLocation();
-
-
     const serviceAddress = location.state?.serviceAddress || "Unknown Address";
-    const serviceCoords = location.state?.serviceCoords 
-    console.log("serviceAddress",serviceAddress)
-    console.log("serviceCoords", serviceCoords)
+    const serviceCoords = location.state?.serviceCoords;
+    
+    console.log("Service Address:", serviceAddress);
+    console.log("Service Coords:", serviceCoords);
 
     useEffect(() => {
         if (!expertId) {
@@ -68,20 +68,24 @@ export default function CustomerTracking() {
             }
         });
 
-        // Listen for expert disconnection
+        // Keep last known location if expert disconnects
         socket.on("expertDisconnected", ({ userId }) => {
             console.log(`Expert ${userId} disconnected`);
-            if (userId === expertId) {
-                setExpertLocation(null);
-            }
         });
 
         return () => {
-            console.log("Cleaning up WebSocket listeners...");
-            socket.off("expertsLocationUpdate");
-            socket.off("expertDisconnected");
+            console.log("Component unmounted but keeping socket active.");
         };
     }, [expertId]);
+
+    const handleBack = () => {
+        if (socketRef.current) {
+            console.log("Disconnecting socket on back navigation...");
+            socketRef.current.disconnect();
+            socketRef.current = null;
+        }
+        navigate(-1);
+    };
 
     return (
         <div className="p-4 bg-white shadow-lg rounded-lg">
@@ -110,13 +114,32 @@ export default function CustomerTracking() {
                     {/* Destination Location */}
                     <Marker position={[serviceCoords.latitude, serviceCoords.longitude]} icon={destinationIcon}>
                         <Popup>
-                            <strong>My location :</strong> {serviceAddress}
+                            <strong>My location:</strong> {serviceAddress}
                         </Popup>
                     </Marker>
+
+                    {/* Route Line between Expert and Destination */}
+                    <Polyline 
+                        positions={[
+                            [expertLocation.lat, expertLocation.lng], 
+                            [serviceCoords.latitude, serviceCoords.longitude]
+                        ]}
+                        color="blue"
+                        weight={5}
+                        opacity={0.7}
+                    />
                 </MapContainer>
             ) : (
                 <p className="text-gray-600 mt-2">Waiting for expert location...</p>
             )}
+
+            {/* Back Button */}
+            <button 
+                onClick={handleBack} 
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700"
+            >
+                Back
+            </button>
         </div>
     );
 }

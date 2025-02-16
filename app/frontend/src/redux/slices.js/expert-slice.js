@@ -193,6 +193,16 @@ export const getExpertReviews = createAsyncThunk('expert/getExpertReviews', asyn
     }
 });
 
+export const getExpertRevenue = createAsyncThunk('expert/getExpertRevenue', async(id)=>{
+    try{
+        const response = await axios.get(`/api/experts/${id}/revenue`, { headers : { Authorization : localStorage.getItem('token')}} )
+        console.log(response.data)
+        return response.data
+    }catch(err){
+        console.log(err)
+    }
+})
+
 
 const expertSlice = createSlice({
     name : 'expert',
@@ -206,7 +216,12 @@ const expertSlice = createSlice({
         myServices : [],
         serviceRequestId : null,
         workingService : null,
-        unVerifiedExperts : null
+        unVerifiedExperts : null,
+        revenue : {
+            totalRevenue : null,
+            transactions : null,
+            payments : null
+        }
     },
     reducers : {
         setServiceRequestId : (state,action)=>{
@@ -310,7 +325,17 @@ const expertSlice = createSlice({
             state.loading = false
             state.profile = {...state.profile, profilePic : action.payload}
         })
-
+        builder.addCase(getExpertRevenue.pending, (state,action)=>{
+            state.loading = true
+        })
+        builder.addCase(getExpertRevenue.fulfilled, (state, action) => {
+            state.loading = false;
+            state.revenue = {
+                ...state.revenue,
+                totalRevenue: action.payload.totalRevenue,
+                payments: action.payload.payments,
+            };
+        });        
     }
 })
 export const { setServiceRequestId, setWorkingService } = expertSlice.actions

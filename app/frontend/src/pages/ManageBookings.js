@@ -102,7 +102,7 @@ export default function ManageBookings() {
                                             </span>
                                         ))}
                                     </td>
-                                    <td className="p-3 text-center text-gray-800 font-semibold">₹{request?.budget?.finalPrice || "N/A"}</td>
+                                    <td className="p-3 text-center text-gray-800 font-semibold">₹{request?.budget?.servicesPrice || "N/A"}</td>
                                     <td className="p-3">{new Date(request.scheduleDate).toLocaleDateString("en-GB")}</td>
                                 </tr>
                             ))}

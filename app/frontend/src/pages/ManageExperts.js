@@ -22,7 +22,7 @@ export default function ManageExperts() {
             <div className="flex flex-wrap gap-4 items-center">
                 <input
                     type="text"
-                    placeholder="Search Customer/Expert"
+                    placeholder="Search Expert"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="border p-2 rounded flex-1"

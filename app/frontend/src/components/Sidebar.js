@@ -85,6 +85,17 @@ export default function Sidebar({ role }) {
                 Manage Availability
               </Link>
             </li>
+            <li className="relative">
+              <Link
+                to="/experts/revenue"
+                className={`block text-white hover:text-blue-700 pl-4 relative`}
+              >
+                {isActive("/experts/revenue") && (
+                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
+                )}
+                Revenue
+              </Link>
+            </li>
           </>
         )}
 
