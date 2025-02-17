@@ -39,6 +39,8 @@ import ServiceInvoice from './pages/ServiceInvoice';
 import CustomerCalendar from './pages/CustomerCalendar';
 import Cart from './pages/Cart';
 import ExpertRevenue from './pages/ExpertRevenue';
+import ExpertBookingsAnalytics from './pages/ExpertBookingsAnalytics';
+import ExpertReviewsPage from './pages/ExpertReviewsPage';
 
 function App() {
   const dispatch = useDispatch()
@@ -146,6 +148,20 @@ function App() {
             <ProtectedRoute>
               <MainLayout>
                 <ExpertRevenue />
+              </MainLayout>
+            </ProtectedRoute> 
+          }/>
+          <Route path="/experts/bookings-analytics" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ExpertBookingsAnalytics />
+              </MainLayout>
+            </ProtectedRoute> 
+          }/>
+          <Route path="/experts/reviews" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ExpertReviewsPage />
               </MainLayout>
             </ProtectedRoute> 
           }/>

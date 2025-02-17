@@ -16,6 +16,6 @@ router.get('/experts/:id', expertCtlr.getProfile)
 router.get('/experts/:id/categories', expertCtlr.expertCategoriesBySkills)
 router.put('/experts/:id', authenticateUser, expertCtlr.updateProfile)
 router.put('/experts/:id/profilePic', authenticateUser, authorizeUser('expert'), upload.fields([{name : 'profilePic', maxCount : 1}]), expertCtlr.changeProfilePic)
-router.get('/experts/:id/revenue', authenticateUser, authorizeUser(['expert']), expertCtlr.expertRevenue)
+// router.get('/experts/:id/revenue', authenticateUser, authorizeUser(['expert']), expertCtlr.expertRevenue)
 
 export default router

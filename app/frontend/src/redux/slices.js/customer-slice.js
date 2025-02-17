@@ -127,7 +127,6 @@ const customerSlice = createSlice({
             state.serverError = action.payload;
         });
     }
-  
 })
 export const { setCurrentService } = customerSlice.actions
 export default customerSlice.reducer

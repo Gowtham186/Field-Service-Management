@@ -284,7 +284,7 @@ paymentCtlr.payServiceFee = async (req, res) => {
                 postal_code: "639006",
                 city: "Karur",
                 state: "TN",
-                country: "IN",
+                country: "US",
             },
         });
 

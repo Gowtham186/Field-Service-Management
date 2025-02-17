@@ -132,7 +132,6 @@ const categorySlice = createSlice({
                     ? { ...category, ...action.payload }
                     : category
             );
-        
             state.serverError = null;
         });        
         builder.addCase(updateCategoryWithServices.rejected, (state,action)=>{
@@ -173,8 +172,6 @@ const categorySlice = createSlice({
         builder.addCase(newCategoryWithServices.rejected, (state,action)=> {
             state.serverError = action.payload
         })
-        
-        
     }
 })
 

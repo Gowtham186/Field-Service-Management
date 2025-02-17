@@ -44,7 +44,7 @@ export default function Sidebar({ role }) {
             <li className="relative">
               <Link
                 to="/expert-dashboard"
-                className={`block text-white hover:text-blue-700 pl-4 relative`}
+                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
               >
                 {isActive("/expert-dashboard") && (
                   <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
@@ -55,7 +55,7 @@ export default function Sidebar({ role }) {
             <li className="relative">
               <Link
                 to="/new-bookings"
-                className={`block text-white hover:text-blue-700 pl-4 relative`}
+                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
               >
                 {isActive("/new-bookings") && (
                   <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
@@ -66,7 +66,7 @@ export default function Sidebar({ role }) {
             <li className="relative">
               <Link
                 to="/experts/calendar"
-                className={`block text-white hover:text-blue-700 pl-4 relative`}
+                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
               >
                 {isActive("/experts/calendar") && (
                   <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
@@ -77,7 +77,7 @@ export default function Sidebar({ role }) {
             <li className="relative">
               <Link
                 to="/experts/availability"
-                className={`block text-white hover:text-blue-700 pl-4 relative`}
+                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
               >
                 {isActive("/experts/availability") && (
                   <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
@@ -88,12 +88,34 @@ export default function Sidebar({ role }) {
             <li className="relative">
               <Link
                 to="/experts/revenue"
-                className={`block text-white hover:text-blue-700 pl-4 relative`}
+                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
               >
                 {isActive("/experts/revenue") && (
                   <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
                 )}
                 Revenue
+              </Link>
+            </li>
+            <li className="relative">
+              <Link
+                to="/experts/bookings-analytics"
+                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+              >
+                {isActive("/experts/bookings-analytics") && (
+                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
+                )}
+                Analytics
+              </Link>
+            </li>
+            <li className="relative">
+              <Link
+                to="/experts/reviews"
+                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+              >
+                {isActive("/experts/reviews") && (
+                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
+                )}
+                Ratings & Reviews
               </Link>
             </li>
           </>
@@ -104,7 +126,7 @@ export default function Sidebar({ role }) {
             <li className="relative">
               <Link
                 to="/admin-dashboard"
-                className={`block text-white hover:text-blue-700 pl-4 relative`}
+                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
               >
                 {isActive("/admin-dashboard") && (
                   <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
@@ -115,7 +137,7 @@ export default function Sidebar({ role }) {
             <li className="relative">
               <Link
                 to="/verify-experts"
-                className={`block text-white hover:text-blue-700 pl-4 relative`}
+                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
               >
                 {isActive("/verify-experts") && (
                   <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
@@ -126,7 +148,7 @@ export default function Sidebar({ role }) {
             <li className="relative">
               <Link
                 to="/manage-experts"
-                className={`block text-white hover:text-blue-700 pl-4 relative`}
+                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
               >
                 {isActive("/manage-experts") && (
                   <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
@@ -137,7 +159,7 @@ export default function Sidebar({ role }) {
             <li className="relative">
               <Link
                 to="/manage-categories"
-                className={`block text-white hover:text-blue-700 pl-4 relative`}
+                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
               >
                 {isActive("/manage-categories") && (
                   <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
@@ -148,7 +170,7 @@ export default function Sidebar({ role }) {
             <li className="relative">
               <Link
                 to="/manage-bookings"
-                className={`block text-white hover:text-blue-700 pl-4 relative`}
+                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
               >
                 {isActive("/manage-bookings") && (
                   <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
@@ -161,7 +183,7 @@ export default function Sidebar({ role }) {
         )}
 
         <li>
-          <button onClick={handleLogout} className="text-white">
+          <button onClick={handleLogout} className="text-white text-sm">
             Logout
           </button>
         </li>

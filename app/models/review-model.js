@@ -10,20 +10,12 @@ const reviewSchema = new Schema({
    serviceRequestId : { type : Schema.Types.ObjectId },
    reviewer : {
         type : Schema.Types.ObjectId,
-        refPath : 'reviewerModel'
+        refPath : 'User'
    },
-//    reviewerModel : {
-//         type : String,
-//         enum : [ 'Customer', 'Expert']
-//    },
    reviewee : {
         type : Schema.Types.ObjectId,
-        refPath : 'revieweeModel'
+        refPath : 'User'
    },
-//    revieweeModel : {
-//         type : String,
-//         enum : ['Customer', 'Expert']
-//    },
    reviewDate : { 
         type : Date, 
         default : Date.now

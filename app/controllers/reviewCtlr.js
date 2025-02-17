@@ -1,6 +1,6 @@
-import { query } from "express"
 import Review from "../models/review-model.js"
 import ServiceRequest from "../models/serviceRequest-model.js"
+import User from "../models/user-model.js";
 
 const reviewCtlr = {}
 
@@ -24,7 +24,7 @@ reviewCtlr.create = async (req, res) => {
             reviewee
         });
 
-        console.log(review);
+        // console.log(review);
         await review.save();
 
         res.status(201).json(review);
@@ -34,15 +34,24 @@ reviewCtlr.create = async (req, res) => {
     }
 };
 
-reviewCtlr.getReviews = async(req,res) => {
-    const id = req.params.id
-    try{
-        const reviews = await Review.find({reviewee : id})
-        console.log(reviews)
-        return res.json(reviews)
-    }catch(err){
-        
+reviewCtlr.getReviews = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const reviews = await Review.find({ reviewee: id });
+
+        const reviewsWithReviewer = await Promise.all(reviews.map(async (review) => {
+            const reviewer = await User.findById(review.reviewer, 'name email'); 
+            return {
+                ...review._doc,  
+                reviewer: reviewer ? reviewer : {}  
+            };
+        }));
+        // console.log(reviewsWithReviewer)
+        return res.json(reviewsWithReviewer);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error fetching reviews' });
     }
-}
+};
 
 export default reviewCtlr
