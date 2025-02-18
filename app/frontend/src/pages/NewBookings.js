@@ -1,32 +1,50 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { getMyServices, updateBookingStatus } from "../redux/slices.js/expert-slice";
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:4500"); // Change to your backend URL
 
 export default function NewBookings() {
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
     const { myServices } = useSelector((state) => state.expert);
     const requestedServices = myServices?.filter(ele => ele.status === 'requested');
 
-    useEffect(()=>{
-            dispatch(getMyServices())
-    },[dispatch])
+    useEffect(() => {
+        dispatch(getMyServices());
 
-    const handleAction = (id, updateStatus)=>{
-        console.log(id, updateStatus)
-        const getConfirm = window.confirm("confirm?")
-        if(getConfirm){
-            dispatch(updateBookingStatus({id : id, body : { status : updateStatus}}))
+        // Fetch expert ID from Redux or Context
+        const expertId = localStorage.getItem("expertId"); // Adjust based on your auth system
+        if (expertId) {
+            socket.emit("joinExpertRoom", expertId);
         }
-    }
+
+        // Listen for new bookings in real-time
+        socket.on("newBooking", (data) => {
+            console.log("📢 New booking received:", data);
+            dispatch(getMyServices()); // Refresh bookings
+        });
+
+        return () => {
+            socket.off("newBooking");
+        };
+    }, [dispatch]);
+
+    const handleAction = (id, updateStatus) => {
+        const getConfirm = window.confirm("Confirm?");
+        if (getConfirm) {
+            dispatch(updateBookingStatus({ id, body: { status: updateStatus } }));
+        }
+    };
 
     return (
         <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">New Bookings</h1>
             {requestedServices?.length > 0 ? (
                 <div className="space-y-4">
-                    {requestedServices?.map(service => (
+                    {requestedServices.map(service => (
                         <div key={service._id} className="border p-4 rounded-lg shadow-md">
-                           {service?.serviceType?.map((servicetype, index) => (
+                            {service?.serviceType?.map((servicetype, index) => (
                                 <div key={index}>
                                     <p><strong>Category :</strong> {servicetype.category.name}</p>
                                     <p><strong>Services :</strong></p>

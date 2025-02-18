@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getTotalRevenue } from "../redux/slices.js/stats-slice";
-import { Users, Calendar, Wrench, UserCheck, DollarSign, BarChart3 } from "lucide-react";
+import { Users, Calendar, Wrench, UserCheck, DollarSign, BarChart3, Clock } from "lucide-react";
 
 export default function DashboardHome() {
   const { totalRevenue, loading } = useSelector((state) => state.stats);
@@ -15,6 +15,8 @@ export default function DashboardHome() {
     totalRevenue: 0,
   });
 
+  const [recentActivities, setRecentActivities] = useState([]);
+
   useEffect(() => {
     dispatch(getTotalRevenue());
   }, [dispatch]);
@@ -23,11 +25,24 @@ export default function DashboardHome() {
     setStats((prevStats) => ({ ...prevStats, totalRevenue }));
   }, [totalRevenue]);
 
+  useEffect(() => {
+    // Simulating an API call for recent activities
+    setTimeout(() => {
+      setRecentActivities([
+        { id: 1, message: "New booking confirmed by John Doe", time: "2 mins ago" },
+        { id: 2, message: "Expert Alice updated her profile", time: "10 mins ago" },
+        { id: 3, message: "Category 'Plumbing' was added", time: "30 mins ago" },
+        { id: 4, message: "User Mark registered on the platform", time: "1 hour ago" },
+      ]);
+    }, 1000);
+  }, []);
+
   if (loading) return <p>...loading</p>;
 
   return (
     <div>
-      <h2 className="text-3xl font-bold mb-6">Welcome, Admin</h2>
+      <h2 className="text-2xl font-bold mb-4">Welcome, Admin</h2>
+
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
         <StatCard title="Total Experts" value={stats.totalExperts} Icon={Users} />
         <StatCard title="Total Bookings" value={stats.totalBookings} Icon={Calendar} />
@@ -35,6 +50,27 @@ export default function DashboardHome() {
         <StatCard title="Users" value={stats.totalUsers} Icon={UserCheck} />
         <StatCard title="Total Revenue" value={`₹${stats.totalRevenue}`} Icon={DollarSign} />
       </div>
+
+      {/* Recent Activities Section */}
+      {/* <div className="mt-10">
+        <h3 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+          <Clock className="w-6 h-6 text-orange-500" /> Recent Activities
+        </h3>
+        <div className="bg-white shadow p-4 rounded-lg">
+          {recentActivities.length > 0 ? (
+            <ul className="divide-y divide-gray-200">
+              {recentActivities.map((activity) => (
+                <li key={activity.id} className="py-2 flex justify-between">
+                  <span>{activity.message}</span>
+                  <span className="text-gray-500 text-sm">{activity.time}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500">No recent activities</p>
+          )}
+        </div>
+      </div> */}
     </div>
   );
 }

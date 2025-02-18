@@ -67,17 +67,31 @@ function App() {
           <Route path='/' element={<Home />}/>
           {/* customer */}
           <Route path='/customerlogin' element={<CustomerLogin />}/>
-          <Route path="/my-bookings" element={<MyBookings />}/>
-          <Route path="/cart" element={<Cart />}/>
+          <Route path="/my-bookings" element={
+            <MainLayout>
+              <MyBookings />
+            </MainLayout>
+          }/>
+          <Route path="/cart" element={
+            <MainLayout>
+              <Cart />
+            </MainLayout>
+            }/>
           <Route path="/my-calendar" element={<CustomerCalendar />}/>
-          <Route path="/experts/:id" element={<ExpertDetails />}/>
-          <Route path="/experts/:id/categories" element={<CategoryDetails />}/>
-    
-
+          <Route path="/experts/:id" element={
+            <MainLayout>
+              <ExpertDetails />
+            </MainLayout>
+            }/>
+          <Route path="/experts/:id/categories" element={
+            <MainLayout>
+              <CategoryDetails />
+            </MainLayout>
+            }/>
           <Route path="/service-requests" element={
-            
+            <MainLayout>
               <ServiceRequest />
-            
+            </MainLayout>
             }/>
           <Route path="/track-expert/:expertId" element={<CustomerTracking />}/>
           <Route path="/track-work/:bookingId" element={<ServiceInvoice />}/>

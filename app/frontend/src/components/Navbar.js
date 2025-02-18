@@ -24,9 +24,10 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
   const closeLogin = () => setIsLoginOpen(false);
 
   const handleLogout = () => {
-    dispatch(logout());
-    localStorage.removeItem("token");
-    navigate("/");
+    localStorage.removeItem("token");  // Clear the token from localStorage
+    dispatch(logout());  // Dispatch the logout action
+    setIsProfileOpen(false);  // Close the profile dropdown
+    navigate("/");  // Navigate to the home page after logout
   };
 
   useEffect(() => {
@@ -47,17 +48,26 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
 
   const handleSaveChanges = (e) => {
     e.preventDefault();
-    console.log(editData);
     dispatch(updateUser(editData));
     setIsEditOpen(false);
   };
 
+  // Determine Navbar Color
+  const navbarColor = isLoggedIn && (user?.role === "expert" || user?.role === "admin") 
+    ? "bg-blue-950"
+    : "bg-orange-500";
+
   return (
     <div>
-      <div className="bg-orange-500 h-14 flex items-center px-6 shadow-md">
-        <Link to="/" className="text-white font-bold text-xl hover:text-blue-200">
-          FixItNow
-        </Link>
+      {/* Navbar with dynamic color */}
+      <div className={`${navbarColor} h-14 min-h-[56px] flex items-center px-6 shadow-md fixed top-0 left-0 w-full z-50`}>
+        {(user?.role === "customer" || !isLoggedIn) ? (
+          <Link to="/" className="text-white font-bold text-xl hover:text-blue-200">
+            FixItNow
+          </Link>
+        ) : (
+          <h1 className="text-white font-bold text-xl">FixItNow</h1>
+        )}
 
         <ul className="ml-auto flex space-x-6 text-white">
           {isLoggedIn && user?.role === "customer" ? (
@@ -69,7 +79,7 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
               </li>
               <li>
                 <Link to="/cart" className="hover:text-blue-200 flex items-center space-x-1">
-                  <ShoppingCart size={20} className="text-white hover:text-blue-200" />                
+                  <ShoppingCart size={20} />
                 </Link>
               </li>
               <li>
@@ -80,10 +90,7 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
               </li>
 
               <li className="relative" ref={profileRef}>
-                <button
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="hover:text-blue-200 focus:outline-none"
-                >
+                <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="hover:text-blue-200 focus:outline-none">
                   Profile
                 </button>
 
@@ -91,22 +98,13 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
                   <div className="absolute right-0 mt-3 w-48 bg-white text-black shadow-md rounded-md p-3 z-50">
                     <div className="flex items-center justify-between">
                       <p className="font-semibold">{user.name}</p>
-                      <button
-                        onClick={() => {
-                          setIsEditOpen(true);
-                          setIsProfileOpen(!isProfileOpen);
-                        }}
-                        className="text-gray-500 hover:text-gray-700"
-                      >
+                      <button onClick={() => { setIsEditOpen(true); setIsProfileOpen(false); }} className="text-gray-500 hover:text-gray-700">
                         <Edit size={16} />
                       </button>
                     </div>
                     <p className="text-sm text-gray-600">{user?.phone_number}</p>
                     <hr className="my-2" />
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left text-sm text-red-600 hover:text-red-800"
-                    >
+                    <button onClick={handleLogout} className="w-full text-left text-sm text-red-600 hover:text-red-800">
                       Logout
                     </button>
                   </div>
@@ -117,7 +115,7 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
             <>
               <li>
                 <Link to="/cart" className="hover:text-blue-200 flex items-center mt-1">
-                <ShoppingCart size={20} className="text-white hover:text-blue-200" />                
+                  <ShoppingCart size={20} />
                 </Link>
               </li>
               <li>
@@ -125,14 +123,19 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
                   Login
                 </button>
               </li>
-              
               <li>
                 <Link to="/expertlogin" className="hover:text-blue-200">
                   Other Login
                 </Link>
               </li>
             </>
-          ) : null}
+          ) : (
+            <li>
+              <button onClick={handleLogout} className="hover:text-blue-200">
+                Logout
+              </button>
+            </li>
+          )}
         </ul>
       </div>
 
@@ -141,10 +144,7 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
       {isEditOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white w-96 p-5 rounded-lg shadow-lg relative">
-            <button
-              onClick={() => setIsEditOpen(false)}
-              className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
-            >
+            <button onClick={() => setIsEditOpen(false)} className="absolute top-2 right-2 text-gray-600 hover:text-gray-800">
               <X size={20} />
             </button>
             <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
@@ -169,10 +169,7 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-orange-400"
                 />
               </div>
-              <button
-                type="submit"
-                className="w-full bg-orange-500 text-white py-2 rounded-md hover:bg-orange-600"
-              >
+              <button type="submit" className="w-full bg-orange-500 text-white py-2 rounded-md hover:bg-orange-600">
                 Save Changes
               </button>
             </form>

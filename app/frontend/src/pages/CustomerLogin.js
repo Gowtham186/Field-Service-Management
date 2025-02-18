@@ -1,14 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import validator from "validator";
-import { customerLogin, getUserProfile, verifyOtpApi } from "../redux/slices.js/user-slice";
+import { customerLogin, getUserProfile, setServerError, verifyOtpApi } from "../redux/slices.js/user-slice";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function CustomerLogin({ closeLogin }) {
   const [phone_number, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [openOtpForm, setOpenOtpForm] = useState(false);
   const [clientErrors, setClientErrors] = useState({});
+  const [otpSent, setOtpSent] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const errors = {};
@@ -65,7 +68,9 @@ export default function CustomerLogin({ closeLogin }) {
       try {
         setClientErrors({});
         await dispatch(customerLogin({ phone_number })).unwrap();
+        toast.success("OTP sent successfully! 🎉", { autoClose: 1000 });
         //localStorage.removeItem('customerLogin')
+        setOtpSent(true)
         setOpenOtpForm(true);
       } catch (err) {
         console.log(err);
@@ -93,6 +98,9 @@ export default function CustomerLogin({ closeLogin }) {
             await dispatch(verifyOtpApi({verifyOtpData, resetForm})).unwrap();
             await dispatch(getUserProfile()).unwrap();
               
+            toast.success("OTP verified! 🎉", { autoClose: 1000 });
+            toast.success("Successfully loggedIn! 🎉", { autoClose: 2000 });
+
             if (closeLogin) closeLogin(); // Close login modal if function exists
 
             // Redirect to the stored path after login
@@ -103,7 +111,8 @@ export default function CustomerLogin({ closeLogin }) {
             }, 200);
 
         }catch(err){
-            console.log(err)
+          toast.error("Invalid OTP. Please try again. ❌", { autoClose: 2000 });
+          console.log(err)
         }
       
     }
@@ -123,6 +132,7 @@ export default function CustomerLogin({ closeLogin }) {
             type="text"
             className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={phone_number}
+            disabled={otpSent}
             onChange={(e) => {
               setPhoneNumber(e.target.value);
               setClientErrors((prev) => ({ ...prev, phone_number: null }));
@@ -146,6 +156,7 @@ export default function CustomerLogin({ closeLogin }) {
               onChange={(e) => {
                 setOtp(e.target.value);
                 setClientErrors((prev) => ({ ...prev, otp: null }));
+                dispatch(setServerError(null))
               }}
             />
             {clientErrors.otp && <p className="text-red-500 text-xs text-left">{clientErrors.otp}</p>}

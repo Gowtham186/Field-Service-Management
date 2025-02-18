@@ -86,6 +86,9 @@ const userSlice = createSlice({
         logout : (state,action)=>{
             state.isLoggedIn = false
             state.user = null
+        },
+        setServerError : (state,action)=>{
+            state.serverError = null
         }
     },
     extraReducers : (builder)=> {
@@ -120,5 +123,5 @@ const userSlice = createSlice({
         
     }
 })
-export const { logout } = userSlice.actions
+export const { logout, setServerError } = userSlice.actions
 export default userSlice.reducer

@@ -5,10 +5,11 @@ import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css";
 import { bookserviceRequest } from "../redux/slices.js/customer-slice";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import CustomerLogin from "./CustomerLogin";
 import { payBookingFee } from "../redux/slices.js/service-request-slice";
 import { getExpertProfile } from "../redux/slices.js/expert-slice";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const formInitialState = {
     name: '',
@@ -29,15 +30,22 @@ export default function ServiceRequest() {
     const [ showLogin, setShowLogin] = useState(false)
     const [bookedData, setBookedData] = useState(null)
     const { currentBooking } = useSelector((state) => state.customer)
-    console.log(selectedExpert)
     const { profile } = useSelector((state) => state.expert)
-
-    useEffect(()=>{
-        if(profile?.userId?._id)
-        dispatch(getExpertProfile(profile?.userId?._id))
-    },[dispatch])
+    const [clientErrors, setClientErrors] = useState({})
+    const errors = {}
 
     const [formData, setFormData] = useState(formInitialState);
+    const selectedServices = JSON.parse(sessionStorage.getItem("selectedServices")).selectedServices || [];
+    console.log(selectedServices)
+    const servicesToDisplay = choosenServices.length > 0 ? choosenServices : selectedServices;
+
+    useEffect(() => {
+        const selectedServices = JSON.parse(sessionStorage.getItem("selectedServices")) || [];
+        const expertId = selectedServices.expertId
+        if (expertId) {
+            dispatch(getExpertProfile({id : expertId}));
+        }
+    }, [dispatch]);
 
     useEffect(() => {
         if (currentAddress) {
@@ -47,6 +55,10 @@ export default function ServiceRequest() {
             }));
         }
     }, [currentAddress]);
+
+    useEffect(()=>{
+        
+    },[])
 
     const handleGetAddress = () => {
         if ("geolocation" in navigator) {
@@ -82,43 +94,61 @@ export default function ServiceRequest() {
         }));
     };
 
+    const runClientValidations = ()=>{
+        if(!user?.name.trim() && !formData.name.trim()){
+            errors.name = "Name is required"
+        }
+        if(!user?.phone_number.length === 0 && formData.phone_number.length === 0){
+            errors.phone_number = "Phone Number is required"
+        }
+        if(!formData.location.address.trim()){
+            errors.location = "Location is required"
+        }
+        if(!formData.scheduleDate){
+            errors.scheduleDate = "Please select date"
+        }
+    }
+
     const handleSubmit = async(e) => {
         e.preventDefault();
-
+        
         if (!user) {
+            alert("You need to log in before booking a service.");
             localStorage.setItem("prevPath", window.location.pathname); // Store the current path
             navigate("/customerlogin");
             return;
         }
 
-        console.log("Form Data:", formData);
-        const resetForm = ()=> setFormData(formInitialState)
+        runClientValidations()
+        if(Object.keys(errors).length !== 0){
+            setClientErrors(errors)
+            console.log(clientErrors)
+        }else{
+            setClientErrors({})
+            console.log("Form Data:", formData);
+            const resetForm = ()=> setFormData(formInitialState)
+            
+            const newFormData = new FormData()
+            newFormData.append('name', formData.name )
+            newFormData.append('serviceType', JSON.stringify(servicesToDisplay))
+            newFormData.append('description', formData.description)
+            newFormData.append('location', JSON.stringify(formData.location))
+            newFormData.append('scheduleDate', formData.scheduleDate)
+            newFormData.append('expertId', selectedExpert?.userId?._id || profile?.userId?._id)
 
-        const newFormData = new FormData()
-        newFormData.append('name', formData.name)
-        newFormData.append('serviceType', JSON.stringify(choosenServices))
-        newFormData.append('description', formData.description)
-        newFormData.append('location', JSON.stringify(formData.location))
-        newFormData.append('scheduleDate', formData.scheduleDate)
-        newFormData.append('expertId', selectedExpert?.userId?._id)
+            formData.serviceImages.forEach((file) => {
+                newFormData.append('serviceImages', file); 
+            });
+            
+            for (let [key, value] of newFormData.entries()) {
+                console.log(`${key}:`, value)
+            }
 
-        formData.serviceImages.forEach((file, index) => {
-            newFormData.append('serviceImages', file); 
-        });
-        
-        for (let [key, value] of newFormData.entries()) {
-            console.log(`${key}:`, value)
+            await dispatch(bookserviceRequest({newFormData, resetForm}))
+            toast.success("Successfully loggedIn! 🎉", { autoClose: 2000 });
+            setIsBooked(true)
+            navigate('/my-bookings')
         }
-
-        await dispatch(bookserviceRequest({newFormData}))
-            .unwrap()
-            .then(()=>{
-                setIsBooked(true)
-            })
-            .catch((err)=>{
-                console.log(err)
-            })
-        // setGreetCard(true)
     };
 
     const handleDocumentChange = (e) => {
@@ -153,10 +183,7 @@ export default function ServiceRequest() {
 
     return (
         <>
-        
-        
-            <Navbar />
-            {showLogin && <CustomerLogin closeLogin={() => setShowLogin(false)} />}
+        {showLogin && <CustomerLogin closeLogin={() => setShowLogin(false)} />}
         <div className="grid grid-cols-2 gap-8 w-full max-w-5xl mx-auto p-6 shadow-lg rounded-lg">
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -164,8 +191,8 @@ export default function ServiceRequest() {
                     <input
                         type="text"
                         id="name"
-                        value={formData.name || user?.name}
-                        // disabled={user.name}
+                        value={user?.name || formData.name}
+                        disabled={user?.name}
                         onChange={(e) =>
                             setFormData((prevForm) => ({
                                 ...prevForm,
@@ -174,6 +201,9 @@ export default function ServiceRequest() {
                         }
                         className="mt-1 block p-1 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                     />
+                    {clientErrors.name && (
+                        <p className="text-red-500 text-xs text-left">{clientErrors.name}</p>
+                    )}                               
                 </div>
                 <div>
                     <label htmlFor="phone_number" className="text-sm font-medium text-gray-700 mb-1">Phone Number:</label>
@@ -184,16 +214,22 @@ export default function ServiceRequest() {
                         disabled
                         className="mt-1 block p-1 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                     />
+                    {clientErrors.phone_number && (
+                        <p className="text-red-500 text-xs text-left">{clientErrors.phone_number}</p>
+                    )} 
                 </div>
-                <div className="relative">
+                <div>
                     <label htmlFor="location" className="text-sm font-medium text-gray-700 mb-1">Location:</label>
                     <input
                         type="search"
                         id="location"
                         value={formData.location.address}
                         onChange={handleLocationChange}
-                        className="mt-1 block p-1 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-96"
+                        className="mt-1 block p-1 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                     />
+                    {clientErrors.location && (
+                        <p className="text-red-500 text-xs text-left">{clientErrors.location}</p>
+                    )} 
                     {formData.location.address && (
                         <button
                             type="button"
@@ -230,6 +266,9 @@ export default function ServiceRequest() {
                         }
                         placeholderText="Select an available date"
                     />
+                    {clientErrors.scheduleDate && (
+                        <p className="text-red-500 text-xs text-left">{clientErrors.scheduleDate}</p>
+                    )} 
                 </div>
                 <div>
                     <label htmlFor="serviceImages" className="block text-sm font-medium text-gray-700 mb-1">Service Images:</label>
@@ -292,24 +331,24 @@ export default function ServiceRequest() {
 
                 <h1 className="text-lg font-bold">Selected Services</h1>
                 <div className="flex-1">
-                    {choosenServices.length > 0 &&
-                        choosenServices.map(
-                            (item) =>
-                                item.servicesChoosen.length > 0 && (
-                                    <div key={item.category._id} className="mt-3">
-                                        <h2 className="text-sm font-semibold mb-2">{item.category.name}</h2>
-                                        {item.servicesChoosen.map((service, index) => (
-                                            <div className="flex justify-between mb-1" key={index}>
-                                                <p className="text-sm">{service.serviceName}</p>
-                                                <p className="text-sm">{service.price}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )
-                        )}
+                {servicesToDisplay.length > 0 &&
+                    servicesToDisplay.map(
+                        (item) =>
+                            item.servicesChoosen.length > 0 && (
+                                <div key={item.category._id} className="mt-3">
+                                    <h2 className="text-sm font-semibold mb-2">{item.category.name}</h2>
+                                    {item.servicesChoosen.map((service, index) => (
+                                        <div className="flex justify-between mb-1" key={index}>
+                                            <p className="text-sm">{service.serviceName}</p>
+                                            <p className="text-sm">{service.price}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )
+                    )}
                 </div>
 
-                {choosenServices.some((item) => item.servicesChoosen.length > 0) && (
+                {servicesToDisplay.some((item) => item.servicesChoosen.length > 0) && (
                     <div>
                         <div className="flex justify-between">
                             <p className="text-sm text-gray-700">Booking Fee:</p>
@@ -319,7 +358,7 @@ export default function ServiceRequest() {
                         <div className="flex justify-between font-bold text-lg">
                             <p className="text-md">Total:</p>
                             <p className="text-md">
-                                {choosenServices.reduce(
+                                {servicesToDisplay.reduce(
                                     (total, item) =>
                                         total + item.servicesChoosen.reduce(
                                             (subtotal, service) => subtotal + parseFloat(service.price || 0),

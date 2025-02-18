@@ -49,7 +49,7 @@ export const toggledIsVerified = createAsyncThunk('expert/editExpert', async({id
     }
 })
 
-export const getExpertProfile = createAsyncThunk('expert/getExpertProfile', async(id, {rejectWithValue}) => {
+export const getExpertProfile = createAsyncThunk('expert/getExpertProfile', async({id}, {rejectWithValue}) => {
     try{
         const response = await axios.get(`/api/experts/${id}`)
         console.log(response.data)
@@ -60,17 +60,33 @@ export const getExpertProfile = createAsyncThunk('expert/getExpertProfile', asyn
     }
 })
 
-export const updateAvailability = createAsyncThunk('expert/updateAvailability', async ({ availability }, { rejectWithValue }) => {
-    try {
-        console.log(availability)
-        const token = localStorage.getItem('token');
-        const response = await axios.put('/api/experts/availability', { availability }, { headers: { Authorization: token } });
-        return response.data;
-    } catch (err) {
-        console.log("Update Availability Error:", err.response?.data || err.message);
-        return rejectWithValue(err.response?.data || "Failed to update availability");
+// export const updateAvailability = createAsyncThunk('expert/updateAvailability', async ({ availability }, { rejectWithValue }) => {
+//     try {
+//         console.log(availability)
+//         const token = localStorage.getItem('token');
+//         const response = await axios.put('/api/experts/availability', { availability }, { headers: { Authorization: token } });
+//         return response.data;
+//     } catch (err) {
+//         console.log("Update Availability Error:", err.response?.data || err.message);
+//         return rejectWithValue(err.response?.data || "Failed to update availability");
+//     }
+// });
+
+export const updateAvailability = createAsyncThunk(
+    "expert/updateAvailability",
+    async ({ id, availability }, { rejectWithValue }) => {
+      try {
+        const { data } = await axios.put("/api/experts/availability", {
+          id,
+          availability,
+        }, { headers : { Authorization : localStorage.getItem('token')}});
+        console.log(data.availability)
+        return data.availability;
+      } catch (error) {
+        return rejectWithValue(error.response.data);
+      }
     }
-});
+  );
 
 export const expertCategoriesBySkills = createAsyncThunk('expert/expertCategoriesBySkills', async(id) => {
     try{
@@ -183,13 +199,15 @@ export const getUnverifiedExperts = createAsyncThunk('expert/getUnverifiedExpert
     }
 })
 
-export const getExpertReviews = createAsyncThunk('expert/getExpertReviews', async (id) => {
+export const getExpertReviews = createAsyncThunk('expert/getExpertReviews', 
+    async ({id, page = 1, limit = 1}) => {
     try {
-        const response = await axios.get(`/api/reviews/${id}`);  // Ensure correct API call
+        const response = await axios.get(`/api/reviews/${id}?page=${page}&limit=${limit}`); 
+        console.log(response.data) 
         return response.data; 
     } catch (err) {
         console.error(err);
-        throw err;  // Throw error for better error handling
+        throw err;  
     }
 });
 
@@ -205,7 +223,14 @@ const expertSlice = createSlice({
         myServices : [],
         serviceRequestId : null,
         workingService : null,
-        unVerifiedExperts : null,    
+        unVerifiedExperts : null, 
+        reviews: {
+            list: [],  // Array to hold reviews
+            hasMore: true,  // Flag for more reviews
+            loading: false,  // Loading state for reviews
+            page: 1,  // Current page for fetching reviews
+          },
+
     },
     reducers : {
         setServiceRequestId : (state,action)=>{
@@ -213,7 +238,12 @@ const expertSlice = createSlice({
         },
         setWorkingService : (state,action) => {
             state.workingService = action.payload
-        }
+        },
+        setReviewsNull: (state) => {
+            state.reviews.list = []; // Clear reviews list
+            state.reviews.hasMore = true; // Reset hasMore flag
+            state.reviews.page = 1; // Reset page
+        },
     },
     extraReducers : (builder)=>{
         builder.addCase(fetchSkills.pending, (state,action)=>{
@@ -265,7 +295,9 @@ const expertSlice = createSlice({
             state.serverError = null
         })
         builder.addCase(updateAvailability.fulfilled, (state,action)=>{
-            state.profile.availability = action.payload
+            if(state.profile){
+                state.profile.availability = action.payload
+            }
         })
         builder.addCase(expertCategoriesBySkills.pending, (state,action)=>{
             state.loading = true
@@ -308,8 +340,17 @@ const expertSlice = createSlice({
         builder.addCase(changeProfilePic.fulfilled, (state,action)=>{
             state.loading = false
             state.profile = {...state.profile, profilePic : action.payload}
-        })       
+        })      
+        builder.addCase(getExpertReviews.fulfilled, (state, action) => {
+            state.reviews.loading = false;
+            const newReviews = action.payload.reviews.filter((review) => 
+                !state.reviews.list.some((existingReview) => existingReview._id === review._id)
+            );
+            state.reviews.list = [...state.reviews.list, ...newReviews];
+            state.reviews.hasMore = action.payload.hasMore;
+            state.reviews.page += 1;
+          }) 
     }
 })
-export const { setServiceRequestId, setWorkingService } = expertSlice.actions
+export const { setServiceRequestId, setWorkingService, setReviewsNull } = expertSlice.actions
 export default expertSlice.reducer

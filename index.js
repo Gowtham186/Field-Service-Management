@@ -47,7 +47,7 @@ app.use('/api', expertRoutes)
 app.use('/api', skillRoutes)
 app.use('/api', categoryRoutes)
 app.use('/api', serviceRoutes)
-app.use('/api', serviceRequestRoutes)
+app.use('/api', serviceRequestRoutes(io))
 app.use('/api', reviewRoutes)
 app.use('/api', queryRoutes)
 app.use('/api', paymentRoutes)
@@ -58,5 +58,5 @@ app.use('/api', statsRoutes)
 //server
 server.listen(4500, () => {
     console.log('server is running');
-    //console.log('WebSocket server is running on ws://localhost:4500');
+    console.log('WebSocket server is running on ws://localhost:4500');
 });

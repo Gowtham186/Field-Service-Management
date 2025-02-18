@@ -31,6 +31,11 @@ export default function SearchComponent() {
 
   const handleSearch = async (e) => {
     e.preventDefault();
+
+    if(!searchLocation){
+      setCoords(null)
+    }
+    
     if (searchLocation) {
       getCoordsFromAddress(searchLocation).then((locationCoords) => {
         if (locationCoords) {
@@ -81,7 +86,7 @@ export default function SearchComponent() {
   };
 
   return (
-    <div className="p-4 max-w-8xl mx-auto">
+    <div className="p-4 relative top-14 max-w-8xl mx-auto">
 
       <div className="bg-white p-3 rounded-lg shadow-md">
         <form onSubmit={handleSearch} className="flex flex-col items-center space-y-4">

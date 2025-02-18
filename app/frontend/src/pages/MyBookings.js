@@ -8,7 +8,7 @@ import { updateBookingStatus } from "../redux/slices.js/expert-slice";
 import { toast } from "react-toastify";
 
 export default function MyBookings() {
-  const [filter, setFilter] = useState("accepted"); // Default filter
+  const [filter, setFilter] = useState("requested"); // Default filter
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();

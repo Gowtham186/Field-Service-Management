@@ -13,7 +13,6 @@ export default function CategoryDetails() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { loading, categoriesBySkills } = useSelector((state) => state.expert);
-  const { userId } = useSelector((state) => state.expert.profile);
   const { choosenServices, selectedExpert } = useSelector((state) => state.search);
   const { isLoggedIn, user } = useSelector((state) => state.user)
   const [selectedServices, setSelectedServices] = useState([]);
@@ -25,12 +24,10 @@ export default function CategoryDetails() {
     if (storedData) {
       const parsedData = JSON.parse(storedData);
   
-      // Check if expertId from sessionStorage matches the current expertId in URL params
       if (parsedData.expertId === id) {
         setSelectedServices(parsedData.selectedServices);
         dispatch(selectService(parsedData.selectedServices));
       } else {
-        // If expertId doesn't match, reset the selected services
         sessionStorage.removeItem("selectedServices");
       }
     }
@@ -43,20 +40,15 @@ export default function CategoryDetails() {
     if (savedBookings) {
       const savedData = JSON.parse(savedBookings);
   
-      // Check if expertId matches from the savedBookings and load services
       if (savedData.expertId === id) {
         setSelectedServices(savedData.selectedServices);
         dispatch(selectService(savedData.selectedServices));
       } else {
-        // If expertId doesn't match, reset the saved bookings
         Cookies.remove("savedBookings");
       }
     }
   }, [dispatch, id]);
   
-  
-  
-
   const handleSelectService = (category, service) => {
     setSelectedServices((prev) => {
       let updatedServices = JSON.parse(JSON.stringify(prev));
@@ -80,11 +72,10 @@ export default function CategoryDetails() {
         updatedServices.push({ category, servicesChoosen: [service] });
       }
   
-      // Store both selectedServices and expertId in sessionStorage
       sessionStorage.setItem(
         "selectedServices",
         JSON.stringify({
-          expertId: id, // Store the expertId along with selectedServices
+          expertId: id, 
           selectedServices: updatedServices,
         })
       );
@@ -93,8 +84,6 @@ export default function CategoryDetails() {
       return updatedServices;
     });
   };
-  
-  
 
   const handleBook = () => {
     console.log(selectedServices);
@@ -145,10 +134,8 @@ export default function CategoryDetails() {
     }
   };  
   
-
   return (
     <>
-      <Navbar />
       <div className="flex gap-6 p-5">
         <div className="flex-1 w-1/2">
           <div className="relative left-32 space-y-6 p-2 w-3/4">
@@ -197,7 +184,6 @@ export default function CategoryDetails() {
                 </div>
               </div>
             ))}
-
           </div>
         </div>
 
@@ -224,9 +210,7 @@ export default function CategoryDetails() {
                   )
               )}
           </div>
-
           <hr />
-
           {choosenServices.some((item) => item.servicesChoosen.length > 0) && (
             <div className="flex flex-col items-end mt-2">
               <div className="flex justify-between font-bold">
@@ -256,8 +240,7 @@ export default function CategoryDetails() {
               </button>
                 <button
                   className="mt-8 py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-700"
-                  onClick={() => handleBook(choosenServices)}
-                >
+                  onClick={() => handleBook(choosenServices)}>
                   Proceed
                 </button>
               </div>

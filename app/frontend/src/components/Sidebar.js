@@ -26,12 +26,12 @@ export default function Sidebar({ role }) {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="bg-blue-950 h-screen p-4 shadow-md fixed transition-all duration-300 w-24 md:w-48">
-      <ul className="space-y-4 relative">
+<div className="bg-blue-950 h-screen p-4 shadow-md fixed transition-all duration-300 w-24 md:w-48">      
+  <ul className="space-y-4 relative">
         <div>
-          <h1 className="text-2xl text-white mb-1">{user && user.name}</h1>
+          <h1 className="text-xl text-white mb-1">{user && user.name}</h1>
           <button
-            className="mb-3 text-white"
+            className="mb-3 text-white text-"
             onClick={() => navigate(`/expert/profile/${user._id}`)}
           >
             View Profile

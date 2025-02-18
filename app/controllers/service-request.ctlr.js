@@ -9,11 +9,10 @@ import mongoose from "mongoose"
 
 const serviceRequestCtlr = {}
 
-serviceRequestCtlr.create = async (req, res) => {
+serviceRequestCtlr.create = (io) => async (req, res) => {
     const body = req.body;
 
     try {
-
         if (body.serviceType && typeof body.serviceType === 'string') {
             body.serviceType = JSON.parse(body.serviceType);
         }
@@ -68,31 +67,32 @@ serviceRequestCtlr.create = async (req, res) => {
             user.name = body.name;
             await user.save();
         }
-        console.log(user)
+        console.log(user);
 
-        const customerFind = await Customer.findOne({userId : req.currentUser.userId})
-        if(!customerFind){
+        const customerFind = await Customer.findOne({ userId: req.currentUser.userId });
+        if (!customerFind) {
             const newCustomerDoc = new Customer();
             newCustomerDoc.location = updateLocation;
-            newCustomerDoc.userId = req.currentUser.userId
+            newCustomerDoc.userId = req.currentUser.userId;
             await newCustomerDoc.save();
-        }
-        else {
-        customerFind.location = updateLocation;
-        await customerFind.save();
+        } else {
+            customerFind.location = updateLocation;
+            await customerFind.save();
         }
 
-        // Emit notification to experts if needed
-        // io.emit('new-service-request', { message: 'New service request received!' });
-
-        // Save service request and send response
+        // Save service request
         await serviceRequest.save();
+
+        // 🔴 Emit WebSocket event to notify experts about the new service request
+        io.to(`expert-${serviceRequest.expertId}`).emit("newBooking", { request: serviceRequest });
+
         res.status(201).json(serviceRequest);
     } catch (err) {
         console.error("Error creating service request:", err);
         res.status(500).json({ errors: "Something went wrong" });
     }
 };
+
 
 serviceRequestCtlr.getAllServiceRequests = async (req, res) => {
     try {

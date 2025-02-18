@@ -221,17 +221,18 @@ expertCtlr.unVerifiedExperts = async (req,res) => {
 }
 
 expertCtlr.getProfile = async(req,res)=>{
-    const id = req.params.id
-    console.log(id)
+    const { id } = req.params
     try{
-        const expert = await Expert.findOne({userId : id})
-            .populate('skills')
-            .populate('userId')
-        if(!expert){
-            return res.status(404).json({errors : 'expert not found'})
+        if(id){
+            const expert = await Expert.findOne({userId : id})
+                .populate('skills')
+                .populate('userId')
+            if(!expert){
+                return res.status(404).json({errors : 'expert not found'})
+            }
+            return res.json(expert)
         }
         
-        return res.json(expert)
     }catch(err){
         console.log(err)
         return res.status(500).json({errors : 'something went wrong'})
@@ -320,70 +321,96 @@ expertCtlr.verify = async (req, res) => {
 
 
 
+// expertCtlr.updateAvailability = async (req, res) => {
+//     try {
+//         const { availability } = req.body;
+//         console.log(availability)
+//         // Ensure availability is an array
+//         if (!Array.isArray(availability)) {
+//             return res.status(400).json({ error: "Availability must be an array of dates." });
+//         }
+
+//         // Convert valid date strings to Date objects
+//         const validDates = availability
+//             .map(date => new Date(date))
+//             .filter(date => !isNaN(date)); // Remove invalid dates
+
+//         if (validDates.length === 0) {
+//             return res.status(400).json({ error: "No valid dates provided." });
+//         }
+
+//         // Find expert by userId
+//         const expert = await Expert.findOne({ userId: req.currentUser.userId });
+//         if (!expert) {
+//             return res.status(404).json({ error: "Expert not found" });
+//         }
+
+//         // Extract existing dates
+//         const existingDates = expert.availability || [];
+
+//         // Convert dates to ISO format for comparison
+//         const formattedAvailability = validDates.map(date => date.toISOString().split("T")[0]);
+//         const formattedExistingDates = existingDates.map(date => new Date(date).toISOString().split("T")[0]);
+
+//         // Get dates to add
+//         const datesToAdd = formattedAvailability.filter(date => !formattedExistingDates.includes(date));
+
+//         // Get dates to remove
+//         const datesToRemove = formattedExistingDates.filter(date => !formattedAvailability.includes(date));
+
+//         let updatedAvailability = expert.availability;
+
+//         // Add new dates
+//         if (datesToAdd.length > 0) {
+//             updatedAvailability = await Expert.findOneAndUpdate(
+//                 { userId: req.currentUser.userId },
+//                 { $addToSet: { availability: { $each: datesToAdd } } },
+//                 { new: true, projection: { availability: 1 } }
+//             );
+//         }
+
+//         // Remove dates
+//         if (datesToRemove.length > 0) {
+//             updatedAvailability = await Expert.findOneAndUpdate(
+//                 { userId: req.currentUser.userId },
+//                 { $pull: { availability: { $in: datesToRemove } } },
+//                 { new: true, projection: { availability: 1 } }
+//             );
+//         }
+//         console.log('wes',updatedAvailability.availability)
+//         return res.json(updatedAvailability ? updatedAvailability.availability : expert.availability);
+//     } catch (err) {
+//         console.log("Update Availability Error:", err);
+//         return res.status(500).json({ error: "Something went wrong" });
+//     }
+// };
+
+
 expertCtlr.updateAvailability = async (req, res) => {
     try {
-        const { availability } = req.body;
-        console.log(availability)
-        // Ensure availability is an array
-        if (!Array.isArray(availability)) {
-            return res.status(400).json({ error: "Availability must be an array of dates." });
-        }
-
-        // Convert valid date strings to Date objects
-        const validDates = availability
-            .map(date => new Date(date))
-            .filter(date => !isNaN(date)); // Remove invalid dates
-
-        if (validDates.length === 0) {
-            return res.status(400).json({ error: "No valid dates provided." });
-        }
-
-        // Find expert by userId
-        const expert = await Expert.findOne({ userId: req.currentUser.userId });
-        if (!expert) {
-            return res.status(404).json({ error: "Expert not found" });
-        }
-
-        // Extract existing dates
-        const existingDates = expert.availability || [];
-
-        // Convert dates to ISO format for comparison
-        const formattedAvailability = validDates.map(date => date.toISOString().split("T")[0]);
-        const formattedExistingDates = existingDates.map(date => new Date(date).toISOString().split("T")[0]);
-
-        // Get dates to add
-        const datesToAdd = formattedAvailability.filter(date => !formattedExistingDates.includes(date));
-
-        // Get dates to remove
-        const datesToRemove = formattedExistingDates.filter(date => !formattedAvailability.includes(date));
-
-        let updatedAvailability = expert.availability;
-
-        // Add new dates
-        if (datesToAdd.length > 0) {
-            updatedAvailability = await Expert.findOneAndUpdate(
-                { userId: req.currentUser.userId },
-                { $addToSet: { availability: { $each: datesToAdd } } },
-                { new: true, projection: { availability: 1 } }
-            );
-        }
-
-        // Remove dates
-        if (datesToRemove.length > 0) {
-            updatedAvailability = await Expert.findOneAndUpdate(
-                { userId: req.currentUser.userId },
-                { $pull: { availability: { $in: datesToRemove } } },
-                { new: true, projection: { availability: 1 } }
-            );
-        }
-        console.log('wes',updatedAvailability.availability)
-        return res.json(updatedAvailability ? updatedAvailability.availability : expert.availability);
-    } catch (err) {
-        console.log("Update Availability Error:", err);
-        return res.status(500).json({ error: "Something went wrong" });
+      const { id, availability } = req.body;
+        console.log(id, availability)
+      if (!id || !availability) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+  
+      const expert = await Expert.findOne({userId : id});
+      if (!expert) {
+        return res.status(404).json({ message: "Expert not found" });
+      }
+  
+      expert.availability = availability; // Update availability array
+      await expert.save();
+  
+      res.status(200).json({
+        message: "Availability updated successfully",
+        availability: expert.availability,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error: error.message });
     }
-};
-
+  };
+  
 expertCtlr.expertCategoriesBySkills = async (req,res)=>{
     try{
         const id = req.params.id
