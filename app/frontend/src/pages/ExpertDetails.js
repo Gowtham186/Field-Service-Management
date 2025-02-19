@@ -15,9 +15,11 @@ export default function ExpertDetails() {
 
   // Reset reviews and page number when expert ID changes
   useEffect(() => {
-    dispatch(setReviewsNull());  // Reset reviews
-    dispatch(getExpertProfile(id)); 
-    dispatch(getExpertReviews({ id, page: 1, limit: pageSize }));  // Reset to page 1
+    if(id){
+      dispatch(setReviewsNull());  // Reset reviews
+      dispatch(getExpertProfile({id})); 
+      dispatch(getExpertReviews({ id, page: 1, limit: pageSize }));  // Reset to page 1
+    }
   }, [dispatch, id]);
 
   // Fetch more reviews when the page number changes

@@ -3,13 +3,15 @@
 const customers = {}; // Store customer socket IDs
 
 export const customerHandlers = (io, socket) => {
-    //console.log("👤 Customer Connected:", socket.id);
+    console.log("👤 Customer Connected:", socket.id);
 
     // ✅ Store customer socket ID when they join
     socket.on("joinCustomer", ({ userId }) => {
         if (!customers[userId]) {
             customers[userId] = socket.id;
+            socket.join(`customer-${userId}`)
             console.log("✅ Customer Registered:", userId, socket.id);
+            console.log(`🏠 Customer joined room: customer-${userId}`);
         } else {
             console.log("⚠️ Customer already connected:", userId);
         }

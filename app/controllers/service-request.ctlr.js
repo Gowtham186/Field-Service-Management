@@ -4,12 +4,11 @@ import Service from "../models/service-model.js"
 import Expert from "../models/expert-model.js"
 import User from '../models/user-model.js'
 import axios from "axios"
-import mongoose from "mongoose"
-//import { io } from "../../index.js"
+import { io } from "../../index.js"
 
 const serviceRequestCtlr = {}
 
-serviceRequestCtlr.create = (io) => async (req, res) => {
+serviceRequestCtlr.create = async (req, res) => {
     const body = req.body;
 
     try {
@@ -21,7 +20,6 @@ serviceRequestCtlr.create = (io) => async (req, res) => {
         }
 
         console.log(req.files);
-        console.log(body);
         
         if (req.files && req.files.length > 0) {
             const uploadImages = req.files.map(file => ({
@@ -67,7 +65,6 @@ serviceRequestCtlr.create = (io) => async (req, res) => {
             user.name = body.name;
             await user.save();
         }
-        console.log(user);
 
         const customerFind = await Customer.findOne({ userId: req.currentUser.userId });
         if (!customerFind) {
@@ -82,10 +79,17 @@ serviceRequestCtlr.create = (io) => async (req, res) => {
 
         // Save service request
         await serviceRequest.save();
+        console.log(serviceRequest)
+        console.log("📢 Attempting to emit newBooking to:", `expert-${serviceRequest?.expertId}`);
 
-        // 🔴 Emit WebSocket event to notify experts about the new service request
-        io.to(`expert-${serviceRequest.expertId}`).emit("newBooking", { request: serviceRequest });
-
+        io.to(`expert-${serviceRequest?.expertId}`).emit("newBooking", { request: serviceRequest }, (ack) => {
+            if (ack?.status === "received") {
+                console.log(`✅ newBooking received by expert at ${ack.timestamp}`);
+            } else {
+                console.log(`⚠️ newBooking emitted, but no acknowledgment from expert!`);
+            }
+        });
+        
         res.status(201).json(serviceRequest);
     } catch (err) {
         console.error("Error creating service request:", err);
@@ -155,7 +159,7 @@ serviceRequestCtlr.getAllServiceRequests = async (req, res) => {
     }
 };
 
-serviceRequestCtlr.getServiceRequest = async(req,res)=>{
+serviceRequestCtlr.getServiceRequest = (io) => async(req,res)=>{
     const {id} = req.params
     console.log(id)
     try{
@@ -267,6 +271,7 @@ serviceRequestCtlr.editServiceRequest = async (req, res) => {
 serviceRequestCtlr.updateStatus = async (req,res)=>{
     const id = req.params.id
     const body = req.body
+    console.log(id, body)
     try{
         const serviceRequest = await ServiceRequest.findByIdAndUpdate(id, body, { new : true})
         if(!serviceRequest){
@@ -292,6 +297,19 @@ serviceRequestCtlr.updateStatus = async (req,res)=>{
             console.log("Service Request Date:", serviceRequest.scheduleDate);
         }
 
+        io.to(`customer-${serviceRequest?.customerId}`).emit("bookingStatusUpdated", {
+            userType: "customer",
+            booking: serviceRequest, 
+        });
+        
+        if (serviceRequest.expertId) {
+            io.to(`expert-${serviceRequest?.expertId}`).emit("bookingStatusUpdated", {
+                userType: "expert",
+                booking: serviceRequest, 
+            });
+        }        
+
+        console.log('booking status updation emitted')
         //console.log(serviceRequest)
         res.json(serviceRequest)
 

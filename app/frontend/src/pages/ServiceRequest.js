@@ -144,8 +144,7 @@ export default function ServiceRequest() {
                 console.log(`${key}:`, value)
             }
 
-            await dispatch(bookserviceRequest({newFormData, resetForm}))
-            toast.success("Successfully loggedIn! 🎉", { autoClose: 2000 });
+            dispatch(bookserviceRequest({newFormData, resetForm}))
             setIsBooked(true)
             navigate('/my-bookings')
         }
@@ -158,28 +157,6 @@ export default function ServiceRequest() {
             serviceImages: files
         }));
     };
-
-    // const makePayment = async () => {
-    //     console.log(currentBooking)
-    //     try{
-    //         const body = {
-    //             serviceRequestId : currentBooking?._id,
-    //             amount : currentBooking?.budget.bookingFee
-    //         }
-    //         const response =  await dispatch(payBookingFee(body)).unwrap()
-
-    //         if(!response){
-    //             console.error("Invalid response from API:", response);
-    //             return;
-    //         }
-
-    //         localStorage.setItem('stripeId', response?.id)
-
-    //         window.location = response?.url
-    //     }catch(err){
-    //         console.log(err)
-    //     }
-    // }
 
     return (
         <>

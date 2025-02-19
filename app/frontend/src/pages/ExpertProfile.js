@@ -16,7 +16,7 @@ export default function ExpertProfile() {
 
     useEffect(() => {
         if (id) {
-            dispatch(getExpertProfile(id));
+            dispatch(getExpertProfile({id}));
         }
     }, [dispatch, id]);
 
@@ -51,7 +51,7 @@ export default function ExpertProfile() {
         try{
             await dispatch(updateProfile({id, body : editProfile})).unwrap()
 
-            dispatch(getExpertProfile({ id }))
+            dispatch(getExpertProfile({id}))
             dispatch(getUserProfile())
         }catch(err){
             console.log(err.response)

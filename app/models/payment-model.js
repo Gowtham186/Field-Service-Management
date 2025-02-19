@@ -35,7 +35,11 @@ const paymentSchema = new Schema({
     },
     expertId : { 
         type : Schema.Types.ObjectId,
-        ref : 'Expert'
+        ref : 'User'
+    },
+    customerId : { 
+        type : Schema.Types.ObjectId,
+        ref : 'User'
     }
 }, { timestamps: true });
 

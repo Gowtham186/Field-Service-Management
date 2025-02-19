@@ -113,6 +113,7 @@ export const getMyServices = createAsyncThunk('expert/getMyServices', async () =
 
 export const updateBookingStatus = createAsyncThunk('expert/updateBookingStatus', async({id, body}) => {
     try{
+        console.log(id, body)
         const response = await axios.put(`/api/service-requests/${id}/status`, body, { headers : { Authorization : localStorage.getItem('token')}})
         console.log(response.data)
         return response.data
@@ -237,6 +238,7 @@ const expertSlice = createSlice({
             state.serviceRequestId = action.payload
         },
         setWorkingService : (state,action) => {
+            state.loading = false
             state.workingService = action.payload
         },
         setReviewsNull: (state) => {
@@ -244,6 +246,16 @@ const expertSlice = createSlice({
             state.reviews.hasMore = true; // Reset hasMore flag
             state.reviews.page = 1; // Reset page
         },
+        addNewService : (state,action) => {
+            state.myServices.push(action.payload)
+        },
+        expertBookingStatusUpdated : (state, action) => {
+            const updatedBooking = action.payload;
+            const index = state.myServices.findIndex(booking => booking._id === updatedBooking._id)
+            if (index !== -1) {
+                state.myServices[index] = updatedBooking
+            }
+        }   
     },
     extraReducers : (builder)=>{
         builder.addCase(fetchSkills.pending, (state,action)=>{
@@ -312,9 +324,6 @@ const expertSlice = createSlice({
             const index = state.myServices.findIndex(ele => ele._id === action.payload._id)
             state.myServices[index] = action.payload 
         })
-        builder.addCase(getServiceRequest.pending, (state,action) => {
-            state.loading = true
-        })
         builder.addCase(getServiceRequest.fulfilled, (state,action) => {
             state.loading = false
             state.workingService = action.payload
@@ -352,5 +361,5 @@ const expertSlice = createSlice({
           }) 
     }
 })
-export const { setServiceRequestId, setWorkingService, setReviewsNull } = expertSlice.actions
+export const { setServiceRequestId, setWorkingService, setReviewsNull, addNewService, expertBookingStatusUpdated } = expertSlice.actions
 export default expertSlice.reducer

@@ -60,7 +60,7 @@ function App() {
     <>
       <ToastContainer position="top-right" autoClose={5000} />    
       {user && user?._id && user?.role && (
-      <NotificationComponent userId={user._id} role={user.role} />
+      <NotificationComponent userId={user?._id} role={user?.role} />
     )}
 
       <Routes>

@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
-import { getMyServices, updateBookingStatus } from "../redux/slices.js/expert-slice";
+import { addNewService, getMyServices, updateBookingStatus } from "../redux/slices.js/expert-slice";
 import { io } from "socket.io-client";
 
 const socket = io("http://localhost:4500"); // Change to your backend URL
@@ -8,32 +8,56 @@ const socket = io("http://localhost:4500"); // Change to your backend URL
 export default function NewBookings() {
     const dispatch = useDispatch();
     const { myServices } = useSelector((state) => state.expert);
+    const { user } = useSelector((state) => state.user)
     const requestedServices = myServices?.filter(ele => ele.status === 'requested');
 
     useEffect(() => {
         dispatch(getMyServices());
-
-        // Fetch expert ID from Redux or Context
-        const expertId = localStorage.getItem("expertId"); // Adjust based on your auth system
-        if (expertId) {
-            socket.emit("joinExpertRoom", expertId);
-        }
-
-        // Listen for new bookings in real-time
-        socket.on("newBooking", (data) => {
-            console.log("📢 New booking received:", data);
-            dispatch(getMyServices()); // Refresh bookings
-        });
-
-        return () => {
-            socket.off("newBooking");
-        };
+    
+        // const expertId = user?._id;
+        // if (expertId) {
+        //     console.log(`🔗 Attempting to join expert room: expert-${expertId}`);
+        //     socket.emit("joinExpertRoom", `expert-${expertId}`);
+        // }
+    
+        // // Listen for any events
+        // socket.onAny((event, ...args) => {
+        //     console.log(`📢 Received event: ${event}`, args);
+        // });
+    
+        // socket.on("newBooking", (data, callback) => {
+        //     console.log("📢 New booking received:", data);
+        
+        //     if (!data) {
+        //         console.log("⚠️ newBooking event received, but data is undefined!");
+        //     } else {
+        //         console.log("✅ newBooking received successfully:", JSON.stringify(data, null, 2));
+        //     }
+        
+        //     // Send acknowledgment back to server
+        //     if (callback) {
+        //         console.log("📩 Sending acknowledgment for newBooking...");
+        //         callback({ status: "received", timestamp: new Date().toISOString() });
+        //     }
+        
+        //     // dispatch(getMyServices()); // Refresh expert services list
+        //     dispatch(addNewService(data.request))
+        // });        
+        
+    
+        // return () => {
+        //     socket.off("newBooking");
+        // };
     }, [dispatch]);
+    
 
     const handleAction = (id, updateStatus) => {
         const getConfirm = window.confirm("Confirm?");
         if (getConfirm) {
-            dispatch(updateBookingStatus({ id, body: { status: updateStatus } }));
+            console.log(updateStatus, 'updating...')
+            dispatch(updateBookingStatus({ id, body: { status: updateStatus } }))
+                .unwrap()
+                .then((response)=> console.log(response.data))
         }
     };
 

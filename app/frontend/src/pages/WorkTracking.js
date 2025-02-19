@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { deleteOnSiteService, getServiceRequest, onSiteService, updateBookingStatus } from "../redux/slices.js/expert-slice";
 import { v4 as uuidv4 } from 'uuid';
 import { Star } from 'lucide-react';
@@ -9,7 +9,7 @@ import { submitReview } from "../redux/slices.js/service-request-slice";
 export default function WorkTracking() {
   const dispatch = useDispatch();
   const { id } = useParams();
-
+  const navigate = useNavigate()
   const { loading, workingService } = useSelector((state) => state.expert);
 
   const [isCompleted, setIsCompleted] = useState(false);
@@ -21,7 +21,6 @@ export default function WorkTracking() {
   useEffect(() => {
     if (id) {
       dispatch(getServiceRequest(id));
-      dispatch(updateBookingStatus({ id, body: { status: "in-progress" } }));
     }
   }, [dispatch, id]);
 
@@ -30,8 +29,6 @@ export default function WorkTracking() {
       setOpenReviewForm(true);
     }
   }, [isCompleted]);
-
-  if (loading) return <p>...loading</p>;
 
   const handleCompleted = async () => {
     try {
@@ -86,6 +83,7 @@ export default function WorkTracking() {
       };
       await dispatch(submitReview({ reviewData })).unwrap();
       setOpenReviewForm(false);
+      navigate(-1)
     } catch (err) {
       console.log(err);
     }

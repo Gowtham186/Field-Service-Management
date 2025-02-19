@@ -222,6 +222,7 @@ expertCtlr.unVerifiedExperts = async (req,res) => {
 
 expertCtlr.getProfile = async(req,res)=>{
     const { id } = req.params
+    console.log('id', id)
     try{
         if(id){
             const expert = await Expert.findOne({userId : id})

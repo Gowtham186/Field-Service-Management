@@ -83,7 +83,17 @@ const customerSlice = createSlice({
     reducers : {
         setCurrentService : (state,action)=>{
             state.workingService = action.payload
-        }
+        },
+        updateNewBooking : (state,action)=>{
+            state.myBookings.push(action.payload)
+        },
+        customerBookingStatusUpdated: (state, action) => {
+            const updatedBooking = action.payload;
+            const index = state.myBookings.findIndex(booking => booking._id === updatedBooking._id)
+            if (index !== -1) {
+                state.myBookings[index] = updatedBooking
+            }
+        }        
     },
     extraReducers : (builder) =>{
         builder.addCase(bookserviceRequest.pending, (state, action)=>{
@@ -128,5 +138,5 @@ const customerSlice = createSlice({
         });
     }
 })
-export const { setCurrentService } = customerSlice.actions
+export const { setCurrentService, updateNewBooking, customerBookingStatusUpdated } = customerSlice.actions
 export default customerSlice.reducer

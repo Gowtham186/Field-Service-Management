@@ -36,7 +36,7 @@ const io = new Server(server, {
 })
 
 socketHandler(io)
-
+app.use('/api/webhooks', express.raw({ type : 'application/json' }))
 app.use(express.json())
 app.use(cors())
 
@@ -47,13 +47,13 @@ app.use('/api', expertRoutes)
 app.use('/api', skillRoutes)
 app.use('/api', categoryRoutes)
 app.use('/api', serviceRoutes)
-app.use('/api', serviceRequestRoutes(io))
+app.use('/api', serviceRequestRoutes)
 app.use('/api', reviewRoutes)
 app.use('/api', queryRoutes)
 app.use('/api', paymentRoutes)
 app.use('/api', statsRoutes)
 
-//export { io }
+export { io }
 
 //server
 server.listen(4500, () => {

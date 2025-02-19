@@ -11,28 +11,12 @@ export default function MyBookings() {
   const [filter, setFilter] = useState("requested"); // Default filter
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  // const [searchParams, setSearchParams] = useSearchParams();
   const { myBookings } = useSelector((state) => state.customer);
 
   useEffect(() => {
     dispatch(getMyBookings());
-
-    if (searchParams.get("payment") === "success") {
-      const storedServiceId = localStorage.getItem("serviceRequestId");
-
-      if (storedServiceId) {
-        toast.success("Booking fee payment succeeded ✅", { position: "top-center", autoClose: 3000 });
-        dispatch(updateBookingStatus({id : storedServiceId, body : { status : "assigned"}}))
-
-        dispatch(getMyBookings());
-
-        localStorage.removeItem("serviceRequestId"); // Clear storage
-        setTimeout(() => {
-          setSearchParams({});
-        }, 3000);
-      }
-    }
-  }, [dispatch, searchParams]);
+  }, [dispatch]);
 
   function isToday(date) {
     const today = new Date();
@@ -72,7 +56,6 @@ export default function MyBookings() {
         return;
       }
 
-      localStorage.setItem("serviceRequestId", booking?._id); // Store for success handling
       window.location.href = response?.url; // Redirect to Stripe
     } catch (err) {
       console.log(err);
@@ -134,11 +117,11 @@ export default function MyBookings() {
                     className="bg-green-500 text-white p-2 mt-2 rounded"
                     onClick={() => makePayment(booking)}
                   >
-                    Proceed to Payment
+                    Pay Booking Fee
                   </button>                
                 )}
 
-                {(filter === "scheduledToday" || booking.status === "in-progress") && booking.expertId?._id && (
+                {(booking.status === "in-progress" || filter === "scheduledToday" ) && booking.expertId?._id && (
                   <>
                     <button
                       className="bg-blue-500 text-white p-2 mt-2 rounded"

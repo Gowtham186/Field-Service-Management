@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import Cookies from 'js-cookie';
 import { useNavigate, useParams } from "react-router-dom";
 import { expertCategoriesBySkills } from "../redux/slices.js/expert-slice";
 import Navbar from "../components/Navbar";
@@ -14,7 +13,7 @@ export default function CategoryDetails() {
   const { id } = useParams();
   const { loading, categoriesBySkills } = useSelector((state) => state.expert);
   const { choosenServices, selectedExpert } = useSelector((state) => state.search);
-  const { isLoggedIn, user } = useSelector((state) => state.user)
+  const { isLoggedIn, user } = useSelector((state) => state.user);
   const [selectedServices, setSelectedServices] = useState([]);
   const [isSaved, setIsSaved] = useState(false);
 
@@ -35,47 +34,26 @@ export default function CategoryDetails() {
     if (id) {
       dispatch(expertCategoriesBySkills(id));
     }
-  
-    const savedBookings = Cookies.get("savedBookings");
-    if (savedBookings) {
-      const savedData = JSON.parse(savedBookings);
-  
-      if (savedData.expertId === id) {
-        setSelectedServices(savedData.selectedServices);
-        dispatch(selectService(savedData.selectedServices));
-      } else {
-        Cookies.remove("savedBookings");
-      }
-    }
   }, [dispatch, id]);
   
   const handleSelectService = (category, service) => {
     setSelectedServices((prev) => {
-      let updatedServices = JSON.parse(JSON.stringify(prev));
-      const existingCategory = updatedServices.find(
-        (item) => item.category._id === category._id
+      let updatedServices = prev.map(item => 
+        item.category._id === category._id 
+          ? { ...item, servicesChoosen: item.servicesChoosen.filter(s => s._id !== service._id) }
+          : item
       );
   
-      if (existingCategory) {
-        const serviceExists = existingCategory.servicesChoosen.some(
-          (existingService) => existingService._id === service._id
-        );
-  
-        if (serviceExists) {
-          existingCategory.servicesChoosen = existingCategory.servicesChoosen.filter(
-            (existingService) => existingService._id !== service._id
-          );
-        } else {
-          existingCategory.servicesChoosen.push(service);
-        }
-      } else {
+      const categoryExists = prev.find(item => item.category._id === category._id);
+      
+      if (!categoryExists || categoryExists.servicesChoosen.every(s => s._id !== service._id)) {
         updatedServices.push({ category, servicesChoosen: [service] });
       }
   
       sessionStorage.setItem(
         "selectedServices",
         JSON.stringify({
-          expertId: id, 
+          expertId: id,
           selectedServices: updatedServices,
         })
       );
@@ -84,13 +62,14 @@ export default function CategoryDetails() {
       return updatedServices;
     });
   };
-
+    
   const handleBook = () => {
     console.log(selectedServices);
     dispatch(setSelectedExpert(selectedExpert));
     dispatch(selectService(selectedServices));
     navigate("/service-requests");
   };
+
   const handleSaveForLater = () => {
     if (!selectedServices.length) {
       toast.warn("Please select at least one service before saving.");
@@ -98,36 +77,9 @@ export default function CategoryDetails() {
     }
     console.log("Saving booking...");
   
-    const savedData = {
-      expertId: id, 
-      selectedServices
-    };
-  
-    const existingSavedData = Cookies.get("savedBookings");
-  
-    if (existingSavedData) {
-      const parsedData = JSON.parse(existingSavedData);
-  
-      if (parsedData.expertId !== id) {
-        Cookies.set("savedBookings", JSON.stringify(savedData), { expires: 7 });
-      }
-    } else {
-      Cookies.set("savedBookings", JSON.stringify(savedData), { expires: 7 });
-    }
-  
     if (isLoggedIn) {
       const userId = user?._id;
       dispatch(saveBookingToDb({ id: userId, expertId: id, selectedServices }))
-        // .unwrap()
-        // .then(() => {
-        //   toast.success("Your booking has been saved to your account!");
-        //   console.log("Booking saved to DB");
-        //   setIsSaved(true);
-        // })
-        // .catch((error) => {
-        //   console.error("Error saving booking:", error);
-        //   toast.error("Failed to save booking. Please try again.");
-        // });
     } else {
       toast.success("Your booking has been saved for later. Please log in to finalize.");
       setIsSaved(true);
@@ -217,30 +169,15 @@ export default function CategoryDetails() {
                 <p>Total : </p>
                 <p>
                   {choosenServices
-                    .reduce(
-                      (total, item) =>
-                        total +
-                        item.servicesChoosen.reduce(
-                          (subtotal, service) =>
-                            subtotal + parseFloat(service.price || 0),
-                          0
-                        ),
-                      0
-                    )
-                    .toFixed(2)}
+                    .reduce((total, item) =>
+                      total + item.servicesChoosen.reduce((subtotal, service) => subtotal + parseFloat(service.price || 0), 0), 0).toFixed(2)}
                 </p>
               </div>
               <div className="flex justify-between">
-              <button
-                className={`mt-8 py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-700 ${isSaved ? 'bg-green-500' : ''}`}
-                onClick={handleSaveForLater}
-                disabled={isSaved} 
-              >
-                {isSaved ? 'Saved' : 'Save for Later'}
-              </button>
-                <button
-                  className="mt-8 py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-700"
-                  onClick={() => handleBook(choosenServices)}>
+                <button onClick={handleSaveForLater} className="mt-8 py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-700">
+                  Save for Later
+                </button>
+                <button onClick={handleBook} className="mt-8 py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-700">
                   Proceed
                 </button>
               </div>
