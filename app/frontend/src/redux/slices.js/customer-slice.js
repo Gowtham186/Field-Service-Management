@@ -35,7 +35,7 @@ export const getWorkingService = createAsyncThunk('customer/getWorkingService', 
 
 export const payServicefee = createAsyncThunk('customer/payServiceFee', async(body)=>{
     try{
-        const response = await axios.post('/api/servicefee', body)
+        const response = await axios.post('/api/servicefee', body, { headers : { Authorization : localStorage.getItem('token')}})
         console.log(response.data)
         return response.data
     }catch(err){
@@ -89,11 +89,37 @@ const customerSlice = createSlice({
         },
         customerBookingStatusUpdated: (state, action) => {
             const updatedBooking = action.payload;
-            const index = state.myBookings.findIndex(booking => booking._id === updatedBooking._id)
-            if (index !== -1) {
-                state.myBookings[index] = updatedBooking
+            state.myBookings = state.myBookings.map(booking =>
+                booking._id === updatedBooking._id ? { ...booking, ...updatedBooking } : booking
+            );
+        },
+        addOnSiteService: (state, action) => {
+            const { serviceRequestId, newService } = action.payload;
+        
+            if (state.workingService?._id === serviceRequestId) {
+                state.workingService = {
+                    ...state.workingService,
+                    onSiteServices: [...state.workingService.onSiteServices, newService],
+                };
             }
-        }        
+        
+            const booking = state.myBookings.find(b => b._id === serviceRequestId);
+            if (booking) {
+                booking.onSiteServices = [...booking.onSiteServices, newService]; // Immutability fix
+            }
+        },
+        removeOnSiteService: (state, action) => {
+            const { serviceRequestId, removedServiceId } = action.payload;
+        
+            if (state.workingService?._id === serviceRequestId) {
+                state.workingService = {
+                    ...state.workingService,
+                    onSiteServices: state.workingService.onSiteServices.filter(
+                        (service) => service._id !== removedServiceId
+                    ),
+                };
+            }
+        }                          
     },
     extraReducers : (builder) =>{
         builder.addCase(bookserviceRequest.pending, (state, action)=>{
@@ -109,9 +135,10 @@ const customerSlice = createSlice({
             state.myBookings = action.payload
         })
         builder.addCase(getWorkingService.pending, (state,action)=>{
-            state.loading = false
+            state.loading = true
         })
         builder.addCase(getWorkingService.fulfilled, (state,action)=>{
+            state.loading = false
             state.workingService = action.payload
         })
         builder.addCase(fetchPaymentDetails.pending, (state) => {
@@ -138,5 +165,5 @@ const customerSlice = createSlice({
         });
     }
 })
-export const { setCurrentService, updateNewBooking, customerBookingStatusUpdated } = customerSlice.actions
+export const { setCurrentService, updateNewBooking, customerBookingStatusUpdated, addOnSiteService, removeOnSiteService } = customerSlice.actions
 export default customerSlice.reducer

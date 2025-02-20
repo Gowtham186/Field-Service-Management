@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { io } from "socket.io-client";
-import { customerBookingStatusUpdated, updateNewBooking } from "../redux/slices.js/customer-slice";  
+import { addOnSiteService, customerBookingStatusUpdated, removeOnSiteService, updateNewBooking } from "../redux/slices.js/customer-slice";  
 import { addNewService, expertBookingStatusUpdated } from "../redux/slices.js/expert-slice";
 
 const socket = io("http://localhost:4500", { reconnection: true });
@@ -91,10 +91,33 @@ const NotificationComponent = ({ userId, role }) => {
             }
         });
 
+        socket.on("onSiteServiceAdded", (data)=>{
+            console.log('onsite data', data)
+            if(data.userType === 'customer'){
+                dispatch(addOnSiteService({
+                    serviceRequestId : data.serviceRequestId,
+                    newService : data.newService
+                }))
+            }
+            toast.info("New On Site service added!")
+        })
+
+        socket.on("onSiteServiceDeleted", (data) => {
+           if(data.userType === 'customer'){
+            dispatch(removeOnSiteService(data))
+            toast.info("On site service deleted")
+           }
+           if(data.userType === 'expert'){
+            toast.info("On site service deleted")
+           }
+        })
+
         return () => {
             socket.off("newBooking");
             socket.off("bookingStatusUpdated"); 
             socket.off("paymentStatusUpdated");
+            socket.off("onSiteServiceAdded");
+            socket.off("onSiteServiceDeleted");
         };
     }, [userId, role, dispatch]);
 

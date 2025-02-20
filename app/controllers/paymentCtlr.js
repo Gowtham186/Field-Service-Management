@@ -65,7 +65,8 @@ paymentCtlr.payServiceFee = async (req, res) => {
             metadata: {
                 serviceRequestId,
                 expertId,
-            },
+                paymentReason: "service",
+            },            
         });
 
         console.log("Session ID:", session.id);
@@ -75,7 +76,7 @@ paymentCtlr.payServiceFee = async (req, res) => {
         const payment = new Payment({
             serviceRequestId,
             expertId,
-            customerId: customer.id,
+            // customerId : req.currentUser.userId,
             transactionId: session.id,
             paymentReason: "service",
             paymentType: "card",
@@ -181,8 +182,9 @@ paymentCtlr.payBookingFee = async (req, res) => {
                 capture_method: "automatic",
             },
             metadata: {
-                serviceRequestId: body.serviceRequestId, // Attach metadata for later retrieval
-            },
+                serviceRequestId: body.serviceRequestId,
+                paymentReason: "booking",
+            },            
         });
 
         console.log("Session ID:", session.id);
@@ -217,6 +219,95 @@ paymentCtlr.payBookingFee = async (req, res) => {
     }
 };
 
+// paymentCtlr.webhooks = async (req, res) => {
+//     const signature = req.headers["stripe-signature"];
+//     console.log("Stripe Signature:", signature);
+
+//     try {
+//         const event = stripe.webhooks.constructEvent(
+//             req.body,
+//             signature,
+//             process.env.STRIPE_WEBHOOK_SECRET
+//         );
+
+//         const session = event.data.object;
+//         console.log("Webhook Session Object:", session);
+
+//         const sessionId = session.id; // Initially stored session ID
+//         const paymentIntentId = session.payment_intent || session.id; // Get actual transaction ID
+
+//         console.log(`Received event: ${event.type}, Session ID: ${sessionId}, Payment Intent: ${paymentIntentId}`);
+
+//         // Find the payment record using session ID (fallback to paymentIntentId)
+//         let payment = await Payment.findOne({
+//             $or: [{ transactionId: sessionId }, { transactionId: paymentIntentId }],
+//         });
+
+//         if (!payment) {
+//             console.log("Payment record not found");
+//             return res.status(404).send("Payment record not found");
+//         }
+
+//         if (!payment.transactionId && paymentIntentId) {
+//             // If transactionId is missing, update it
+//             payment.transactionId = paymentIntentId;
+//         }
+
+//         const serviceRequest = await ServiceRequest.findById(payment.serviceRequestId);
+//         if (!serviceRequest) {
+//             console.log("Service request not found");
+//             return res.status(404).send("Service request not found");
+//         }
+
+//         if (event.type === "checkout.session.completed" || event.type === "payment_intent.succeeded") {
+//             payment.paymentStatus = "success";
+//             await payment.save();
+//             console.log("Payment successful, updated record");
+
+//             serviceRequest.status = "assigned"
+//             await serviceRequest.save()
+//             console.log('updated status', serviceRequest)
+
+//             io.to(`customer-${payment.customerId}`).emit("paymentStatusUpdated", {
+//                 userType: "customer",
+//                 payment: payment,
+//             });
+//             console.log('emitting...')
+
+//             io.to(`customer-${serviceRequest.customerId}`).emit("bookingStatusUpdated", {
+//                 userType: "customer",
+//                 booking: serviceRequest, // Send the full updated booking object
+//             });
+            
+//             if (serviceRequest.expertId) {
+//                 io.to(`expert-${serviceRequest.expertId}`).emit("bookingStatusUpdated", {
+//                     userType: "expert",
+//                     booking: serviceRequest, // Send the full updated booking object
+//                 });
+//             } 
+
+//             return res.status(200).send("Payment processed successfully");
+//         } else if (event.type === "payment_intent.payment_failed" || event.type === "checkout.session.expired") {
+//             payment.paymentStatus = "failed";
+//             payment.failure_reason = session.last_payment_error?.message || "Payment failed";
+//             await payment.save();
+//             console.log("Payment failed, updated record");
+
+//             io.to(`customer-${payment.customerId}`).emit("paymentStatusUpdated", {
+//                 userType: "customer",
+//                 payment: payment,
+//             });
+
+//             return res.status(400).send("Payment failed");
+//         } else {
+//             return res.status(400).send("Unhandled event type");
+//         }
+//     } catch (err) {
+//         console.error("Webhook error:", err);
+//         return res.status(400).send(`Webhook error: ${err.message}`);
+//     }
+// };
+
 paymentCtlr.webhooks = async (req, res) => {
     const signature = req.headers["stripe-signature"];
     console.log("Stripe Signature:", signature);
@@ -235,6 +326,10 @@ paymentCtlr.webhooks = async (req, res) => {
         const paymentIntentId = session.payment_intent || session.id; // Get actual transaction ID
 
         console.log(`Received event: ${event.type}, Session ID: ${sessionId}, Payment Intent: ${paymentIntentId}`);
+
+        // Extract payment reason from metadata
+        const paymentReason = session.metadata?.paymentReason || "service"; // Default to "service" if not provided
+        console.log("Payment Reason:", paymentReason);
 
         // Find the payment record using session ID (fallback to paymentIntentId)
         let payment = await Payment.findOne({
@@ -262,26 +357,32 @@ paymentCtlr.webhooks = async (req, res) => {
             await payment.save();
             console.log("Payment successful, updated record");
 
-            serviceRequest.status = "assigned"
-            await serviceRequest.save()
+            // Update the service request status based on payment reason
+            if (paymentReason === "service") {
+                serviceRequest.status = "paid"; // Full service payment
+            } else if (paymentReason === "bookingFee") {
+                serviceRequest.status = "assigned"; // Only booking fee paid
+            }
+
+            await serviceRequest.save();
+            console.log("Updated service request status:", serviceRequest.status);
 
             io.to(`customer-${payment.customerId}`).emit("paymentStatusUpdated", {
                 userType: "customer",
                 payment: payment,
             });
-            console.log('emitting...')
 
             io.to(`customer-${serviceRequest.customerId}`).emit("bookingStatusUpdated", {
                 userType: "customer",
                 booking: serviceRequest, // Send the full updated booking object
             });
-            
+
             if (serviceRequest.expertId) {
                 io.to(`expert-${serviceRequest.expertId}`).emit("bookingStatusUpdated", {
                     userType: "expert",
                     booking: serviceRequest, // Send the full updated booking object
                 });
-            } 
+            }
 
             return res.status(200).send("Payment processed successfully");
         } else if (event.type === "payment_intent.payment_failed" || event.type === "checkout.session.expired") {

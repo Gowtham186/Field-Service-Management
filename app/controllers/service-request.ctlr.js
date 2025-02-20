@@ -160,9 +160,9 @@ serviceRequestCtlr.getAllServiceRequests = async (req, res) => {
 };
 
 serviceRequestCtlr.getServiceRequest = (io) => async(req,res)=>{
-    const {id} = req.params
-    console.log(id)
     try{
+        const {id} = req.params
+        console.log(id)
         const serviceRequest = await ServiceRequest.findById(id)
             .populate({
                 path: "serviceType.category",
@@ -274,6 +274,18 @@ serviceRequestCtlr.updateStatus = async (req,res)=>{
     console.log(id, body)
     try{
         const serviceRequest = await ServiceRequest.findByIdAndUpdate(id, body, { new : true})
+        .populate({
+            path: "serviceType.category",
+            model: "Category",
+            select: "name",
+        })
+        .populate({
+            path: "serviceType.servicesChoosen",
+            model: "Service",
+            select: "serviceName price",
+        })
+        .populate("customerId", "name") // Populate customer details
+        .populate("expertId", "name");
         if(!serviceRequest){
             return res.status(404).json({errors : 'service request is not found'})
         }
@@ -372,7 +384,21 @@ serviceRequestCtlr.onSiteService = async(req,res)=>{
         }
 
         serviceRequest.onSiteServices.push(newServiceEntry)
+        
         await serviceRequest.save()
+
+        io.to(`customer-${serviceRequest?.customerId}`).emit("onSiteServiceAdded", {
+            userType: "customer",
+            newService: newServiceEntry, 
+            serviceRequestId: serviceRequest._id, 
+        });
+
+        io.to(`expert-${serviceRequest?.expertId}`).emit("onSiteServiceAdded", {
+            userType: "expert",
+            newService: newServiceEntry, 
+            serviceRequestId: serviceRequest._id, 
+        });
+
 
         res.json(newServiceEntry)
     }catch(err){
@@ -383,6 +409,7 @@ serviceRequestCtlr.onSiteService = async(req,res)=>{
 
 serviceRequestCtlr.deleteOnSiteService = async(req,res)=>{
     const serviceId = req.params.serviceId
+    console.log('serviceId', serviceId)
     try{
         const serviceRequest = await ServiceRequest.findOne({"onSiteServices._id" : serviceId})
 
@@ -395,6 +422,19 @@ serviceRequestCtlr.deleteOnSiteService = async(req,res)=>{
         )
 
         await serviceRequest.save()
+
+        io.to(`customer-${serviceRequest?.customerId}`).emit("onSiteServiceDeleted", {
+            userType: "customer",
+            removedServiceId: serviceId,
+            serviceRequestId: serviceRequest._id,
+        });
+
+        // Emit event to expert
+        io.to(`expert-${serviceRequest?.expertId}`).emit("onSiteServiceDeleted", {
+            userType: "expert",
+            removedServiceId: serviceId,
+            serviceRequestId: serviceRequest._id,
+        });
 
         return res.json(serviceId)
 

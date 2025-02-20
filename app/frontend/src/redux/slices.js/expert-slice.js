@@ -201,9 +201,9 @@ export const getUnverifiedExperts = createAsyncThunk('expert/getUnverifiedExpert
 })
 
 export const getExpertReviews = createAsyncThunk('expert/getExpertReviews', 
-    async ({id, page = 1, limit = 1}) => {
+    async ({id}) => {
     try {
-        const response = await axios.get(`/api/reviews/${id}?page=${page}&limit=${limit}`); 
+        const response = await axios.get(`/api/reviews/${id}`); 
         console.log(response.data) 
         return response.data; 
     } catch (err) {
@@ -226,12 +226,9 @@ const expertSlice = createSlice({
         workingService : null,
         unVerifiedExperts : null, 
         reviews: {
-            list: [],  // Array to hold reviews
-            hasMore: true,  // Flag for more reviews
-            loading: false,  // Loading state for reviews
-            page: 1,  // Current page for fetching reviews
-          },
-
+            loading : false,
+            data : []
+        }
     },
     reducers : {
         setServiceRequestId : (state,action)=>{
@@ -242,9 +239,7 @@ const expertSlice = createSlice({
             state.workingService = action.payload
         },
         setReviewsNull: (state) => {
-            state.reviews.list = []; // Clear reviews list
-            state.reviews.hasMore = true; // Reset hasMore flag
-            state.reviews.page = 1; // Reset page
+            state.reviews.data = null; 
         },
         addNewService : (state,action) => {
             state.myServices.push(action.payload)
@@ -350,15 +345,22 @@ const expertSlice = createSlice({
             state.loading = false
             state.profile = {...state.profile, profilePic : action.payload}
         })      
+        builder.addCase(getExpertReviews.pending, (state, action)=>{
+            state.reviews.loading = true
+        })
         builder.addCase(getExpertReviews.fulfilled, (state, action) => {
             state.reviews.loading = false;
-            const newReviews = action.payload.reviews.filter((review) => 
-                !state.reviews.list.some((existingReview) => existingReview._id === review._id)
-            );
-            state.reviews.list = [...state.reviews.list, ...newReviews];
-            state.reviews.hasMore = action.payload.hasMore;
-            state.reviews.page += 1;
-          }) 
+        
+            if (!state.reviews.data) {
+                state.reviews.data = []; // Ensure `data` is always an array
+            }
+        
+            const newReviews = action.payload.filter(
+                (review) => !state.reviews.data.some((existingReview) => existingReview._id === review._id)
+            ) || [];
+        
+            state.reviews.data.push(...newReviews); // Use direct `.push()`, not optional chaining
+        });        
     }
 })
 export const { setServiceRequestId, setWorkingService, setReviewsNull, addNewService, expertBookingStatusUpdated } = expertSlice.actions

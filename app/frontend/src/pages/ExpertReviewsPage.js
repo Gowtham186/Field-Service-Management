@@ -12,7 +12,7 @@ export default function ExpertReviewsPage() {
   useEffect(() => {
     if (user) {
       const id = user?._id;
-      dispatch(getExpertReviews(id))
+      dispatch(getExpertReviews({id}))
         .unwrap()
         .then((reviews) => {
           setReviews(reviews);
@@ -27,10 +27,9 @@ export default function ExpertReviewsPage() {
     }
   }, [dispatch, user?._id]);
 
-  // Prepare data for the side bar chart (ratings 5 to 1)
   const ratingCounts = [5, 4, 3, 2, 1].map((rating) => ({
     rating,
-    count: reviews.filter((review) => review.rating === rating).length,
+    count: reviews?.filter((review) => review.rating === rating).length,
   }));
 
   return (
@@ -63,7 +62,7 @@ export default function ExpertReviewsPage() {
 
       <div className="bg-white rounded-lg shadow-lg p-3">
         <h1 className="text-xl font-semibold mb-4">Latest Reviews</h1>
-        {reviews.length > 0 ? (
+        {reviews?.length > 0 ? (
           reviews?.map((review) => (
             <div key={review._id} className="mb-4 p-2 border-b">
               <div className="flex items-center justify-between mb-2">

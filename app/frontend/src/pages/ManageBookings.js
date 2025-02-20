@@ -69,14 +69,14 @@ export default function ManageBookings() {
                 <div className="overflow-x-auto">
                     <table className="w-full border border-gray-300 rounded-lg shadow-sm">
                         <thead className="bg-gray-100 text-gray-700">
-                            <tr className="text-left">
+                            <tr className="text-center">
                                 <th className="p-3">#</th>
                                 <th className="p-3">Customer</th>
                                 <th className="p-3">Expert</th>
                                 <th className="p-3">Status</th>
                                 <th className="p-3">Category</th>
                                 <th className="p-3">Service Price</th>
-                                <th className="p-3">Scheduled Date</th>
+                                <th className="p-3">Service Date</th>
                             </tr>
                         </thead>
                         <tbody>

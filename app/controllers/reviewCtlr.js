@@ -36,18 +36,10 @@ reviewCtlr.create = async (req, res) => {
 reviewCtlr.getReviews = async (req, res) => {
     const id = req.params.id;
     console.log('id', id)
-    const page = Math.max(1, parseInt(req.query.page) || 1); // Ensure page is at least 1
-    const limit = Math.max(1, parseInt(req.query.limit) || 1); // Ensure limit is at least 1    
-    const skip = (page - 1) * limit;
-    console.log(page, limit, skip)
     
     try {
-        // Fetch reviews with pagination
         const reviews = await Review.find({ reviewee: id })
-            .skip(skip)
-            .limit(limit)
-            .sort({ createdAt: -1 });
-        // Fetch reviewer details for each review
+
         const reviewsWithReviewer = await Promise.all(reviews.map(async (review) => {
             try {
                 const reviewer = await User.findById(review.reviewer, 'name email');
@@ -59,16 +51,12 @@ reviewCtlr.getReviews = async (req, res) => {
                 console.error(`Error fetching reviewer details for review ID: ${review._id}`, err);
                 return {
                     ...review._doc,
-                    reviewer: {}  // Default value if reviewer is not found
+                    reviewer: {}  
                 };
             }
         }));
-
-        // Calculate total reviews for pagination
-        const totalReviews = await Review.countDocuments({ reviewee: id });
-        const hasMore = (page * limit) < totalReviews;
-        console.log({ reviews: reviewsWithReviewer, hasMore })
-        return res.json({ reviews: reviewsWithReviewer, hasMore });
+        const expertReviews = reviewsWithReviewer
+        return res.json(expertReviews);
     } catch (err) {
         console.error("Error fetching reviews:", err);
         return res.status(500).json({ message: 'Error fetching reviews' });

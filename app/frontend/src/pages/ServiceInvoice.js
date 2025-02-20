@@ -5,38 +5,36 @@ import { getWorkingService, payServicefee } from "../redux/slices.js/customer-sl
 
 export default function ServiceInvoice() {
     const dispatch = useDispatch();
-    const { workingService } = useSelector((state) => state.customer);
+    const { workingService, loading } = useSelector((state) => state.customer);
     const { id } = useParams();
     
     useEffect(() => {
-        if (id && !workingService) {
-            console.log(id)
-            dispatch(getWorkingService(id))
+        if (id) {
+            dispatch(getWorkingService(id));
         }
-    }, [id]);
+    }, [id, dispatch]);
 
-    if (!workingService) {
+    if (loading) {
         return <p className="text-center text-gray-500">Loading service details...</p>;
     }
-    
 
-    console.log(workingService);
+    console.log("Working Service:", workingService);
 
-    // Calculate total cost
-    const servicesTotal = workingService?.serviceType?.reduce(
-        (acc, type) => acc + type.servicesChoosen.reduce((sum, service) => sum + (service.price || 0), 0),
-        0
+    // ✅ Ensure values are numbers and avoid NaN errors
+    const servicesTotal = Number(workingService?.serviceType?.reduce(
+        (acc, type) => acc + type.servicesChoosen.reduce(
+            (sum, service) => sum + (Number(service.price) || 0), 
+        0), 0) || 0
     );
 
-    const onSiteTotal = workingService?.onSiteServices?.reduce(
-        (acc, service) => acc + (service.price || 0),
+    const onSiteTotal = Number(workingService?.onSiteServices?.reduce(
+        (acc, service) => acc + (Number(service.price) || 0),
         0
-    );
+    ) || 0);
 
     const grandTotal = servicesTotal + onSiteTotal;
 
-    const handleServicePay = async (workingService) => {
-        console.log(workingService);
+    const handleServicePay = async () => {
         try {
             const body = {
                 serviceRequestId: workingService?._id,
@@ -61,7 +59,6 @@ export default function ServiceInvoice() {
             console.log(err);
         }
     };
-    
 
     return (
         <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
@@ -74,7 +71,7 @@ export default function ServiceInvoice() {
                         {type?.servicesChoosen?.map((service) => (
                             <div key={service?._id} className="border p-2 rounded-md shadow-sm bg-gray-50 flex justify-between">
                                 <p className="text-gray-700 font-medium">{service.serviceName}</p>
-                                <p className="font-semibold text-green-600">₹{service.price.toFixed(2)}</p>
+                                <p className="font-semibold text-green-600">₹{Number(service.price || 0).toFixed(2)}</p>
                             </div>
                         ))}
                     </div>
@@ -86,7 +83,7 @@ export default function ServiceInvoice() {
                 <div className="mt-6 bg-white shadow-lg rounded-lg p-4">
                     <h3 className="font-semibold text-lg mb-3 text-gray-700">On-Site Services</h3>
 
-                    <div className="grid grid-cols-2 gap-4 border-b pb-2 text-gray-600 font-medium justify-between  ">
+                    <div className="grid grid-cols-2 gap-4 border-b pb-2 text-gray-600 font-medium">
                         <p>Service Name</p>
                         <p className="text-center">Price</p>
                     </div>
@@ -94,37 +91,40 @@ export default function ServiceInvoice() {
                     {workingService?.onSiteServices?.map((service) => (
                         <div key={service?._id} className="grid grid-cols-2 gap-4 py-2 border-b items-center">
                             <p className="text-gray-800">{service?.serviceName}</p>
-                            <p className="text-center font-semibold text-green-600">₹{service?.price.toFixed(2)}</p>
+                            <p className="text-center font-semibold text-green-600">
+                                ₹{Number(service?.price || 0).toFixed(2)}
+                            </p>
                         </div>
                     ))}
                 </div>
             )}
 
-            {/* Total Calculation */}
+            {/* Invoice Summary */}
             <div className="mt-6 p-4 bg-gray-100 rounded-lg shadow-sm">
                 <h3 className="font-semibold text-lg text-gray-700 mb-2">Invoice Summary</h3>
 
                 <div className="flex justify-between text-gray-800 text-md">
                     <p>Service Type Total:</p>
-                    <p className="font-semibold">₹{servicesTotal.toFixed(2)}</p>
+                    <p className="font-semibold">₹{Number(servicesTotal || 0).toFixed(2)}</p>
                 </div>
 
                 {workingService?.onSiteServices?.length > 0 && (
                     <div className="flex justify-between text-gray-800 text-md">
                         <p>On-Site Services Total:</p>
-                        <p className="font-semibold">₹{onSiteTotal.toFixed(2)}</p>
+                        <p className="font-semibold">₹{Number(onSiteTotal || 0).toFixed(2)}</p>
                     </div>
                 )}
 
                 <div className="flex justify-between font-bold text-lg text-gray-900 mt-3 border-t pt-2">
                     <p>Total:</p>
-                    <p>₹{grandTotal.toFixed(2)}</p>
+                    <p>₹{Number(grandTotal || 0).toFixed(2)}</p>
                 </div>
             </div>
 
             {/* Approve & Pay Button */}
-            <button className="w-full mt-6 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
-                onClick={()=> handleServicePay(workingService)}
+            <button 
+                className="w-full mt-6 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+                onClick={handleServicePay}
             >
                 Approve & Pay
             </button>

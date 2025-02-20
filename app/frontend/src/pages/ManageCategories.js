@@ -14,6 +14,7 @@ export default function ManageCategories() {
   const [newServices, setNewServices] = useState([]);
   const [clientErrors, setClientErrors] = useState({})
   const [options, setOptions] = useState([])
+  const [category, setCategory] = useState("");
 
   useEffect(() => {
     dispatch(getCategoriesWithServices());
@@ -215,11 +216,22 @@ if(loading){
   return (
     <div className="relative max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Manage Categories</h1>
-      <button className="mb-4 py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
-        onClick={handleNewCategory}
+      <div className="flex flex-wrap gap-4 mb-4 items-center justify-between">
+        <input
+          type="text"
+          placeholder="Filter by Category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="border p-2 rounded h-10"
+        />
+        <button 
+          className="py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 h-10 flex items-center"
+          onClick={handleNewCategory}
         >
-        Add New Category
-      </button>
+          Add New Category
+        </button>
+      </div>
+
 
       {categoriesWithServices?.length > 0 ? (
         <div className="space-y-6">

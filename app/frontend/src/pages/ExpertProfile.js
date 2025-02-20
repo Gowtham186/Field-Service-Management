@@ -142,7 +142,7 @@ export default function ExpertProfile() {
                         <img src={profile.profilePic} alt="Profile" className="w-32 h-32 rounded-full border-2 border-gray-300" />
                     </div>
                         <button 
-                            className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 flex items-center"
+                            className="absolute top-44 left-36 bg-gray-200 text-gray-500 p-2 rounded-full hover:bg-blue-600 flex items-center"
                             onClick={handleImageUpload}
                         >
                             <ImagePlus size={20} />

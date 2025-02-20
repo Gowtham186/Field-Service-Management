@@ -87,6 +87,18 @@ export default function Sidebar({ role }) {
             </li>
             <li className="relative">
               <Link
+                to={`/experts/${user?._id}/history`}
+                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+              >
+                {isActive(`/experts/${user._id}/history`) && (
+                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
+                )}
+                Manage History
+              </Link>
+            </li>
+
+            <li className="relative">
+              <Link
                 to="/experts/revenue"
                 className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
               >

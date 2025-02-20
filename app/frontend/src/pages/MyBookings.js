@@ -1,22 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getMyBookings, setCurrentService } from "../redux/slices.js/customer-slice";
 import Navbar from "../components/Navbar";
 import { payBookingFee } from "../redux/slices.js/service-request-slice";
-import { updateBookingStatus } from "../redux/slices.js/expert-slice";
 import { toast } from "react-toastify";
 
 export default function MyBookings() {
   const [filter, setFilter] = useState("requested"); // Default filter
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  // const [searchParams, setSearchParams] = useSearchParams();
-  const { myBookings } = useSelector((state) => state.customer);
+  const myBookings  = useSelector((state) => state.customer.myBookings);
 
   useEffect(() => {
     dispatch(getMyBookings());
-  }, [dispatch]);
+  }, [dispatch, filter]);
 
   function isToday(date) {
     const today = new Date();
@@ -27,20 +25,31 @@ export default function MyBookings() {
     );
   }
 
+  useEffect(() => {
+    console.log("Updated Bookings:", myBookings);
+}, [myBookings]);
+
+
   // Filter scheduled today
   const scheduledTodayBookings = myBookings?.filter((booking) => {
     const serviceDate = new Date(booking.scheduleDate);
-    return (booking.status === "assigned" || booking.status === "in-progress") && isToday(serviceDate);
+    return (booking.status === "in-progress" || booking.status === "assigned") && isToday(serviceDate);
   });
+  console.log("Scheduled Today Bookings:", scheduledTodayBookings);
 
-  const filteredBookings = myBookings?.filter((booking) => {
-    if (filter === "scheduledToday") return scheduledTodayBookings.includes(booking);
-    return booking.status === filter;
-  });
+  const filteredBookings = myBookings ? myBookings.filter((booking) => {
+    if (filter === "scheduledToday") {
+        return scheduledTodayBookings.some((b) => b._id === booking._id);
+    }
+    return filter === "in-progress"
+        ? ["in-progress", "assigned"].includes(booking.status)
+        : booking.status === filter;
+}) : [];
 
   const handleServiceProgress = (booking) => {
-    navigate(`/track-work/${booking._id}`);
+    // localStorage.setItem("serviceId", booking._id);
     dispatch(setCurrentService(booking));
+    navigate(`/track-work/${booking?._id}`);
   };
 
   const makePayment = async (booking) => {
@@ -52,13 +61,13 @@ export default function MyBookings() {
       const response = await dispatch(payBookingFee(body)).unwrap();
 
       if (!response || !response.url) {
-        console.error("Invalid response from API:", response);
+        toast.error("Payment processing failed.");
         return;
       }
 
-      window.location.href = response?.url; // Redirect to Stripe
+      window.location.href = response.url; // Redirect to Stripe
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.error("Payment failed. Try again.");
     }
   };
@@ -83,7 +92,7 @@ export default function MyBookings() {
             className={`btn ${filter === status ? "bg-blue-500 text-white" : "bg-gray-200"} p-2`}
             onClick={() => setFilter(status)}
           >
-            {status.charAt(0).toUpperCase() + status.slice(1).replace(/([A-Z])/g, " $1")}
+            {status.charAt(0).toUpperCase() + status.slice(1)}
           </button>
         ))}
       </div>
@@ -96,6 +105,7 @@ export default function MyBookings() {
           <ul className="space-y-4">
             {filteredBookings?.map((booking) => (
               <li key={booking._id} className="border p-4 rounded-lg shadow-md">
+                <p><strong>Id:</strong> {booking._id}</p>
                 {booking?.serviceType?.map((servicetype, index) => (
                   <div key={index}>
                     <p><strong>Category:</strong> {servicetype.category.name}</p>
@@ -121,7 +131,33 @@ export default function MyBookings() {
                   </button>                
                 )}
 
-                {(booking.status === "in-progress" || filter === "scheduledToday" ) && booking.expertId?._id && (
+                  {/* {["in-progress", "scheduledToday"].includes(filter) && booking.expertId?._id && booking.status === "in-progress" && (                   <>
+                    <button
+                      className="bg-blue-500 text-white p-2 mt-2 rounded"
+                      onClick={() =>
+                        navigate(`/track-expert/${booking.expertId._id}`, {
+                          state: {
+                            serviceAddress: booking.location?.address,
+                            serviceCoords: {
+                              latitude: booking.location?.coords.lat,
+                              longitude: booking.location?.coords.lng,
+                            },
+                          },
+                        })
+                      }
+                    >
+                      Track Expert
+                    </button>
+                    <button
+                      className="bg-blue-500 text-white p-2 ml-3 mt-2 rounded"
+                      onClick={() => handleServiceProgress(booking)}
+                    >
+                      Track Work
+                    </button>
+                  </>
+                )} */}
+
+                {["in-progress", "scheduledToday", "assigned"].includes(booking.status) && (
                   <>
                     <button
                       className="bg-blue-500 text-white p-2 mt-2 rounded"

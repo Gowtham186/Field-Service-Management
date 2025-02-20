@@ -41,6 +41,7 @@ import Cart from './pages/Cart';
 import ExpertRevenue from './pages/ExpertRevenue';
 import ExpertBookingsAnalytics from './pages/ExpertBookingsAnalytics';
 import ExpertReviewsPage from './pages/ExpertReviewsPage';
+import ExpertHistory from './pages/ExpertHistory';
 
 function App() {
   const dispatch = useDispatch()
@@ -155,6 +156,13 @@ function App() {
             <ProtectedRoute>
               <MainLayout>
                 <ExpertProfile />
+              </MainLayout>
+            </ProtectedRoute> 
+          }/>
+          <Route path="/experts/:id/history" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ExpertHistory />
               </MainLayout>
             </ProtectedRoute> 
           }/>

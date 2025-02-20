@@ -42,6 +42,7 @@ export default function WorkTracking() {
   };
 
   const handleAddService = () => {
+    if (workingService?.status === 'completed') return; // Prevent adding service if completed
     const newService = { id: uuidv4(), serviceName: "", price: "" };
     setNewServices((prevServices) => [...prevServices, newService]);
   };
@@ -65,9 +66,8 @@ export default function WorkTracking() {
   };
 
   const handleDelete = (serviceId) => {
-    dispatch(deleteOnSiteService(serviceId))
-      .unwrap()
-      .catch((err) => console.log(err));
+    if (workingService?.status === 'completed') return; // Prevent deletion if completed
+    dispatch(deleteOnSiteService(serviceId));
   };
 
   const handleStarClick = (index) => {
@@ -122,20 +122,19 @@ export default function WorkTracking() {
                 <p className="text-gray-800">{service?.serviceName}</p>
                 <p className="text-center font-semibold text-green-600">₹{service?.price}</p>
                 <button
+                  className="text-red-600 hover:text-red-800 text-sm font-medium px-1 py-1 bg-red-100 hover:bg-red-200 rounded disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
                   onClick={() => handleDelete(service?._id)}
-                  className="text-red-600 hover:text-red-800 text-sm font-medium px-1 py-1 bg-red-100 hover:bg-red-200 rounded"
-                >
+                  disabled={isCompleted}>
                   Delete
                 </button>
               </div>
             ))}
           </div>
         )}
-
         <button
-          className="mt-3 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+          className="mt-3 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
           onClick={handleAddService}
-        >
+          disabled={isCompleted}>
           Add On-Site Service
         </button>
       </div>
@@ -159,9 +158,9 @@ export default function WorkTracking() {
             onChange={(e) => handleServiceChange(e, service.id)}
           />
           <button
-            className="mt-3 py-2 px-4 bg-green-500 text-white font-semibold shadow-md hover:bg-blue-600"
+            className="mt-3 py-2 px-4 bg-green-500 text-white font-semibold shadow-md hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
             onClick={() => handleSave(service)}
-          >
+            disabled={isCompleted}>
             Save
           </button>
         </div>
