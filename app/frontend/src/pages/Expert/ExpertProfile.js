@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addNewSkill, changeProfilePic, fetchSkills, getExpertProfile, updateProfile } from "../../redux/slices.js/expert-slice";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import CreatableSelect from 'react-select/creatable';
 import { getUserProfile } from "../../redux/slices.js/user-slice";
 import { ImagePlus } from 'lucide-react'
@@ -13,12 +13,13 @@ export default function ExpertProfile() {
     const [editProfile, setEditProfile] = useState(null);
     const [selectedSkills, setSelectedSkills] = useState([]);
     const fileInputRef = useRef(null);
+    const navigate = useNavigate()
 
     useEffect(() => {
-        if (id) {
+        if (id && !profile) {
             dispatch(getExpertProfile({id}));
         }
-    }, [dispatch, id]);
+    }, [dispatch, id, profile]);
 
     useEffect(() => {
         if (profile?.skills) {
@@ -117,6 +118,10 @@ export default function ExpertProfile() {
             });        }
     };
 
+    const handleChangePassword = ()=>{
+        navigate('/reset-password')
+    }
+
     return (
         <div className="relative">
             <button
@@ -165,6 +170,7 @@ export default function ExpertProfile() {
                     </div>
                 </div>
 
+                 {/* Right Column */}
                 <div className="w-1/2 border p-6 rounded-lg shadow-sm bg-gray-50">
                     <div className="mb-2">
                         <p className="text-gray-500 uppercase text-sm">Age</p>
@@ -200,10 +206,10 @@ export default function ExpertProfile() {
                         <p className="text-gray-500 uppercase text-sm">Verified</p>
                         <p className="text-gray-700">{profile?.isVerified ? "Yes" : "No"}</p>
                     </div>
-                    <div className="mb-2">
+                    {/* <div className="mb-2">
                         <p className="text-gray-500 uppercase text-sm">Premium</p>
                         <p className="text-gray-700">{profile?.isPremium ? "Yes" : "No"}</p>
-                    </div>
+                    </div> */}
                 </div>
             </div>
 
@@ -271,6 +277,10 @@ export default function ExpertProfile() {
                     </div>
                 </div>
             )}
+
+            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                onClick={handleChangePassword}
+            >Change Password</button>
         </div>
     );
 }

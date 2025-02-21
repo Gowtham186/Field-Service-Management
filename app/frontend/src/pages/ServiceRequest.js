@@ -24,12 +24,10 @@ export default function ServiceRequest() {
     const { currentAddress, choosenServices, selectedExpert } = useSelector((state) => state.search);
     
     const dispatch = useDispatch();
-    // const [greetCard, setGreetCard] = useState(false)
     const navigate = useNavigate()
     const [isBooked, setIsBooked] = useState(false)
     const [ showLogin, setShowLogin] = useState(false)
-    const [bookedData, setBookedData] = useState(null)
-    const { currentBooking } = useSelector((state) => state.customer)
+    const { currentBooking, loading } = useSelector((state) => state.customer)
     const { profile } = useSelector((state) => state.expert)
     const [clientErrors, setClientErrors] = useState({})
     const errors = {}
@@ -270,11 +268,24 @@ export default function ServiceRequest() {
                     />
                 </div>
                 {!isBooked && (
-                    <button type="submit"
-                    className="py-2 px-4 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-                        >
-                        Confirm Booking
-                    </button>
+                    <button
+                    type="submit"
+                    className="py-2 px-4 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full flex items-center justify-center"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25"cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4l-3 3-3-3h4z"></path>
+                        </svg>
+                        Booking...
+                      </>
+                    ) : (
+                      "Confirm Booking"
+                    )}
+                  </button>
+                  
                 )}
             </form>
 

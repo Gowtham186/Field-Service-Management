@@ -5,6 +5,7 @@ import { generateOtp } from "../utils.js/otphelper.js";
 import { sendSMS } from "../utils.js/sendSMS.js";
 import { validationResult } from 'express-validator';
 import Otp from '../models/otp-model.js';
+import { comparePassword, hashPassword } from '../utils.js/hashPassword.js'
 const userCtlr = {}
 
 userCtlr.register = async(req,res)=>{
@@ -152,6 +153,34 @@ userCtlr.updateUser = async(req,res)=>{
     }catch(err){
         console.log(err)
         return res.status(500).json({errors : 'something went wrong'})
+    }
+}
+
+userCtlr.resetPassword = async (req, res) => {
+    try {
+      const { email, oldPassword, newPassword } = req.body;
+      console.log({ email, oldPassword, newPassword })
+  
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ error: "User with this email does not exist." });
+      }
+  
+      if (!(await comparePassword(oldPassword, user.password))) {
+        return res.status(400).json({ error: "Incorrect old password." });
+      }
+  
+      if (oldPassword === newPassword) {
+        return res.status(400).json({ error: "New password cannot be the same as the old password." });
+      }
+  
+      user.password = await hashPassword(newPassword);
+      await user.save();
+  
+      return res.status(200).json({ message: "Password has been updated successfully." });
+    } catch (error) {
+      console.error("Reset Password Error:", error);
+      return res.status(500).json({ error: "Something went wrong. Please try again later." });
     }
 }
 

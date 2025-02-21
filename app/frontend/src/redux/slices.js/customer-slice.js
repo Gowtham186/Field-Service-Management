@@ -123,9 +123,10 @@ const customerSlice = createSlice({
     },
     extraReducers : (builder) =>{
         builder.addCase(bookserviceRequest.pending, (state, action)=>{
-            state.loading = action.payload
+            state.loading = true
         })
         builder.addCase(bookserviceRequest.fulfilled, (state, action)=>{
+            state.loading = false
             state.currentBooking = action.payload
         })
         builder.addCase(bookserviceRequest.rejected, (state,action) => {

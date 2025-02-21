@@ -10,6 +10,7 @@ router.post('/users/login', userCtlr.login)
 router.post('/users/verifyOtp', userCtlr.verifyOtp)
 router.get('/users/profile', authenticateUser, userCtlr.profile)
 router.put('/users', authenticateUser, userCtlr.updateUser)
+router.post("/users/resetPassword",userCtlr.resetPassword)
 
 //optional if admin login has different route in frontend
 router.post('/users/admin', checkSchema(adminLoginValidation), userCtlr.adminLogin)

@@ -42,6 +42,7 @@ import ExpertRevenue from './pages/Expert/ExpertRevenue';
 import ExpertBookingsAnalytics from './pages/Expert/ExpertBookingsAnalytics';
 import ExpertReviewsPage from './pages/Expert/ExpertReviewsPage';
 import ExpertHistory from './pages/Expert/ExpertHistory';
+import ResetPassword from './pages/ResetPassowrd';
 
 function App() {
   const dispatch = useDispatch()
@@ -184,6 +185,13 @@ function App() {
             <ProtectedRoute>
               <MainLayout>
                 <ExpertReviewsPage />
+              </MainLayout>
+            </ProtectedRoute> 
+          }/>
+          <Route path="/reset-password" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ResetPassword />
               </MainLayout>
             </ProtectedRoute> 
           }/>
