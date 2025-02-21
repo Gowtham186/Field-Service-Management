@@ -43,7 +43,8 @@ const searchSlice = createSlice({
         serverError : null,
         selectedSkill : null,
         choosenServices : [],
-        selectedExpert : null
+        selectedExpert : null,
+        loading : false
     },
     reducers : {
         setSearchSkillState : (state,action)=>{
@@ -57,13 +58,21 @@ const searchSlice = createSlice({
         }
     },
     extraReducers : (builder)=>{
+        builder.addCase(querying.pending, (state,action)=>{
+            state.loading = true
+            state.serverError = null
+            state.resultsExperts = null
+        })
         builder.addCase(querying.fulfilled, (state,action)=>{
+            state.loading = false
             state.resultsExperts = action.payload?.verifiedExperts
             //state.resultsCategories = action.payload.skills
             state.serverError = null
         })
+        
         builder.addCase(querying.rejected, (state,action)=>{
             state.serverError = action.payload
+            state.resultsExperts = null
         })
         builder.addCase(getAddress.fulfilled, (state,action)=>{
             state.currentAddress = action.payload

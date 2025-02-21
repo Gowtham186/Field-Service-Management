@@ -153,6 +153,7 @@ export const onSiteService = createAsyncThunk(
 
 export const deleteOnSiteService = createAsyncThunk('expert/deleteOnSiteService', async(serviceId) => {
 try{
+    console.log(serviceId)
     const response = await axios.delete(`/api/service-requests/delete-service/${serviceId}`,{ headers : { Authorization : localStorage.getItem('token')}})
     console.log(response.data)
     return response.data

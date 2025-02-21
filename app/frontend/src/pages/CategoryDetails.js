@@ -18,53 +18,50 @@ export default function CategoryDetails() {
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    const storedData = sessionStorage.getItem("selectedServices");
-  
-    if (storedData) {
-      const parsedData = JSON.parse(storedData);
-  
-      if (parsedData.expertId === id) {
-        setSelectedServices(parsedData.selectedServices);
-        dispatch(selectService(parsedData.selectedServices));
-      } else {
-        sessionStorage.removeItem("selectedServices");
-      }
-    }
-  
+
     if (id) {
       dispatch(expertCategoriesBySkills(id));
     }
   }, [dispatch, id]);
   
   const handleSelectService = (category, service) => {
+    if (!category || !service) {
+        console.error("Invalid category or service:", category, service);
+        return;
+    }
+
+    const categoryId = category._id;
+    const categoryName = category.name;
+    const serviceDetails = { _id: service._id, serviceName: service.serviceName, price: service.price };
+
     setSelectedServices((prev) => {
-      let updatedServices = prev.map(item => 
-        item.category._id === category._id 
-          ? { ...item, servicesChoosen: item.servicesChoosen.filter(s => s._id !== service._id) }
-          : item
-      );
-  
-      const categoryExists = prev.find(item => item.category._id === category._id);
-      
-      if (!categoryExists || categoryExists.servicesChoosen.every(s => s._id !== service._id)) {
-        updatedServices.push({ category, servicesChoosen: [service] });
-      }
-  
-      sessionStorage.setItem(
-        "selectedServices",
-        JSON.stringify({
-          expertId: id,
-          selectedServices: updatedServices,
-        })
-      );
-  
-      dispatch(selectService(updatedServices));
-      return updatedServices;
+        const existingCategory = prev.find(ele => ele._id === categoryId);
+
+        if (existingCategory) {
+            // Check if service already exists
+            const serviceExists = existingCategory.services.some(s => s._id === serviceDetails._id);
+            
+            return prev.map(ele => 
+                ele._id === categoryId
+                    ? {
+                        ...ele,
+                        services: serviceExists
+                            ? ele.services.filter(s => s._id !== serviceDetails._id) // Remove service if exists
+                            : [...ele.services, serviceDetails] // Add service if not exists
+                    }
+                    : ele
+            );
+        } else {
+            // If category doesn't exist, add a new one
+            return [...prev, { _id: categoryId, name: categoryName, services: [serviceDetails] }];
+        }
     });
-  };
-    
+};
+console.log(selectedServices)
+
   const handleBook = () => {
     console.log(selectedServices);
+    sessionStorage.setItem("selectedServices", JSON.stringify(selectedServices));
     dispatch(setSelectedExpert(selectedExpert));
     dispatch(selectService(selectedServices));
     navigate("/service-requests");
@@ -108,27 +105,28 @@ export default function CategoryDetails() {
                             <p className="text-gray-700 font-semibold text-md">{service?.price}</p>
                           </div>
                           <div className="flex justify-end mt-4">
-                            {(() => {
-                              const isSelected = choosenServices.some(
-                                (ele) =>
-                                  ele.category?._id === category._id &&
-                                  ele.servicesChoosen.some((s) => s._id === service._id)
-                              );
+  {(() => {
+    const isSelected = selectedServices.some(
+      (ele) =>
+        ele._id === category._id &&
+        ele.services.some((s) => s._id === service._id)
+    );
 
-                              return (
-                                <button
-                                  onClick={() => handleSelectService(category, service)}
-                                  className={`py-1 px-3 border text-blue-500 font-semibold rounded-md ${
-                                    isSelected
-                                      ? "bg-red-700 text-white"
-                                      : "hover:bg-blue-700 hover:text-white"
-                                  }`}
-                                >
-                                  {isSelected ? "Unselect" : "Select"}
-                                </button>
-                              );
-                            })()}
-                          </div>
+    return (
+      <button
+        onClick={() => handleSelectService(category, service)}
+        className={`py-1 px-3 border text-blue-500 font-semibold rounded-md ${
+          isSelected
+            ? "bg-red-700 text-white"
+            : "hover:bg-blue-700 hover:text-white"
+        }`}
+      >
+        {isSelected ? "Unselect" : "Select"}
+      </button>
+    );
+  })()}
+</div>
+
                         </div>
                       )
                     ))}
@@ -140,50 +138,59 @@ export default function CategoryDetails() {
         </div>
 
         <div className="w-1/3 p-4 mt-4 bg-gray-100 rounded-lg mr-7 flex flex-col justify-between h-full">
-          <h1 className="text-lg font-bold">Selected Services</h1>
-          <div className="flex-1">
-            {choosenServices.length > 0 &&
-              choosenServices.map(
-                (item) =>
-                  item.servicesChoosen.length > 0 && (
-                    <div key={item.category?._id} className="mt-3">
-                      <h2 className="text-md font-semibold">
-                        {item.category.name}
-                      </h2>
+  <h1 className="text-lg font-bold">Selected Services</h1>
+  <div className="flex-1">
+    {selectedServices?.length > 0 &&
+      selectedServices.map((item) => (
+        <div key={item._id} className="mt-3">
+          <h2 className="text-md font-semibold">{item.name}</h2>
 
-                      {item.servicesChoosen.map((service, index) => (
-                        <div className="flex justify-between mb-4" key={index}>
-                          <p>{service.serviceName}</p>
-                          <p>{service.price}</p>
-                          <hr />
-                        </div>
-                      ))}
-                    </div>
-                  )
-              )}
-          </div>
-          <hr />
-          {choosenServices.some((item) => item.servicesChoosen.length > 0) && (
-            <div className="flex flex-col items-end mt-2">
-              <div className="flex justify-between font-bold">
-                <p>Total : </p>
-                <p>
-                  {choosenServices
-                    .reduce((total, item) =>
-                      total + item.servicesChoosen.reduce((subtotal, service) => subtotal + parseFloat(service.price || 0), 0), 0).toFixed(2)}
-                </p>
-              </div>
-              <div className="flex justify-between">
-                <button onClick={handleSaveForLater} className="mt-8 py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-700">
-                  Save for Later
-                </button>
-                <button onClick={handleBook} className="mt-8 py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-700">
-                  Proceed
-                </button>
-              </div>
+          {item.services.map((service) => (
+            <div className="flex justify-between mb-4" key={service._id}>
+              <p>{service.serviceName}</p>
+              <p>${service.price}</p>
+              <hr />
             </div>
-          )}
+          ))}
         </div>
+      ))}
+  </div>
+  <hr />
+  {selectedServices.some((item) => item.services.length > 0) && (
+    <div className="flex flex-col items-end mt-2">
+      <div className="flex justify-between font-bold">
+        <p>Total:</p>
+        <p>
+          ${selectedServices
+            .reduce(
+              (total, item) =>
+                total +
+                item.services.reduce(
+                  (subtotal, service) => subtotal + parseFloat(service.price || 0),
+                  0
+                ),
+              0
+            )
+            .toFixed(2)}
+        </p>
+      </div>
+      <div className="flex justify-between w-full">
+        <button
+          onClick={handleSaveForLater}
+          className="mt-8 py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-700"
+        >
+          Save for Later
+        </button>
+        <button
+          onClick={handleBook}
+          className="mt-8 py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-700"
+        >
+          Proceed
+        </button>
+      </div>
+    </div>
+  )}
+</div>
       </div>
     </>
   );

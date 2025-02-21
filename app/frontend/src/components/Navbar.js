@@ -113,20 +113,26 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
           ) : !isLoggedIn ? (
             <>
               <li>
-                <Link to="/cart" className="hover:text-blue-200 flex items-center mt-1">
-                  <ShoppingCart size={20} />
-                </Link>
-              </li>
-              <li>
-                <button onClick={openLogin} className="hover:text-blue-200">
-                  Login
-                </button>
-              </li>
-              <li>
-                <Link to="/expertlogin" className="hover:text-blue-200">
-                  Other Login
-                </Link>
-              </li>
+                  <Link to="/cart" className="text-white hover:text-blue-400 flex items-center mt-1">
+                    <ShoppingCart size={20} />
+                  </Link>
+                </li>
+                <li>
+  <button 
+    onClick={openLogin} 
+    className="bg-white text-sm text-orange-500 border border-orange-500 px-4 py-1 rounded-full hover:bg-orange-500 hover:text-white transition  font-semibold"
+  >
+    Login
+  </button>
+</li>
+<li>
+  <Link to="/expertlogin">
+    <button className="bg-white text-sm text-orange-500 border border-orange-500 px-4 py-1 rounded-full hover:bg-orange-500 hover:text-white transition font-semibold">
+      I'm an expert
+    </button>
+  </Link>
+</li>
+
             </>
           ) : (
             <li>

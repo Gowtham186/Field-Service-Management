@@ -23,6 +23,9 @@ export default function FilteredExpertsMap({ resultsExperts, searchLocation, coo
     }, [resultsExperts]);
 
     const handleViewDetails = (expert) => {
+        if (expert?.userId?._id) {
+            sessionStorage.setItem("selectedExpertId", expert.userId._id);
+        }        
         dispatch(setSelectedExpert(expert));
         navigate(`/experts/${expert?.userId?._id}`);
     };

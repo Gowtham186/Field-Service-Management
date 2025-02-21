@@ -9,7 +9,7 @@ import { FaLocationArrow } from "react-icons/fa";
 import HeroSection from "./HeroSection";
 
 export default function SearchComponent() {
-  const { resultsExperts, serverError, currentAddress } = useSelector((state) => state.search);
+  const { resultsExperts, serverError, currentAddress, loading } = useSelector((state) => state.search);
   const [searchLocation, setSearchLocation] = useState(currentAddress || "");
   const [searchSkill, setSearchSkill] = useState("");
   const [coords, setCoords] = useState(null);
@@ -19,7 +19,11 @@ export default function SearchComponent() {
 
   useEffect(() => {
     dispatch(fetchSkills());
-  }, []);
+  }, [dispatch]);
+
+  if(loading){
+    <p>Loading...</p>
+  }
 
   const skillOptions = allSkills?.map((skill) => ({ value: skill._id, label: skill.name }));
 
@@ -129,7 +133,7 @@ export default function SearchComponent() {
       )}
 
       {/* Show HeroSection only on the first render (before search) */}
-      {/* {(!resultsExperts || resultsExperts.length === 0) && !serverError && <HeroSection />} */}
+      {(!resultsExperts || resultsExperts.length === 0) && !serverError && <HeroSection />}
 
       {/* Map Section (Replaces HeroSection after search) */}
       {resultsExperts?.length > 0 && (

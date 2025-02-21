@@ -23,7 +23,7 @@ queryCtlr.search = async (req, res) => {
                 });
 
                 if (resource.data.results.length === 0) {
-                    return res.status(400).json({ errors: 'Try another address' });
+                    return res.status(400).json({ errors: 'Invalid location!' });
                 }
 
                 const geometry = resource.data.results[0].geometry;

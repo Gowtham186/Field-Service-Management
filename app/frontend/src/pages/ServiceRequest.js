@@ -33,18 +33,20 @@ export default function ServiceRequest() {
     const errors = {}
 
     const [formData, setFormData] = useState(formInitialState);
-    const selectedServices = JSON.parse(sessionStorage.getItem("selectedServices")).selectedServices || [];
-    console.log(selectedServices)
-    const servicesToDisplay = choosenServices.length > 0 ? choosenServices : selectedServices;
+    const storedServices = JSON.parse(sessionStorage.getItem("selectedServices")) || [];
+    console.log(storedServices);
+
 
     useEffect(() => {
-        const selectedServices = JSON.parse(sessionStorage.getItem("selectedServices")) || [];
-        const expertId = selectedServices.expertId
+        const expertId = sessionStorage.getItem("selectedExpertId");
+    
         if (expertId) {
-            dispatch(getExpertProfile({id : expertId}));
+            dispatch(getExpertProfile({ id: expertId }));
         }
-    }, [dispatch]);
-
+    }, [dispatch]);     
+    
+    console.log(profile)
+    
     useEffect(() => {
         if (currentAddress) {
             setFormData((prevForm) => ({
@@ -128,7 +130,7 @@ export default function ServiceRequest() {
             
             const newFormData = new FormData()
             newFormData.append('name', formData.name )
-            newFormData.append('serviceType', JSON.stringify(servicesToDisplay))
+            newFormData.append('serviceType', JSON.stringify(storedServices))
             newFormData.append('description', formData.description)
             newFormData.append('location', JSON.stringify(formData.location))
             newFormData.append('scheduleDate', formData.scheduleDate)
@@ -143,8 +145,13 @@ export default function ServiceRequest() {
             }
 
             dispatch(bookserviceRequest({newFormData, resetForm}))
-            setIsBooked(true)
-            navigate('/my-bookings')
+                .unwrap()
+                .then(()=>{
+                    setIsBooked(true)
+                    toast.success("Successfully Booked")
+                    navigate('/my-bookings')    
+                })
+                .catch((err)=> console.log(err))
         }
     };
 
@@ -319,13 +326,12 @@ export default function ServiceRequest() {
 
                 <h1 className="text-lg font-bold">Selected Services</h1>
                 <div className="flex-1">
-                {servicesToDisplay.length > 0 &&
-                    servicesToDisplay.map(
-                        (item) =>
-                            item.servicesChoosen.length > 0 && (
-                                <div key={item.category._id} className="mt-3">
-                                    <h2 className="text-sm font-semibold mb-2">{item.category.name}</h2>
-                                    {item.servicesChoosen.map((service, index) => (
+                {storedServices?.length > 0 &&
+                    storedServices?.map(
+                        (item) => (
+                                <div key={item?._id} className="mt-3">
+                                    <h2 className="text-sm font-semibold mb-2">{item?.name}</h2>
+                                    {item.services.map((service, index) => (
                                         <div className="flex justify-between mb-1" key={index}>
                                             <p className="text-sm">{service.serviceName}</p>
                                             <p className="text-sm">{service.price}</p>
@@ -336,28 +342,30 @@ export default function ServiceRequest() {
                     )}
                 </div>
 
-                {servicesToDisplay.some((item) => item.servicesChoosen.length > 0) && (
-                    <div>
-                        <div className="flex justify-between">
-                            <p className="text-sm text-gray-700">Booking Fee:</p>
-                            <p className="text-sm text-gray-700">50.00</p>
-                        </div>
-                        <hr className="my-4" />
-                        <div className="flex justify-between font-bold text-lg">
-                            <p className="text-md">Total:</p>
-                            <p className="text-md">
-                                {servicesToDisplay.reduce(
-                                    (total, item) =>
-                                        total + item.servicesChoosen.reduce(
-                                            (subtotal, service) => subtotal + parseFloat(service.price || 0),
-                                            0
-                                        ),
-                                    50
-                                ).toFixed(2)}
-                            </p>
-                        </div>
-                    </div>
-                )}
+                {storedServices?.some((item) => item?.services?.length > 0) && (
+    <div>
+        <div className="flex justify-between">
+            <p className="text-sm text-gray-700">Booking Fee:</p>
+            <p className="text-sm text-gray-700">50.00</p>
+        </div>
+        <hr className="my-4" />
+        <div className="flex justify-between font-bold text-lg">
+            <p className="text-md">Total:</p>
+            <p className="text-md">
+                {storedServices.reduce(
+                    (total, category) =>
+                        total +
+                        category.services.reduce(
+                            (subtotal, service) => subtotal + parseFloat(service.price || 0),
+                            0
+                        ),
+                    50 // Initial value (booking fee)
+                ).toFixed(2)}
+            </p>
+        </div>
+    </div>
+)}
+
                 {/* {isBooked && (
                     <button type="submit" 
                     onClick={makePayment}

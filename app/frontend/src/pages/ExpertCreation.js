@@ -5,6 +5,7 @@ import { createExpertProfile, fetchSkills } from "../redux/slices.js/expert-slic
 import { useNavigate } from "react-router-dom"
 import { getAddress } from "../redux/slices.js/search-slice"
 import { expertRegister } from "../redux/slices.js/user-slice"
+import { toast } from "react-toastify"
 
 const formInitialState = {
     profilePic : '',
@@ -106,6 +107,7 @@ export default function ExpertCreation() {
                 await dispatch(createExpertProfile({formData, resetForm}))
                     .unwrap()
                     .then(()=>{
+                        toast.success("Profile Details Submitted")
                         navigate('/expert-dashboard')
                     })
                     .catch((err) => {

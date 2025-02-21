@@ -320,7 +320,7 @@ paymentCtlr.webhooks = async (req, res) => {
         );
 
         const session = event.data.object;
-        console.log("Webhook Session Object:", session);
+        // console.log("Webhook Session Object:", session);
 
         const sessionId = session.id; // Initially stored session ID
         const paymentIntentId = session.payment_intent || session.id; // Get actual transaction ID
@@ -360,7 +360,8 @@ paymentCtlr.webhooks = async (req, res) => {
             // Update the service request status based on payment reason
             if (paymentReason === "service") {
                 serviceRequest.status = "paid"; // Full service payment
-            } else if (paymentReason === "bookingFee") {
+            }
+            if (paymentReason === "booking") {
                 serviceRequest.status = "assigned"; // Only booking fee paid
             }
 

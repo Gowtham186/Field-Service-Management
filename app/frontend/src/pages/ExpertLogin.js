@@ -3,13 +3,15 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { expertLogin, getUserProfile } from "../redux/slices.js/user-slice";
 import validator from 'validator'
+import { toast } from "react-toastify";
 
 
 export default function ExpertLogin() {
   const [formData, setFormData] = useState({
-    email: '', 
+    email: localStorage.getItem("rememberEmail") || "", 
     password: '' 
   }) ;
+  const [rememberMe, setRememberMe] = useState(localStorage.getItem("rememberMe") === "true")
   const navigate = useNavigate();
   const [clientErrors, setClientErrors] = useState({});
   const dispatch = useDispatch();
@@ -39,13 +41,14 @@ export default function ExpertLogin() {
     e.preventDefault();
     runClientValidations();
     console.log(formData);
-    const resetForm = () => setFormData({ email: '', password: '' });
+    const resetForm = () => setFormData({ email: rememberMe ? formData.email : '', password: '' });
     if (Object.keys(errors).length !== 0) {
       setClientErrors(errors);
     } else {
       try {
         setClientErrors({});
         await dispatch(expertLogin({ formData, resetForm })).unwrap();
+        toast.success("Successfully loggedIn!")
         const userProfile = await dispatch(getUserProfile()).unwrap();
       
         if (userProfile && userProfile.role) {
@@ -62,6 +65,16 @@ export default function ExpertLogin() {
       }
     }
   };
+
+  useEffect(()=>{
+    if(rememberMe){
+      localStorage.setItem("rememberEmail", formData.email)
+      localStorage.setItem("rememberMe", true)
+    }else{
+      localStorage.removeItem("rememberEmail")
+      localStorage.removeItem("rememberMe")
+    }
+  },[rememberMe, formData.email])
 
   return (
     <div className="flex min-h-screen">
@@ -101,6 +114,20 @@ export default function ExpertLogin() {
           {serverError && serverError.includes('password') && (
             <p className="text-red-500 text-xs text-left mb-3">{serverError}</p>
           )}
+
+          <div className="mt-2 flex items-center">
+              <input 
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={() => setRememberMe(!rememberMe)}
+                className="h-3 w-3 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="rememberMe" className="ml-1 text-xs text-gray-500">
+              Remember Me
+              </label>
+          </div>
+
           <button
             type="submit"
             className="mt-3 py-2 px-4 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"

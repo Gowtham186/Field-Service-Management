@@ -7,7 +7,7 @@ import { payBookingFee } from "../redux/slices.js/service-request-slice";
 import { toast } from "react-toastify";
 
 export default function MyBookings() {
-  const [filter, setFilter] = useState("requested"); // Default filter
+  const [filter, setFilter] = useState("scheduledToday"); // Default filter
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const myBookings  = useSelector((state) => state.customer.myBookings);

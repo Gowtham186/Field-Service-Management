@@ -20,6 +20,7 @@ serviceRequestCtlr.create = async (req, res) => {
         }
 
         console.log(req.files);
+        console.log(body.serviceType)
         
         if (req.files && req.files.length > 0) {
             const uploadImages = req.files.map(file => ({
@@ -48,17 +49,34 @@ serviceRequestCtlr.create = async (req, res) => {
 
         const updateLocation = { address: body.location.address, coords: { lat, lng } };
 
+        
+        
+        const serviceFinal = body.serviceType.map(ele => ({
+            category: ele._id, 
+            servicesChoosen: ele.services.map(service => service._id)
+        }));
+        
+        console.log("serviceFinal", JSON.stringify(serviceFinal, null, 2));
+        
+        body.serviceType = serviceFinal;        
+        
         const serviceRequest = new ServiceRequest({
             ...body,
+            serviceType: serviceFinal, // ✅ Ensure serviceType is properly set
             customerId: req.currentUser.userId,
             location: updateLocation,
             budget: { bookingFee: 50 },
         });
-
-        const selectedServices = body.serviceType.flatMap(({ servicesChoosen }) => servicesChoosen);
+        // ✅ Extract selected service IDs correctly
+        const selectedServices = serviceFinal.flatMap(({ servicesChoosen }) => servicesChoosen);
+        console.log("selectedServices", selectedServices);
+        
+        // ✅ Fetch service prices correctly
         const servicePrices = await Promise.all(selectedServices.map(id => Service.findById(id)));
-        serviceRequest.budget.servicesPrice = servicePrices.reduce((sum, cv) => sum + cv.price, 0);
-
+        console.log("servicePrices", servicePrices);
+        
+        serviceRequest.budget.servicesPrice = servicePrices.reduce((sum, service) => sum + (service?.price || 0), 0);
+        
         let user = await User.findById(req.currentUser.userId);
     
         if (!user.name) {
@@ -76,11 +94,19 @@ serviceRequestCtlr.create = async (req, res) => {
             customerFind.location = updateLocation;
             await customerFind.save();
         }
-
+        
         // Save service request
         await serviceRequest.save();
         console.log(serviceRequest)
         console.log("📢 Attempting to emit newBooking to:", `expert-${serviceRequest?.expertId}`);
+
+        io.to(`customer-${serviceRequest?.customerId}`).emit("newBooking", { request: serviceRequest }, (ack) => {
+            if (ack?.status === "received") {
+                console.log(`✅ newBooking received by customer at ${ack.timestamp}`);
+            } else {
+                console.log(`⚠️ newBooking emitted, but no acknowledgment from customer!`);
+            }
+        });
 
         io.to(`expert-${serviceRequest?.expertId}`).emit("newBooking", { request: serviceRequest }, (ack) => {
             if (ack?.status === "received") {
