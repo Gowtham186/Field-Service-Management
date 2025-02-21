@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getExpertReviews } from "../redux/slices.js/expert-slice";
+import { getExpertReviews } from "../../redux/slices.js/expert-slice";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function ExpertReviewsPage() {

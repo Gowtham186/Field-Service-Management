@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getExpertProfile, updateAvailability } from "../redux/slices.js/expert-slice";
+import { getExpertProfile, updateAvailability } from "../../redux/slices.js/expert-slice";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";

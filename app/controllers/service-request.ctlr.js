@@ -107,7 +107,7 @@ serviceRequestCtlr.getAllServiceRequests = async (req, res) => {
         const page = parseInt(req.query.page) || 1
         const limit = parseInt(req.query.limit) || 5
         const skip = (page - 1) * limit 
-
+        console.log(sort)
         const pipeline = [
             { $lookup: { from: "users", localField: "customerId", foreignField: "_id", as: "customer"}},
             { $unwind: { path: "$customer", preserveNullAndEmptyArrays: true } },
@@ -137,8 +137,8 @@ serviceRequestCtlr.getAllServiceRequests = async (req, res) => {
         }
 
         let sortOrder = {}
-        if(sort === 'asc') sortOrder = { "budget.finalPrice" : 1}
-        if(sort === 'desc') sortOrder = { "budget.finalPrice" : -1}
+        if(sort === 'asc') sortOrder = { "budget.servicesPrice" : 1}
+        if(sort === 'desc') sortOrder = { "budget.servicesPrice" : -1}
 
         if(sort) pipeline.push({ $sort : sortOrder})
 

@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from 'uuid'
 import { deleteCategoryAndServices, deleteManyServices, deleteService, getCategoriesWithServices, newCategoryWithServices, updateCategoryWithServices } from "../redux/slices.js/category-slice";
 import { fetchSkills } from "../redux/slices.js/expert-slice";
+import Select from 'react-select'
 
 export default function ManageCategories() {
   const dispatch = useDispatch();
@@ -14,11 +15,23 @@ export default function ManageCategories() {
   const [newServices, setNewServices] = useState([]);
   const [clientErrors, setClientErrors] = useState({})
   const [options, setOptions] = useState([])
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(null);
+  const [categoryOptions, setCategoryOptions] = useState([])
 
   useEffect(() => {
-    dispatch(getCategoriesWithServices());
-  }, [dispatch]);
+      dispatch(getCategoriesWithServices({category}));
+  }, [dispatch, category]);
+
+  useEffect(() => {
+    if (categoriesWithServices.length > 0) {
+        const newData = categoriesWithServices.map(ele => ({
+            value: ele._id,
+            label: ele.name
+        }));
+        console.log(newData);
+        setCategoryOptions(newData);
+    }
+}, [categoriesWithServices]);
   
   useEffect(() => {
     dispatch(fetchSkills()).unwrap().then((data) => {
@@ -59,7 +72,6 @@ if(loading){
   return <p>fetching categories</p>
 }
 
-  
   const errors = {
     serviceName :[], price:[]
   }
@@ -213,16 +225,21 @@ if(loading){
     })
   }
 
+  const handleSearchCategory = (selectedOption)=>{
+    console.log("selected", selectedOption)
+    setCategory(selectedOption?.value)
+  }
+
   return (
     <div className="relative max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Manage Categories</h1>
       <div className="flex flex-wrap gap-4 mb-4 items-center justify-between">
-        <input
-          type="text"
-          placeholder="Filter by Category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="border p-2 rounded h-10"
+        <Select 
+          options={categoryOptions}
+          value={categoryOptions?.find(option => option.value === category)}
+          onChange={handleSearchCategory}
+          isClearable={true}
+          placeholder="Search by category"
         />
         <button 
           className="py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 h-10 flex items-center"
@@ -231,7 +248,6 @@ if(loading){
           Add New Category
         </button>
       </div>
-
 
       {categoriesWithServices?.length > 0 ? (
         <div className="space-y-6">
@@ -245,7 +261,6 @@ if(loading){
                 <h2 className="text-lg font-semibold text-gray-700">Skill:</h2>
                 <p className="text-lg font-medium text-gray-900">{ele.skill.name}</p>
               </div>
-
 
               <h2 className="text-lg font-semibold text-gray-700 mt-4">Services:</h2>
               <div className="mt-3 space-y-3">

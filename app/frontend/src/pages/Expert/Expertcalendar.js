@@ -3,7 +3,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getMyServices, setServiceRequestId } from "../redux/slices.js/expert-slice";
+import { getMyServices, setServiceRequestId } from "../../redux/slices.js/expert-slice";
 import { useNavigate } from "react-router-dom";
 
 export default function ExpertCalendar() {

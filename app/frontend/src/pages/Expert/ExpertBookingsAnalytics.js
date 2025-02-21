@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getExpertBookingAnalytics } from "../redux/slices.js/stats-slice";
+import { getExpertBookingAnalytics } from "../../redux/slices.js/stats-slice";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts"; // Import BarChart and Bar
 import dayjs from "dayjs";
 import { FaArrowUp, FaArrowDown } from "react-icons/fa"; // For trend icons

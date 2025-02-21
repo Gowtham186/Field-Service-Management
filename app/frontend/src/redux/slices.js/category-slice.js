@@ -10,9 +10,13 @@ export const fetchCategories = createAsyncThunk('category/fetchCategories', asyn
     }
 })
 
-export const getCategoriesWithServices = createAsyncThunk('category/getCategoriesWithServices', async(_, {rejectWithValue})=>{
+export const getCategoriesWithServices = createAsyncThunk('category/getCategoriesWithServices', 
+    async({category = "" } = {}, {rejectWithValue}) => {
     try{
-        const response = await axios.get('/api/categories')
+        const params = { category }
+        const response = await axios.get('/api/categories', {
+            params
+        })
         console.log(response.data)
         return response.data
     }catch(err){

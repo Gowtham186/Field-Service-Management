@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getMyServices } from "../redux/slices.js/expert-slice";
+import { getMyServices } from "../../redux/slices.js/expert-slice";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 

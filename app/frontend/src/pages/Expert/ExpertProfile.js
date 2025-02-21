@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addNewSkill, changeProfilePic, fetchSkills, getExpertProfile, updateProfile } from "../redux/slices.js/expert-slice";
+import { addNewSkill, changeProfilePic, fetchSkills, getExpertProfile, updateProfile } from "../../redux/slices.js/expert-slice";
 import { useParams } from "react-router-dom";
 import CreatableSelect from 'react-select/creatable';
-import { getUserProfile } from "../redux/slices.js/user-slice";
+import { getUserProfile } from "../../redux/slices.js/user-slice";
 import { ImagePlus } from 'lucide-react'
 
 export default function ExpertProfile() {

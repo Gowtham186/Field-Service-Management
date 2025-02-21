@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getExpertRevenue } from "../redux/slices.js/stats-slice";
+import { getExpertRevenue } from "../../redux/slices.js/stats-slice";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import ExpertRevenueByCategory from "../analytics/ExpertRevenueByCategory";
-import ExpertAvgBookingValueChart from "../analytics/ExpertAvgBookingValue";
+import ExpertRevenueByCategory from "../../analytics/ExpertRevenueByCategory";
+import ExpertAvgBookingValueChart from "../../analytics/ExpertAvgBookingValue";
 
 export default function ExpertRevenue() {
     const dispatch = useDispatch();

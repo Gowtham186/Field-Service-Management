@@ -1,39 +1,38 @@
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../redux/slices.js/user-slice";
+import { 
+  LogOut, User, Calendar, History, DollarSign, 
+  BarChart, Star, ShieldCheck, Users, List, Clipboard 
+} from "lucide-react";
 
 export default function Sidebar({ role }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation(); 
-
+  const location = useLocation();
   const { user } = useSelector((state) => state.user);
 
   const handleLogout = () => {
-    localStorage.setItem("isLoggingOut", "true"); // Flag to prevent unwanted redirects
-    navigate("/"); // Navigate first
-
+    localStorage.setItem("isLoggingOut", "true");
+    navigate("/");
     setTimeout(() => {
-        dispatch(logout());  
-        localStorage.removeItem("token");
-    }, 100); // Delay Redux state update slightly
-};
+      dispatch(logout());
+      localStorage.removeItem("token");
+    }, 100);
+  };
 
-
-
-
-  // Function to check if a link is active
   const isActive = (path) => location.pathname === path;
 
   return (
-<div className="bg-blue-950 h-screen p-4 shadow-md fixed transition-all duration-300 w-24 md:w-48">      
-  <ul className="space-y-4 relative">
+    <div className="bg-blue-950 h-screen p-4 shadow-md fixed transition-all duration-300 w-24 md:w-48">
+      <ul className="space-y-4 relative">
         <div>
           <h1 className="text-xl text-white mb-1">{user && user.name}</h1>
           <button
-            className="mb-3 text-white text-"
+            className="mb-3 text-white text-sm flex items-center gap-2"
             onClick={() => navigate(`/expert/profile/${user._id}`)}
           >
+            <User size={16} />
             View Profile
           </button>
           <hr />
@@ -41,92 +40,91 @@ export default function Sidebar({ role }) {
 
         {role === "expert" && (
           <>
-            <li className="relative">
+            <li>
               <Link
                 to="/expert-dashboard"
-                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+                className={`relative text-white text-sm flex items-center gap-2 ${
+                  isActive("/expert-dashboard") ? "border-l-2 border-white pl-2" : ""
+                }`}
               >
-                {isActive("/expert-dashboard") && (
-                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
-                )}
+                <Clipboard size={16} />
                 Dashboard
               </Link>
             </li>
-            <li className="relative">
+            <li>
               <Link
                 to="/new-bookings"
-                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+                className={`relative text-white text-sm flex items-center gap-2 ${
+                  isActive("/new-bookings") ? "border-l-2 border-white pl-2" : ""
+                }`}
               >
-                {isActive("/new-bookings") && (
-                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
-                )}
+                <List size={16} />
                 New Bookings
               </Link>
             </li>
-            <li className="relative">
+            <li>
               <Link
                 to="/experts/calendar"
-                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+                className={`relative text-white text-sm flex items-center gap-2 ${
+                  isActive("/experts/calendar") ? "border-l-2 border-white pl-2" : ""
+                }`}
               >
-                {isActive("/experts/calendar") && (
-                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
-                )}
+                <Calendar size={16} />
                 My Calendar
               </Link>
             </li>
-            <li className="relative">
+            <li>
               <Link
                 to="/experts/availability"
-                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+                className={`relative text-white text-sm flex items-center gap-2 ${
+                  isActive("/experts/availability") ? "border-l-2 border-white pl-2" : ""
+                }`}
               >
-                {isActive("/experts/availability") && (
-                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
-                )}
+                <ShieldCheck size={16} />
                 Manage Availability
               </Link>
             </li>
-            <li className="relative">
+            <li>
               <Link
                 to={`/experts/${user?._id}/history`}
-                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+                className={`relative text-white text-sm flex items-center gap-2 ${
+                  isActive(`/experts/${user?._id}/history`) ? "border-l-2 border-white pl-2" : ""
+                }`}
               >
-                {isActive(`/experts/${user._id}/history`) && (
-                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
-                )}
+                <History size={16} />
                 Manage History
               </Link>
             </li>
-
-            <li className="relative">
+            <li>
               <Link
                 to="/experts/revenue"
-                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+                className={`relative text-white text-sm flex items-center gap-2 ${
+                  isActive("/experts/revenue") ? "border-l-2 border-white pl-2" : ""
+                }`}
               >
-                {isActive("/experts/revenue") && (
-                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
-                )}
+                <DollarSign size={16} />
                 Revenue
               </Link>
             </li>
-            <li className="relative">
+            <li>
               <Link
                 to="/experts/bookings-analytics"
-                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+                className={`relative text-white text-sm flex items-center gap-2 ${
+                  isActive("/experts/bookings-analytics") ? "border-l-2 border-white pl-2" : ""
+                }`}
               >
-                {isActive("/experts/bookings-analytics") && (
-                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
-                )}
+                <BarChart size={16} />
                 Analytics
               </Link>
             </li>
-            <li className="relative">
+            <li>
               <Link
                 to="/experts/reviews"
-                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+                className={`relative text-white text-sm flex items-center gap-2 ${
+                  isActive("/experts/reviews") ? "border-l-2 border-white pl-2" : ""
+                }`}
               >
-                {isActive("/experts/reviews") && (
-                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
-                )}
+                <Star size={16} />
                 Ratings & Reviews
               </Link>
             </li>
@@ -135,67 +133,70 @@ export default function Sidebar({ role }) {
 
         {role === "admin" && (
           <>
-            <li className="relative">
+            <li>
               <Link
                 to="/admin-dashboard"
-                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+                className={`relative text-white text-sm flex items-center gap-2 ${
+                  isActive("/admin-dashboard") ? "border-l-2 border-white pl-2" : ""
+                }`}
               >
-                {isActive("/admin-dashboard") && (
-                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
-                )}
+                <Clipboard size={16} />
                 Admin Dashboard
               </Link>
             </li>
-            <li className="relative">
+            <li>
               <Link
                 to="/verify-experts"
-                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+                className={`relative text-white text-sm flex items-center gap-2 ${
+                  isActive("/verify-experts") ? "border-l-2 border-white pl-2" : ""
+                }`}
               >
-                {isActive("/verify-experts") && (
-                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
-                )}
+                <ShieldCheck size={16} />
                 Verify Experts
               </Link>
             </li>
-            <li className="relative">
+            <li>
               <Link
                 to="/manage-experts"
-                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+                className={`relative text-white text-sm flex items-center gap-2 ${
+                  isActive("/manage-experts") ? "border-l-2 border-white pl-2" : ""
+                }`}
               >
-                {isActive("/manage-experts") && (
-                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
-                )}
+                <Users size={16} />
                 Manage Experts
               </Link>
             </li>
-            <li className="relative">
+            <li>
               <Link
                 to="/manage-categories"
-                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+                className={`relative text-white text-sm flex items-center gap-2 ${
+                  isActive("/manage-categories") ? "border-l-2 border-white pl-2" : ""
+                }`}
               >
-                {isActive("/manage-categories") && (
-                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
-                )}
+                <List size={16} />
                 Manage Categories & Services
               </Link>
             </li>
-            <li className="relative">
+            <li>
               <Link
                 to="/manage-bookings"
-                className={`block text-white text-sm hover:text-blue-700 pl-4 relative`}
+                className={`relative text-white text-sm flex items-center gap-2 ${
+                  isActive("/manage-bookings") ? "border-l-2 border-white pl-2" : ""
+                }`}
               >
-                {isActive("/manage-bookings") && (
-                  <span className="absolute left-0 top-0 h-full w-1 bg-white"></span>
-                )}
+                <Clipboard size={16} />
                 Manage Bookings
               </Link>
             </li>
-            
           </>
         )}
 
         <li>
-          <button onClick={handleLogout} className="text-white text-sm">
+          <button
+            onClick={handleLogout}
+            className="text-white text-sm flex items-center gap-2"
+          >
+            <LogOut size={16} />
             Logout
           </button>
         </li>

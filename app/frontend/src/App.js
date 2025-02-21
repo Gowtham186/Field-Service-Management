@@ -15,12 +15,12 @@ import { getUserProfile } from './redux/slices.js/user-slice';
 import ManageCategories from './pages/ManageCategories';
 import ExpertDetails from './pages/ExpertDetails';
 import CategoryDetails from './pages/CategoryDetails';
-import ExpertAvailability from './components/ExpertAvailability';
+import ExpertAvailability from './pages/Expert/ExpertAvailability';
 import ServiceRequest from './pages/ServiceRequest';
-import ExpertDashboard from './pages/ExpertDashboard';
+import ExpertDashboard from './pages/Expert/ExpertDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ManageExperts from './pages/ManageExperts';
-import ExpertCalendar from './pages/Expertcalendar';
+import ExpertCalendar from './pages/Expert/Expertcalendar';
 // import ManageBookings from './pages/NewBookings';
 import NewBookings from './pages/NewBookings';
 import ServiceDetails from './pages/ServiceDetails';
@@ -31,17 +31,17 @@ import { ToastContainer } from 'react-toastify';
 import NotificationComponent from './components/NotificationComponent';
 import WorkTracking from './pages/WorkTracking';
 import ManageBookings from './pages/ManageBookings';
-import ExpertProfile from './pages/ExpertProfile';
+import ExpertProfile from './pages/Expert/ExpertProfile';
 import ProtectedRoute from './components/ProtectedRoute';
 import Success from './components/Success';
 import Failed from './components/Failed';
 import ServiceInvoice from './pages/ServiceInvoice';
 import CustomerCalendar from './pages/CustomerCalendar';
 import Cart from './pages/Cart';
-import ExpertRevenue from './pages/ExpertRevenue';
-import ExpertBookingsAnalytics from './pages/ExpertBookingsAnalytics';
-import ExpertReviewsPage from './pages/ExpertReviewsPage';
-import ExpertHistory from './pages/ExpertHistory';
+import ExpertRevenue from './pages/Expert/ExpertRevenue';
+import ExpertBookingsAnalytics from './pages/Expert/ExpertBookingsAnalytics';
+import ExpertReviewsPage from './pages/Expert/ExpertReviewsPage';
+import ExpertHistory from './pages/Expert/ExpertHistory';
 
 function App() {
   const dispatch = useDispatch()

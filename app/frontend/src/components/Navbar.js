@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { Edit, X, CalendarDays, ShoppingCart } from "lucide-react"; // Importing icons
+import { Edit, X, CalendarDays, ShoppingCart, ClipboardList, UserRound } from "lucide-react"; // Importing icons
 
 import CustomerLogin from "../pages/CustomerLogin";
 import { logout, updateUser } from "../redux/slices.js/user-slice"; // Import updateUser action
@@ -24,10 +24,10 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
   const closeLogin = () => setIsLoginOpen(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");  // Clear the token from localStorage
-    dispatch(logout());  // Dispatch the logout action
-    setIsProfileOpen(false);  // Close the profile dropdown
-    navigate("/");  // Navigate to the home page after logout
+    localStorage.removeItem("token");  
+    dispatch(logout());  
+    setIsProfileOpen(false);  
+    navigate("/");  
   };
 
   useEffect(() => {
@@ -73,25 +73,24 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
           {isLoggedIn && user?.role === "customer" ? (
             <>
               <li>
-                <Link to="/my-bookings" className="hover:text-blue-200">
-                  My Bookings
+                <Link to="/my-bookings" className="hover:text-blue-200" title="My Bookings">
+                <ClipboardList size={20} />
                 </Link>
               </li>
               <li>
-                <Link to="/cart" className="hover:text-blue-200 flex items-center space-x-1">
-                  <ShoppingCart size={20} />
-                </Link>
-              </li>
-              <li>
-                <Link to="/my-calendar" className="hover:text-blue-200 flex items-center space-x-1">
+                <Link to="/my-calendar" className="hover:text-blue-200 flex items-center space-x-1" title="My Calendar">
                   <CalendarDays size={18} />
-                  <span>My Calendar</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/cart" className="hover:text-blue-200 flex items-center space-x-1" title="My Cart">
+                  <ShoppingCart size={20} />
                 </Link>
               </li>
 
               <li className="relative" ref={profileRef}>
                 <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="hover:text-blue-200 focus:outline-none">
-                  Profile
+                <UserRound size={20} />
                 </button>
 
                 {isProfileOpen && (

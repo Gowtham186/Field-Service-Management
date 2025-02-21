@@ -3,6 +3,7 @@ import Category from "../models/category-model.js";
 import Service from "../models/service-model.js";
 import categoryValidation from "../validators/category-validation.js";
 import Skill from "../models/skill-model.js";
+import mongoose from "mongoose";
 
 const categoryCtlr = {}
 
@@ -150,8 +151,18 @@ categoryCtlr.getSingleService = async(req,res)=>{
 
 //
 categoryCtlr.categoriesWithServices = async (req,res)=>{
+    const category = req.query.category || ""
+    console.log("category", category)
     try{
-        const categories = await Category.aggregate([
+        const pipeline = []
+
+        if(category){
+            pipeline.push({
+                $match : { _id : new mongoose.Types.ObjectId(category)}
+            })
+        }
+
+        pipeline.push(
             {
                 $lookup : {
                     from : "services",
@@ -173,8 +184,9 @@ categoryCtlr.categoriesWithServices = async (req,res)=>{
                     skill: { $arrayElemAt: ["$skill", 0] } // Extract the first (and only) element from the skill array
                 }
             }
-        ])
-        //console.log(categories)
+        )
+        const categories = await Category.aggregate(pipeline)
+        console.log(categories)
         res.json(categories)
     }catch(err){
         console.log(err)
@@ -265,4 +277,3 @@ categoryCtlr.getCategoryAndServicesBySkill = async(req,res)=>{
 }
 
 export default categoryCtlr
-
