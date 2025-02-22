@@ -84,9 +84,12 @@ const customerSlice = createSlice({
         setCurrentService : (state,action)=>{
             state.workingService = action.payload
         },
-        updateNewBooking : (state,action)=>{
-            state.myBookings.push(action.payload)
-        },
+        updateNewBooking: (state, action) => {
+            if (!state.myBookings) {
+              state.myBookings = []; // Ensure it is an array before pushing
+            }
+            state.myBookings.push(action.payload);
+          },          
         customerBookingStatusUpdated: (state, action) => {
             const updatedBooking = action.payload;
             state.myBookings = state.myBookings.map(booking =>

@@ -1,13 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../config/axios";
 
-export const getTotalRevenue = createAsyncThunk('stats/getTotalRevenue', async()=>{
+export const getTotalRevenue = createAsyncThunk('stats/getTotalRevenue', async(_, {rejectWithValue})=>{
     try{
         const response = await axios.get('/api/stats/total-revenue', { headers : { Authorization : localStorage.getItem('token')}})
         console.log(response.data)
         return response.data
     }catch(err){
         console.log(err)
+        return rejectWithValue.response.data.errors
     }
 })
 
@@ -35,8 +36,31 @@ export const getExpertBookingAnalytics = createAsyncThunk(
         console.error(err);  // Log any errors
       }
     }
-  );
+);
 
+export const fetchStatsCounts = createAsyncThunk('stats/statsCoutns',
+    async() => {
+        try{
+            const response = await axios.get('/api/stats/counts')
+            console.log(response.data)
+            return response.data
+        }catch(err){
+            console.log(err)
+        }
+    }
+)
+
+export const fetchAdminBookingsAnalytics = createAsyncThunk(
+    "stats/fetchAdminBookingsAnalytics",
+    async (_, { rejectWithValue }) => {
+        try {
+        const response = await axios.get("/api/stats/bookings-analytics");
+        return response.data;
+        } catch (error) {
+        return rejectWithValue(error.response.data);
+        }
+    }
+);  
 
 const statsSlice = createSlice({
     name : 'stats',
@@ -55,6 +79,9 @@ const statsSlice = createSlice({
             previousBookings :0,
             growth : null,
             bookings : []
+        },
+        allAnalytics : {
+            
         }
     },
     extraReducers : (builder)=>{
@@ -93,6 +120,12 @@ const statsSlice = createSlice({
               bookingsByCategory : action?.payload?.bookingsByCategory
             };
           });
+        builder.addCase(fetchStatsCounts.pending, (state)=>{
+            state.loading = true
+        })
+        builder.addCase(fetchStatsCounts.fulfilled, (state,action)=>{
+            state.loading = false
+        })
           
     }
 })

@@ -53,14 +53,14 @@ categoryCtlr.create = async (req, res) => {
 };
 
 
-// categoryCtlr.getAllCategory = async(req,res)=>{
-//     try{
-//         const allcategory = await Category.find()
-//         res.json(allcategory)
-//     }catch(err){
-//        return res.status(500).json({errors : 'something went wrong'})
-//     }
-// }
+categoryCtlr.getAllCategory = async(req,res)=>{
+    try{
+        const allcategory = await Category.find()
+        res.json(allcategory)
+    }catch(err){
+       return res.status(500).json({errors : 'something went wrong'})
+    }
+}
 
 categoryCtlr.getCategory = async (req,res)=>{
     const errors = validationResult(req)

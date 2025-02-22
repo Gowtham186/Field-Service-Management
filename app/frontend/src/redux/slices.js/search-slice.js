@@ -71,6 +71,7 @@ const searchSlice = createSlice({
         })
         
         builder.addCase(querying.rejected, (state,action)=>{
+            state.loading = false
             state.serverError = action.payload
             state.resultsExperts = null
         })

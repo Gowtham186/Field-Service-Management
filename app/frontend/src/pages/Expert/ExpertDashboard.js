@@ -17,9 +17,9 @@ export default function ExpertDashboard(){
             <div>
                 <OngoingService />
             </div>
-            <div>
+            {/* <div>
                 <UpcomingService />
-            </div>
+            </div> */}
             
         </>
     )

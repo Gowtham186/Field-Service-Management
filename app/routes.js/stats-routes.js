@@ -6,6 +6,10 @@ import statsCtlr from "../controllers/statsCtlr.js"
 const router = express.Router()
 
 router.get('/stats/total-revenue', authenticateUser, authorizeUser(['admin']), statsCtlr.totalRevenue)
+router.get('/stats/counts', statsCtlr.getStatCounts)
+router.get("/stats/bookings-analytics", statsCtlr.allBookingsAnalytics);
+
+
 // stats route for expert revenue
 router.get('/stats/experts/:id/revenue', authenticateUser, authorizeUser(['expert']), statsCtlr.expertRevenue);
 router.get('/stats/experts/:id/bookings', authenticateUser, authorizeUser(['expert']), statsCtlr.expertBookingsAnalytics)
