@@ -24,9 +24,11 @@ export default function Sidebar({ role }) {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="bg-blue-950 h-screen p-4 shadow-md fixed transition-all duration-300 w-24 md:w-48">
-      <ul className="space-y-4 relative">
+    <div className="bg-blue-950 h-screen p-4 shadow-md fixed transition-all duration-300 w-24 md:w-48 flex flex-col">
+      <ul className="space-y-4 flex-grow">
         <div>
+          <h1 className="text-xl font-semibold text-white mb-1">FixItNow</h1>
+          <hr />
           <h1 className="text-xl text-white mb-1">{user && user.name}</h1>
           <button
             className="mb-3 text-white text-sm flex items-center gap-2"
@@ -190,17 +192,17 @@ export default function Sidebar({ role }) {
             </li>
           </>
         )}
-
-        <li>
-          <button
-            onClick={handleLogout}
-            className="text-white text-sm flex items-center gap-2"
-          >
-            <LogOut size={16} />
-            Logout
-          </button>
-        </li>
       </ul>
+      <hr className="mb-3"/>
+      <div className="mt-auto">
+        <button
+          onClick={handleLogout}
+          className="text-white text-sm flex items-center gap-2 w-full"
+        >
+          <LogOut size={16} />
+          Logout
+        </button>
+      </div>
     </div>
   );
 }

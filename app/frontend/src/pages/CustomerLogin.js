@@ -59,7 +59,6 @@ export default function CustomerLogin({ closeLogin }) {
 
   const handleSubmit = async(e) => {
     e.preventDefault();
-    console.log('sekjfn')
     runClientValidations();
     
     if (Object.keys(errors).length !== 0) {
@@ -77,46 +76,47 @@ export default function CustomerLogin({ closeLogin }) {
       }
     }
   };
-  const verifyOtp = async (e)=>{
-    e.preventDefault()
-    console.log('sdjf')
+
+  const verifyOtp = async (e) => {
+    e.preventDefault();
     otpClientValidations();
     
     const verifyOtpData = { 
-        identifier : phone_number,
-        otp : otp
-    }
-    const resetForm = ()=>{
-        setPhoneNumber('')
-        setOtp('')
-    }
+        identifier: phone_number,
+        otp: otp
+    };
+    
+    const resetForm = () => {
+        setPhoneNumber('');
+        setOtp('');
+    };
+
     if (Object.keys(errors).length !== 0) {
-      setClientErrors(errors);
+        setClientErrors(errors);
     } else {
-        try{
+        try {
             setClientErrors({});
-            await dispatch(verifyOtpApi({verifyOtpData, resetForm})).unwrap();
+            await dispatch(verifyOtpApi({ verifyOtpData, resetForm })).unwrap();
             await dispatch(getUserProfile()).unwrap();
+            if (closeLogin) closeLogin(); 
               
             toast.success("OTP verified! 🎉", { autoClose: 1000 });
-            toast.success("Successfully loggedIn! 🎉", { autoClose: 2000 });
+            toast.success("Successfully logged in! 🎉", { autoClose: 2000 });
 
-            if (closeLogin) closeLogin(); // Close login modal if function exists
+            // Retrieve stored path and navigate back after login
+            const prevPath = localStorage.getItem("prevPath") || "/";  
+            localStorage.removeItem("prevPath"); // Clear after using
+            
+            navigate(prevPath, { replace: true });
 
-            // Redirect to the stored path after login
-            setTimeout(() => {
-                const prevPath =  "/";
-                localStorage.removeItem("prevPath"); // Remove it after using
-                navigate(prevPath);
-            }, 200);
-
-        }catch(err){
-          toast.error("Invalid OTP. Please try again. ❌", { autoClose: 2000 });
-          console.log(err)
+        } catch (err) {
+            toast.error("Invalid OTP. Please try again. ❌", { autoClose: 2000 });
+            console.log(err);
         }
-      
     }
-  }
+};
+
+
 
   return (
     <div

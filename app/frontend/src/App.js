@@ -21,7 +21,6 @@ import ExpertDashboard from './pages/Expert/ExpertDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ManageExperts from './pages/ManageExperts';
 import ExpertCalendar from './pages/Expert/Expertcalendar';
-// import ManageBookings from './pages/NewBookings';
 import NewBookings from './pages/NewBookings';
 import ServiceDetails from './pages/ServiceDetails';
 import MyBookings from './pages/MyBookings';
@@ -43,6 +42,8 @@ import ExpertBookingsAnalytics from './pages/Expert/ExpertBookingsAnalytics';
 import ExpertReviewsPage from './pages/Expert/ExpertReviewsPage';
 import ExpertHistory from './pages/Expert/ExpertHistory';
 import ResetPassword from './pages/ResetPassowrd';
+import UnauthorizedPage from './components/UnauthorizedPage';
+import NotFoundPage from './components/NotFoundPage';
 
 function App() {
   const dispatch = useDispatch()
@@ -91,98 +92,101 @@ function App() {
             </MainLayout>
             }/>
           <Route path="/service-requests" element={
-            <MainLayout>
-              <ServiceRequest />
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <ServiceRequest />
+              </MainLayout>  
+            </ProtectedRoute>
             }/>
           <Route path="/track-expert/:expertId" element={<CustomerTracking />}/>
           <Route path="/track-work/:bookingId" element={<ServiceInvoice />}/>
 
           {/* expert */}
           <Route path='/expertlogin' element={<ExpertLogin />}/>
-          <Route path='/expertregister' element={<ExpertRegister />}/>
-
+          <Route path='/expertregister' element={
+            <ExpertRegister />
+          }/>
           <Route path='/create-expert' element={
-            <ProtectedRoute>
+            <ProtectedRoute role='expert'>
               <ExpertCreation />
             </ProtectedRoute>}/>
           <Route path="/expert-dashboard" element={ 
-            <ProtectedRoute>
+            <ProtectedRoute role='expert'>
               <MainLayout> 
                 <ExpertDashboard />
               </MainLayout>
             </ProtectedRoute>
           }/>
           <Route path="/experts/availability" element={ 
-            <ProtectedRoute>
+            <ProtectedRoute role='expert'>
               <MainLayout> 
                 <ExpertAvailability />
               </MainLayout>
             </ProtectedRoute>
           }/>
           <Route path="/new-bookings" element={ 
-            <ProtectedRoute>
+            <ProtectedRoute role='expert'>
               <MainLayout> 
                 <NewBookings />
               </MainLayout>
             </ProtectedRoute>
           }/>
           <Route path="/experts/calendar" element={ 
-            <ProtectedRoute>
+            <ProtectedRoute role='expert'>
               <MainLayout> 
                 <ExpertCalendar />
               </MainLayout>
             </ProtectedRoute>
           }/>
           <Route path="/service-details" element={ 
-            <ProtectedRoute>
+            <ProtectedRoute role='expert'>
               <MainLayout> 
                 <ServiceDetails />
               </MainLayout>
             </ProtectedRoute>
           }/>
           <Route path="/live-tracking/:serviceId" element={
-            <ProtectedRoute>
+            <ProtectedRoute role='expert'>
               <LiveTracking />
             </ProtectedRoute>}/> 
 
           <Route path="/service-requests/:id" element={ 
-            <ProtectedRoute>
+            <ProtectedRoute role='expert'>
               <MainLayout>
                 <WorkTracking />
               </MainLayout>
             </ProtectedRoute>
           }/>
           <Route path="/expert/profile/:id" element={
-            <ProtectedRoute>
+            <ProtectedRoute role='expert'>
               <MainLayout>
                 <ExpertProfile />
               </MainLayout>
             </ProtectedRoute> 
           }/>
           <Route path="/experts/:id/history" element={
-            <ProtectedRoute>
+            <ProtectedRoute role='expert'>
               <MainLayout>
                 <ExpertHistory />
               </MainLayout>
             </ProtectedRoute> 
           }/>
           <Route path="/experts/revenue" element={
-            <ProtectedRoute>
+            <ProtectedRoute role='expert'>
               <MainLayout>
                 <ExpertRevenue />
               </MainLayout>
             </ProtectedRoute> 
           }/>
           <Route path="/experts/bookings-analytics" element={
-            <ProtectedRoute>
+            <ProtectedRoute role='expert'>
               <MainLayout>
                 <ExpertBookingsAnalytics />
               </MainLayout>
             </ProtectedRoute> 
           }/>
           <Route path="/experts/reviews" element={
-            <ProtectedRoute>
+            <ProtectedRoute role='expert'>
               <MainLayout>
                 <ExpertReviewsPage />
               </MainLayout>
@@ -199,35 +203,35 @@ function App() {
           
           {/* admin */}
           <Route path="/admin-dashboard" element={ 
-            <ProtectedRoute>
+            <ProtectedRoute role='admin'>
               <MainLayout> 
                 <AdminDashboard />
               </MainLayout>
             </ProtectedRoute>
           }/>
           <Route path="/verify-experts" element={ 
-            <ProtectedRoute>
+            <ProtectedRoute role='admin'>
               <MainLayout> 
                 <VerifyExperts />
               </MainLayout>
             </ProtectedRoute>
           }/>
           <Route path="/manage-experts" element={ 
-            <ProtectedRoute>
+            <ProtectedRoute role='admin'>
               <MainLayout> 
                 <ManageExperts />
               </MainLayout>
             </ProtectedRoute>
           }/>
           <Route path="/manage-categories" element={ 
-            <ProtectedRoute>
+            <ProtectedRoute role='admin'>
               <MainLayout> 
                 <ManageCategories />
               </MainLayout>
             </ProtectedRoute>
           }/>
           <Route path="/manage-bookings" element={ 
-            <ProtectedRoute>
+            <ProtectedRoute role='admin'>
               <MainLayout> 
                 <ManageBookings />
               </MainLayout>
@@ -237,6 +241,8 @@ function App() {
           {/* payment */}
           <Route path='/payment/success' element={<Success />}/>
           <Route path='/payment/failed' element={<Failed />}/>
+          <Route path='/unauthorized' element={<UnauthorizedPage />}/>
+          <Route path='*' element={<NotFoundPage />}/>
 
         </Routes>
     </>

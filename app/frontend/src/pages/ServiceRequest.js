@@ -343,48 +343,29 @@ export default function ServiceRequest() {
                 </div>
 
                 {storedServices?.some((item) => item?.services?.length > 0) && (
-    <div>
-        <div className="flex justify-between">
-            <p className="text-sm text-gray-700">Booking Fee:</p>
-            <p className="text-sm text-gray-700">50.00</p>
-        </div>
-        <hr className="my-4" />
-        <div className="flex justify-between font-bold text-lg">
-            <p className="text-md">Total:</p>
-            <p className="text-md">
-                {storedServices.reduce(
-                    (total, category) =>
-                        total +
-                        category.services.reduce(
-                            (subtotal, service) => subtotal + parseFloat(service.price || 0),
-                            0
-                        ),
-                    50 // Initial value (booking fee)
-                ).toFixed(2)}
-            </p>
-        </div>
-    </div>
-)}
-
-                {/* {isBooked && (
-                    <button type="submit" 
-                    onClick={makePayment}
-                    className="py-2 px-4 bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
-                        Pay Booking Fee
-                    </button>
-                )} */}
-                
-            </div>
-            {/* {greetCard && (
-                <div
-                className="absolute top-1/2 left-1/2 bg-opacity-50 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-lg p-6 w-96 text-center z-50"
-                >
-                    <h1>Thank you!! </h1>
-                    <button
-                        onClick={()=> navigate('/')}
-                    >Home</button>
+                <div>
+                    <div className="flex justify-between">
+                        <p className="text-sm text-gray-700">Booking Fee:</p>
+                        <p className="text-sm text-gray-700">50.00</p>
+                    </div>
+                    <hr className="my-4" />
+                    <div className="flex justify-between font-bold text-lg">
+                        <p className="text-md">Total:</p>
+                        <p className="text-md">
+                            {storedServices.reduce(
+                                (total, category) =>
+                                    total +
+                                    category.services.reduce(
+                                        (subtotal, service) => subtotal + parseFloat(service.price || 0),
+                                        0
+                                    ),
+                                50 // Initial value (booking fee)
+                            ).toFixed(2)}
+                        </p>
+                    </div>
                 </div>
-            )} */}
+            )}
+            </div>
         </div>
         </>
     );

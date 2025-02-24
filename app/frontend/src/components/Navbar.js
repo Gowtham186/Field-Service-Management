@@ -52,15 +52,10 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
     setIsEditOpen(false);
   };
 
-  // Determine Navbar Color
-  const navbarColor = isLoggedIn && (user?.role === "expert" || user?.role === "admin") 
-    ? "bg-blue-950"
-    : "bg-orange-500";
-
   return (
     <div>
       {/* Navbar with dynamic color */}
-      <div className={`${navbarColor} h-14 min-h-[56px] flex items-center px-6 shadow-md fixed top-0 left-0 w-full z-50`}>
+      <div className='bg-orange-500 h-14 min-h-[56px] flex items-center px-6 shadow-md fixed top-0 left-0 w-full z-50'>
         {(user?.role === "customer" || !isLoggedIn) ? (
           <Link to="/" className="text-white font-bold text-xl hover:text-blue-200">
             FixItNow
@@ -118,21 +113,20 @@ export default function Navbar({ setIsLoginOpen, isLoginOpen }) {
                   </Link>
                 </li>
                 <li>
-  <button 
-    onClick={openLogin} 
-    className="bg-white text-sm text-orange-500 border border-orange-500 px-4 py-1 rounded-full hover:bg-orange-500 hover:text-white transition  font-semibold"
-  >
-    Login
-  </button>
-</li>
-<li>
-  <Link to="/expertlogin">
-    <button className="bg-white text-sm text-orange-500 border border-orange-500 px-4 py-1 rounded-full hover:bg-orange-500 hover:text-white transition font-semibold">
-      I'm an expert
-    </button>
-  </Link>
-</li>
-
+                <button 
+                  onClick={openLogin} 
+                  className="bg-white text-sm text-orange-500 border border-orange-500 px-4 py-1 rounded-full hover:bg-orange-500 hover:text-white transition  font-semibold"
+                >
+                  Login
+                </button>
+              </li>
+              <li>
+                <Link to="/expertlogin">
+                  <button className="bg-white text-sm text-orange-500 border border-orange-500 px-4 py-1 rounded-full hover:bg-orange-500 hover:text-white transition font-semibold">
+                    I'm an expert
+                  </button>
+                </Link>
+              </li>
             </>
           ) : (
             <li>
