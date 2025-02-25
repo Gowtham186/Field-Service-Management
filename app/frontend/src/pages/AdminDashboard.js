@@ -19,7 +19,7 @@ export default function DashboardHome() {
   const [selectedAnalytics, setSelectedAnalytics] = useState(null);
 
   useEffect(() => {
-    async function fetchStats() {
+    (async()=> {
       try {
         const revenueRes = await dispatch(getTotalRevenue()).unwrap();
         const statsRes = await dispatch(fetchStatsCounts()).unwrap();
@@ -34,8 +34,7 @@ export default function DashboardHome() {
       } catch (err) {
         console.log("Error fetching stats", err);
       }
-    }
-    fetchStats();
+    })()
   }, [dispatch]);
 
   if (loading) return <p>Loading...</p>;

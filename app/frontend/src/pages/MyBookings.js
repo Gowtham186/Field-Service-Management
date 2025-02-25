@@ -131,32 +131,6 @@ export default function MyBookings() {
                   </button>                
                 )}
 
-                  {/* {["in-progress", "scheduledToday"].includes(filter) && booking.expertId?._id && booking.status === "in-progress" && (                   <>
-                    <button
-                      className="bg-blue-500 text-white p-2 mt-2 rounded"
-                      onClick={() =>
-                        navigate(`/track-expert/${booking.expertId._id}`, {
-                          state: {
-                            serviceAddress: booking.location?.address,
-                            serviceCoords: {
-                              latitude: booking.location?.coords.lat,
-                              longitude: booking.location?.coords.lng,
-                            },
-                          },
-                        })
-                      }
-                    >
-                      Track Expert
-                    </button>
-                    <button
-                      className="bg-blue-500 text-white p-2 ml-3 mt-2 rounded"
-                      onClick={() => handleServiceProgress(booking)}
-                    >
-                      Track Work
-                    </button>
-                  </>
-                )} */}
-
                 {["in-progress", "scheduledToday", "assigned"].includes(booking.status) && (
                   <>
                     <button

@@ -10,15 +10,14 @@ export default function ExpertBookingAnalytics() {
     const { user } = useSelector((state) => state.user);
     const { expertBookingAnalytics } = useSelector((state) => state.stats);
   
-    const [period, setPeriod] = useState("month"); // Default period
+    const [period, setPeriod] = useState("month"); 
   
     useEffect(() => {
       if (user?._id) {
-        dispatch(getExpertBookingAnalytics({ id: user?._id, period })); // Fetch analytics based on period
+        dispatch(getExpertBookingAnalytics({ id: user?._id, period })); 
       }
     }, [dispatch, user?._id, period]);
   
-    // Log the analytics data to debug
     console.log("Expert Booking Analytics:", expertBookingAnalytics);
   
     // Function to format raw booking data
@@ -27,8 +26,8 @@ export default function ExpertBookingAnalytics() {
   
       // Convert timestamps to formatted dates
       const formattedData = bookings.map((booking) => ({
-        date: dayjs(booking.timestamp).format("YYYY-MM-DD"), // Ensures correct format
-        bookings: 1, // Each entry represents one booking
+        date: dayjs(booking.timestamp).format("YYYY-MM-DD"),
+        bookings: 1, 
       }));
   
       // Aggregate bookings by date
@@ -58,18 +57,14 @@ export default function ExpertBookingAnalytics() {
     return (
       <>
         <div className="flex gap-2">
-          {/* Left Section without Background */}
           <div className="w-1/4 p-4">
-            {/* Total Bookings (First Row) */}
             <div className="bg-white p-4 rounded-lg shadow">
               <h2 className="text-lg font-semibold">Total Bookings</h2>
               <p className="text-2xl font-bold text-blue-600">{expertBookingAnalytics?.totalBookings || 0}</p>
             </div>
   
-            {/* Gap between the two sections */}
             <div className="my-4"></div>
   
-            {/* Growth & Dynamic Bookings (Second Row) */}
             <div className="bg-white p-4 rounded-lg shadow">
               <h2 className="text-lg font-semibold">Growth & Dynamic Bookings</h2>
               <div className="mt-2">
@@ -90,7 +85,6 @@ export default function ExpertBookingAnalytics() {
                       : "No Change"}
                   </span>
                 </div>
-                {/* Progress Bar */}
                 <div className="mt-2 w-full h-2 bg-gray-200 rounded-full relative">
                   <div
                     className="h-2 rounded-full transition-all duration-300"
@@ -105,7 +99,6 @@ export default function ExpertBookingAnalytics() {
             </div>
           </div>
   
-          {/* Right Section - Booking Trends Chart */}
           <div className="flex-1 bg-white py-3 px-4 rounded-lg shadow">
             <h2 className="text-lg font-semibold">Booking Trends</h2>
             <div className="flex gap-4 mb-2">
@@ -135,7 +128,6 @@ export default function ExpertBookingAnalytics() {
           </div>
         </div>
   
-        {/* New Section - Bookings by Category (Below the main content) */}
         <div className="mt-4">
           <div className="bg-white py-3 px-4 rounded-lg shadow">
             <h2 className="text-lg font-semibold">Bookings by Category</h2>

@@ -88,89 +88,6 @@ statsCtlr.expertRevenue = async(req,res)=>{
     }
 }
 
-// statsCtlr.expertBookingsAnalytics = async(req,res)=>{
-//     const { id } = req.params
-//     try{
-//         const expertBookings = await ServiceRequest.find({expertId : id})
-//         // console.log(expertBookings)
-//         res.json({
-//             totalBookings : expertBookings.length,
-//             bookings : expertBookings
-//         })
-//     }catch(err){
-//         console.log(err)
-//         return res.status(500).json({errors : 'something went wrong'})
-//     }
-// }
-
-// statsCtlr.expertBookingsAnalytics = async (req, res) => {
-//     const { id } = req.params;
-//     const { period } = req.query; 
-  
-//     try {
-//       const getStartDate = (period, offset = 0) => {
-//         switch (period) {
-//           case "day":
-//             return dayjs().subtract(offset, "day").startOf("day").toDate();
-//           case "week":
-//             return dayjs().subtract(offset, "week").startOf("week").toDate();
-//           case "month":
-//             return dayjs().subtract(offset, "month").startOf("month").toDate();
-//           case "year":
-//             return dayjs().subtract(offset, "year").startOf("year").toDate();
-//           default:
-//             return dayjs().subtract(offset, "month").startOf("month").toDate();
-//         }
-//       };
-  
-//       // Get start dates for current and previous periods
-//       const currentStartDate = getStartDate(period);
-//       const previousStartDate = getStartDate(period, 1);
-  
-//       // Fetch expert's total bookings
-//       const totalBookings = await ServiceRequest.countDocuments({ expertId: id });
-  
-//       // Fetch bookings for current and previous period in one query
-//       const [currentBookings, previousBookings] = await Promise.all([
-//         ServiceRequest.countDocuments({ expertId: id, createdAt: { $gte: currentStartDate } }),
-//         ServiceRequest.countDocuments({ expertId: id, createdAt: { $gte: previousStartDate, $lt: currentStartDate } })
-//       ]);
-  
-//       // Calculate growth percentage
-//       const growth = previousBookings > 0
-//         ? ((currentBookings - previousBookings) / previousBookings) * 100
-//         : currentBookings > 0 ? 100 : 0;
-  
-//       // Fetch bookings with populated category and services
-//       const serviceRequests = await ServiceRequest.find({ expertId: id })
-//         .populate("serviceType.category", "name")
-//         .populate("serviceType.servicesChoosen", "serviceName price");
-  
-//       // Count bookings per category
-//       const categoryCounts = serviceRequests.reduce((acc, service) => {
-//         service.serviceType?.forEach((serviceItem) => {
-//           const categoryName = serviceItem?.category?.name;
-//           if (categoryName) {
-//             acc[categoryName] = (acc[categoryName] || 0) + 1;
-//           }
-//         });
-//         return acc;
-//       }, {});
-  
-//       res.json({
-//         totalBookings,
-//         currentBookings,
-//         previousBookings,
-//         growth: parseFloat(growth.toFixed(2)),
-//         bookingsByCategory: categoryCounts,
-//       });
-  
-//     } catch (err) {
-//       console.log(err);
-//       return res.status(500).json({ errors: "Something went wrong" });
-//     }
-//   };
-
 statsCtlr.expertBookingsAnalytics = async (req, res) => {
     const { id } = req.params;
     const { period } = req.query;
@@ -335,5 +252,4 @@ statsCtlr.expertBookingsAnalytics = async (req, res) => {
     }
   };
   
-
 export default statsCtlr

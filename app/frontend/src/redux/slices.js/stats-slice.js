@@ -24,16 +24,16 @@ export const getExpertRevenue = createAsyncThunk('stats/getExpertRevenue', async
 
 export const getExpertBookingAnalytics = createAsyncThunk(
     'stats/getExpertBookingsAnalytics',
-    async ({ id, period }) => {  // Accept both `id` and `period`
+    async ({ id, period }) => {  
       try {
         const response = await axios.get(`/api/stats/experts/${id}/bookings`, {
-          params: { period },  // Pass the period as a query parameter
+          params: { period },  
           headers: { Authorization: localStorage.getItem('token') },
         });
-        console.log(response.data);  // Log the response data for debugging
-        return response.data;  // Return the response data to be used in the Redux store
+        console.log(response.data);  
+        return response.data; 
       } catch (err) {
-        console.error(err);  // Log any errors
+        console.error(err); 
       }
     }
 );
