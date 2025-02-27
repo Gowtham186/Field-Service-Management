@@ -52,15 +52,29 @@ export const fetchStatsCounts = createAsyncThunk('stats/statsCoutns',
 
 export const fetchAdminBookingsAnalytics = createAsyncThunk(
     "stats/fetchAdminBookingsAnalytics",
-    async (_, { rejectWithValue }) => {
+    async ({period}, { rejectWithValue }) => {
         try {
-        const response = await axios.get("/api/stats/bookings-analytics");
+        const response = await axios.get("/api/stats/bookings-analytics", { params : {period}});
+        console.log(response.data)
         return response.data;
         } catch (error) {
         return rejectWithValue(error.response.data);
         }
     }
 );  
+
+export const fetchRevenueAnalytics = createAsyncThunk(
+    "stats/fetchRevenueAnalytics",
+    async(_, {rejectWithValue})=>{
+        try{
+            const response = await axios.get("/api/stats/revenue-analytics", { headers : { Authorization : localStorage.getItem("token")}})
+            console.log(response.data)
+            return response.data
+        }catch(err){
+            return rejectWithValue(err.response.data)
+        }
+    }
+)
 
 const statsSlice = createSlice({
     name : 'stats',
@@ -80,9 +94,8 @@ const statsSlice = createSlice({
             growth : null,
             bookings : []
         },
-        allAnalytics : {
-            
-        }
+        allBookingAnalytics:null,
+        revenueAnalytics:null
     },
     extraReducers : (builder)=>{
         builder.addCase(getTotalRevenue.pending, (state, action)=>{
@@ -126,6 +139,24 @@ const statsSlice = createSlice({
         builder.addCase(fetchStatsCounts.fulfilled, (state,action)=>{
             state.loading = false
         })
+        builder.addCase(fetchRevenueAnalytics.pending, (state,action)=>{
+            state.loading = true
+        })
+        builder.addCase(fetchAdminBookingsAnalytics.pending, (state,action)=>{
+            state.loading = true
+        })
+        builder.addCase(fetchAdminBookingsAnalytics.fulfilled, (state,action)=>{
+            state.loading = false
+            state.allBookingAnalytics = action.payload
+        })
+        builder.addCase(fetchRevenueAnalytics.fulfilled, (state,action)=>{
+            state.loading = false
+            state.revenueAnalytics = action.payload
+        })
+        
+
+        
+
           
     }
 })

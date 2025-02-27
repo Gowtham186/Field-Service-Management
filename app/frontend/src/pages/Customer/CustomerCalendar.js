@@ -3,10 +3,10 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getMyBookings  } from "../redux/slices.js/customer-slice";
+import { getMyBookings  } from "../../redux/slices.js/customer-slice";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import { setServiceRequestId } from "../redux/slices.js/expert-slice";
+import Navbar from "../../components/Navbar";
+import { setServiceRequestId } from "../../redux/slices.js/expert-slice";
 
 export default function CustomerCalendar() {
     const dispatch = useDispatch();

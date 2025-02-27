@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { expertRegister, getUserProfile } from "../redux/slices.js/user-slice";
 import validator from 'validator';
 import { useNavigate } from "react-router-dom";
+import ExpertRegisterImg from '../images/expertRegister.jpg'
 
 const formInitialState = {
   name: '',
@@ -171,11 +172,11 @@ export default function ExpertRegister() {
         </form>
       </div>
 
-      <div className="w-1/2 bg-gray-200 flex items-center justify-center">
+      <div className="w-1/2 bg-white flex items-center justify-center">
         <img
-          src="your-image-url-here.jpg"
+          src={ExpertRegisterImg}
           alt="Expert Register"
-          className="w-full h-full object-cover"
+          className="w-full h-3/4 object-cover"
         />
       </div>
     </div>

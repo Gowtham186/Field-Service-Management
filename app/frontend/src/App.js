@@ -7,36 +7,36 @@ import Home from './pages/Home';
 import ExpertRegister from './pages/ExpertRegister';
 import ExpertCreation from './pages/ExpertCreation';
 import MainLayout from './components/MainLayout';
-import VerifyExperts from './pages/VerifyExperts';
+import VerifyExperts from './pages/Admin/VerifyExperts';
 //import MaterialUIForm from './components/Material';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserProfile } from './redux/slices.js/user-slice';
-import ManageCategories from './pages/ManageCategories';
+import ManageCategories from './pages/Admin/ManageCategories';
 import ExpertDetails from './pages/ExpertDetails';
 import CategoryDetails from './pages/CategoryDetails';
 import ExpertAvailability from './pages/Expert/ExpertAvailability';
-import ServiceRequest from './pages/ServiceRequest';
+import ServiceRequest from './pages/Customer/ServiceRequest';
 import ExpertDashboard from './pages/Expert/ExpertDashboard';
-import AdminDashboard from './pages/AdminDashboard';
-import ManageExperts from './pages/ManageExperts';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import ManageExperts from './pages/Admin/ManageExperts';
 import ExpertCalendar from './pages/Expert/Expertcalendar';
-import NewBookings from './pages/NewBookings';
+import NewBookings from './pages/Expert/NewBookings';
 import ServiceDetails from './pages/ServiceDetails';
-import MyBookings from './pages/MyBookings';
-import LiveTracking from './pages/LiveTracking';
-import CustomerTracking from './pages/CustomerTracking';
+import MyBookings from './pages/Customer/MyBookings';
+import LiveTracking from './pages/Tracking/LiveTracking';
+import CustomerTracking from './pages/Tracking/CustomerTracking';
 import { ToastContainer } from 'react-toastify';
 import NotificationComponent from './components/NotificationComponent';
-import WorkTracking from './pages/WorkTracking';
-import ManageBookings from './pages/ManageBookings';
+import WorkTracking from './pages/Expert/WorkTracking';
+import ManageBookings from './pages/Admin/ManageBookings';
 import ExpertProfile from './pages/Expert/ExpertProfile';
 import ProtectedRoute from './components/ProtectedRoute';
 import Success from './components/Success';
 import Failed from './components/Failed';
-import ServiceInvoice from './pages/ServiceInvoice';
-import CustomerCalendar from './pages/CustomerCalendar';
-import Cart from './pages/Cart';
+import ServiceInvoice from './pages/Customer/ServiceInvoice';
+import CustomerCalendar from './pages/Customer/CustomerCalendar';
+import Cart from './pages/Customer/Cart';
 import ExpertRevenue from './pages/Expert/ExpertRevenue';
 import ExpertBookingsAnalytics from './pages/Expert/ExpertBookingsAnalytics';
 import ExpertReviewsPage from './pages/Expert/ExpertReviewsPage';
@@ -92,7 +92,7 @@ function App() {
             </MainLayout>
             }/>
           <Route path="/service-requests" element={
-            <ProtectedRoute>
+            <ProtectedRoute role='customer'>
               <MainLayout>
                 <ServiceRequest />
               </MainLayout>  

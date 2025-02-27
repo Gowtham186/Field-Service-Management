@@ -1,13 +1,12 @@
 import { useDispatch, useSelector } from "react-redux";
-import { getAddress, setSelectedExpert } from "../redux/slices.js/search-slice";
+import { getAddress, setSelectedExpert } from "../../redux/slices.js/search-slice";
 import { useState, useEffect } from "react";
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css";
-import { bookserviceRequest } from "../redux/slices.js/customer-slice";
+import { bookserviceRequest } from "../../redux/slices.js/customer-slice";
 import { useNavigate } from "react-router-dom";
-import CustomerLogin from "./CustomerLogin";
-import { payBookingFee } from "../redux/slices.js/service-request-slice";
-import { getExpertProfile } from "../redux/slices.js/expert-slice";
+import CustomerLogin from "../CustomerLogin";
+import { getExpertProfile } from "../../redux/slices.js/expert-slice";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

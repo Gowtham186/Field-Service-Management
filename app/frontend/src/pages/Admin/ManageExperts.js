@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllExperts } from "../redux/slices.js/expert-slice";
+import { getAllExperts } from "../../redux/slices.js/expert-slice";
 
 export default function ManageExperts() {
     const { experts } = useSelector((state) => state.expert);

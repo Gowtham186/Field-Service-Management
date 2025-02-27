@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getMyBookings, setCurrentService } from "../redux/slices.js/customer-slice";
-import Navbar from "../components/Navbar";
-import { payBookingFee } from "../redux/slices.js/service-request-slice";
+import { getMyBookings, setCurrentService } from "../../redux/slices.js/customer-slice";
+import Navbar from "../../components/Navbar";
+import { payBookingFee } from "../../redux/slices.js/service-request-slice";
 import { toast } from "react-toastify";
 
 export default function MyBookings() {

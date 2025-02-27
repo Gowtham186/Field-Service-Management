@@ -10,23 +10,52 @@ import User from "../models/user-model.js"
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 const statsCtlr = {}
 
-statsCtlr.totalRevenue = async(req,res)=>{
-    try{
-        const payments = await stripe.paymentIntents.list()
+// statsCtlr.totalRevenue = async(req,res)=>{
+//     try{
+//         const payments = await stripe.paymentIntents.list()
 
-        const totalRevenue = payments.data
-            .filter(payment => payment.status === 'succeeded')
-            .reduce((sum, payment) => sum + payment.amount, 0)
-        console.log(totalRevenue / 100)
+//         const paymente = await Payment.find({paymentReason : 'booking'})
+//     const totalBookingFee = paymente.reduce((acc,cv) => acc + cv.amount, 0)
+//     console.log("totalBookingFee", totalBookingFee)
 
-        res.json({totalRevenue : totalRevenue / 100})
+//     const sharePayements = await Payment.find({systemAmount})
+//     const totalServiceFee = sharePayements.reduce((acc,cv) => acc + cv.systemAmount, 0)
+//     console.log("totalServiceFee", totalServiceFee)
+
+//         const totalRevenue = payments.data
+//             .filter(payment => payment.status === 'succeeded')
+//             .reduce((sum, payment) => sum + payment.amount, 0)
+//         console.log(totalRevenue / 100)
+
+//         res.json({totalRevenue : totalRevenue / 100})
         
-    }catch(err){
-        console.log(err)
-        return res.status(500).json({errors : 'something went wrong'})
-    }
-}
+//     }catch(err){
+//         console.log(err)
+//         return res.status(500).json({errors : 'something went wrong'})
+//     }
+// }
 
+statsCtlr.totalRevenue = async (req, res) => {
+  try {
+    const paymente = await Payment.find({ paymentReason: "booking" });
+    const totalBookingFee = paymente.reduce((acc, cv) => acc + cv.amount, 0);
+    console.log("Total Booking Fee:", totalBookingFee);
+
+    // Fetch all system service fee payments
+    const sharePayments = await Payment.find({ systemAmount: { $exists: true } });
+    const totalServiceFee = sharePayments.reduce((acc, cv) => acc + cv.systemAmount, 0);
+    console.log("Total Service Fee:", totalServiceFee);
+
+    // Calculate total revenue (Stripe + Booking Fees + Service Fees)
+    const totalRevenue = totalBookingFee + totalServiceFee;
+
+    // Return the structured response
+    res.json({ totalRevenue });
+  } catch (err) {
+    console.error("Error in totalRevenue:", err);
+    return res.status(500).json({ errors: "Something went wrong" });
+  }
+};
 
 statsCtlr.expertRevenue = async(req,res)=>{
     const { id } = req.params
@@ -86,6 +115,55 @@ statsCtlr.expertRevenue = async(req,res)=>{
         console.log(err)
         return res.status(500).json({errors : 'something went wrong'})
     }
+}
+
+statsCtlr.revenueAnalytics = async(req,res)=>{
+  try{
+    const paymente = await Payment.find({ paymentReason: "booking" });
+    const totalBookingFee = paymente.reduce((acc, cv) => acc + cv.amount, 0);
+    console.log("Total Booking Fee:", totalBookingFee);
+
+    // Fetch all system service fee payments
+    const sharePayments = await Payment.find({ systemAmount: { $exists: true } });
+    const totalServiceFee = sharePayments.reduce((acc, cv) => acc + cv.systemAmount, 0);
+    console.log("Total Service Fee:", totalServiceFee);
+
+    const serviceRequests = await ServiceRequest.find({status : 'completed'})
+            .populate({
+                path: "serviceType.category",
+                model: "Category",
+                select: "name", // ✅ Get only category name
+            })
+            .populate({
+                path: "serviceType.servicesChoosen",
+                model: "Service",
+                select: "serviceName price", // ✅ Get service details
+            });
+        
+
+        const revenueByCategory = {};
+
+        serviceRequests.forEach(request => {
+            request.serviceType.forEach(service => {
+                const categoryName = service.category.name;
+
+                service.servicesChoosen.forEach(serviceItem => {
+                    const price = serviceItem.price * 0.1;
+
+                    if (!revenueByCategory[categoryName]) {
+                        revenueByCategory[categoryName] = 0;
+                    }
+                    revenueByCategory[categoryName] += price ;
+                });
+            });
+        });
+
+        console.log({totalBookingFee, totalServiceFee, revenueByCategory}); 
+        res.json({totalBookingFee, totalServiceFee, revenueByCategory})
+
+  }catch(err){
+    return res.status(500).json({errors : 'something went wrong'})
+  }
 }
 
 statsCtlr.expertBookingsAnalytics = async (req, res) => {
@@ -173,7 +251,7 @@ statsCtlr.expertBookingsAnalytics = async (req, res) => {
       const totalCategories = await Category.countDocuments()
       const totalCustomers = await User.countDocuments({role : 'customer'})
 
-      console.log({totalBookings, totalExperts, totalCategories, totalCustomers})
+      // console.log({totalBookings, totalExperts, totalCategories, totalCustomers})
       res.json({totalBookings, totalExperts, totalCategories, totalCustomers})
     }catch(err){
       console.log(err)
@@ -251,5 +329,7 @@ statsCtlr.expertBookingsAnalytics = async (req, res) => {
       return res.status(500).json({ errors: "Something went wrong" });
     }
   };
+
+
   
 export default statsCtlr

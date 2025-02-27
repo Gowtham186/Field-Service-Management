@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { ShoppingCart } from "lucide-react";
-import Navbar from "../components/Navbar";
+import Navbar from "../../components/Navbar";
 
 export default function Cart() {
     const [savedBookings, setSavedBookings] = useState(null);

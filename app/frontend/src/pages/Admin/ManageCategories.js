@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import '../App.css'
+import "../../App.css"
 import CreatableSelect from 'react-select/creatable'
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from 'uuid'
-import { deleteCategoryAndServices, deleteManyServices, deleteService, getCategoriesWithServices, newCategoryWithServices, updateCategoryWithServices } from "../redux/slices.js/category-slice";
-import { fetchSkills } from "../redux/slices.js/expert-slice";
+import { deleteCategoryAndServices, deleteManyServices, deleteService, getCategoriesWithServices, newCategoryWithServices, updateCategoryWithServices } from "../../redux/slices.js/category-slice";
+import { fetchSkills } from "../../redux/slices.js/expert-slice";
 import Select from 'react-select'
 
 export default function ManageCategories() {

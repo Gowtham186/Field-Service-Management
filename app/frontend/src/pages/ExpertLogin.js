@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { expertLogin, getUserProfile } from "../redux/slices.js/user-slice";
 import validator from 'validator'
 import { toast } from "react-toastify";
+import ExpertLoginImg from '../images/6333040.jpg'
 
 
 export default function ExpertLogin() {
@@ -181,7 +182,7 @@ export default function ExpertLogin() {
 
       <div className="w-1/2 bg-gray-200 flex items-center justify-center">
         <img
-          src="your-image-url-here.jpg"
+          src={ExpertLoginImg}
           alt="Expert Login"
           className="w-full h-full object-cover"
         />

@@ -4,9 +4,10 @@ import { useNavigate } from "react-router-dom";
 const UnauthorizedPage = () => {
     const { user } = useSelector(state => state.user);
     const navigate = useNavigate();
-
+    console.log(user)
     const handleGoHome = () => {
         if (!user || !user.role) {
+            console.log(user.role)
             navigate("/"); 
             return;
         }

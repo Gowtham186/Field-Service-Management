@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllServiceRequests } from "../redux/slices.js/service-request-slice";
+import { getAllServiceRequests } from "../../redux/slices.js/service-request-slice";
 
 export default function ManageBookings() {
     const dispatch = useDispatch();

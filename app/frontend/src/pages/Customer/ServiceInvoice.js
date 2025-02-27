@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { getWorkingService, payServicefee } from "../redux/slices.js/customer-slice";
+import { getWorkingService, payServicefee } from "../../redux/slices.js/customer-slice";
 
 export default function ServiceInvoice() {
     const dispatch = useDispatch();

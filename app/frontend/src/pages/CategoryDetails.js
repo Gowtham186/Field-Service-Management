@@ -61,6 +61,7 @@ console.log(selectedServices)
 
   const handleBook = () => {
     console.log(selectedServices);
+    console.log(user)
     sessionStorage.setItem("selectedServices", JSON.stringify(selectedServices));
     dispatch(setSelectedExpert(selectedExpert));
     dispatch(selectService(selectedServices));

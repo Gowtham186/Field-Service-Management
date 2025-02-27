@@ -8,6 +8,7 @@ const router = express.Router()
 router.get('/stats/total-revenue', authenticateUser, authorizeUser(['admin']), statsCtlr.totalRevenue)
 router.get('/stats/counts', statsCtlr.getStatCounts)
 router.get("/stats/bookings-analytics", statsCtlr.allBookingsAnalytics);
+router.get('/stats/revenue-analytics', statsCtlr.revenueAnalytics)
 
 
 // stats route for expert revenue

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getUnverifiedExperts, toggledIsVerified } from "../redux/slices.js/expert-slice";
+import { getUnverifiedExperts, toggledIsVerified } from "../../redux/slices.js/expert-slice";
 
 export default function VerifyExperts() {
     const dispatch = useDispatch();
