@@ -38,34 +38,6 @@ export default function ExpertLogin() {
     }
   };
 
-  // const handleExpertLogin = async (e) => {
-  //   e.preventDefault();
-  //   runClientValidations();
-  //   console.log(formData);
-  //   const resetForm = () => setFormData({ email: rememberMe ? formData.email : '', password: '' });
-  //   if (Object.keys(errors).length !== 0) {
-  //     setClientErrors(errors);
-  //   } else {
-  //     try {
-  //       setClientErrors({});
-  //       await dispatch(expertLogin({ formData, resetForm })).unwrap();
-  //       toast.success("Successfully loggedIn!")
-  //       const userProfile = await dispatch(getUserProfile()).unwrap();
-      
-  //       if (userProfile && userProfile.role) {
-  //         if (userProfile.role === 'expert') {
-  //           navigate('/expert-dashboard');
-  //         } else {
-  //           navigate('/admin-dashboard');
-  //         }
-  //       } else {
-  //         console.log("Error: User profile not loaded correctly.");
-  //       }
-  //     } catch (err) {
-  //       console.log('Error login expert', err);
-  //     }
-  //   }
-  // };
 
   const handleExpertLogin = async (e) => {
     e.preventDefault();
@@ -76,7 +48,7 @@ export default function ExpertLogin() {
   
     if (Object.keys(errors).length !== 0) {
       setClientErrors(errors);
-      toast.error("Please fix the errors before submitting.");
+      toast.error("Invalid Credentials!");
     } else {
       try {
         setClientErrors({});

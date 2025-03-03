@@ -43,7 +43,7 @@ export default function FilteredExpertsMap({ resultsExperts, searchLocation, coo
                 >
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                     
-                    {/* ✅ Show search area circle if valid */}
+                    {/* Show search area circle if valid */}
                     {coords?.lat && coords?.lng && (
                         <Circle 
                             center={[coords.lat, coords.lng]} 
@@ -54,7 +54,7 @@ export default function FilteredExpertsMap({ resultsExperts, searchLocation, coo
                         />
                     )}
 
-                    {/* ✅ Show user's location with a light blue dot */}
+                    {/*  Show user's location with a light blue dot */}
                     {coords?.lat && coords?.lng && (
                         <CircleMarker 
                             center={[coords.lat, coords.lng]} 
@@ -73,7 +73,7 @@ export default function FilteredExpertsMap({ resultsExperts, searchLocation, coo
                         </CircleMarker>
                     )}
 
-                    {/* ✅ Display experts only if they have valid coordinates */}
+                    {/* Display experts only if they have valid coordinates */}
                     {experts?.map((expert) => {
                         const { lat, lng } = expert.location.coords || {};
                         if (lat === undefined || lng === undefined) return null;

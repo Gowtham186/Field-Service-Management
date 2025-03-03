@@ -1,6 +1,6 @@
 import Location from "../models/location-model.js";
 
-exports.updateLocation = async (req, res) => {
+export const updateLocation = async (req, res) => {
     try {
         const { serviceId, latitude, longitude } = req.body;
         

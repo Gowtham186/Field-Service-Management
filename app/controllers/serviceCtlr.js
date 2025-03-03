@@ -1,6 +1,5 @@
 import Service from "../models/service-model.js"
 
-
 const serviceCtlr = {}
 
 serviceCtlr.deleteService = async (req,res)=>{

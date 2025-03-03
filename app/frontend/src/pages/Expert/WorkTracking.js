@@ -66,6 +66,7 @@ export default function WorkTracking() {
   };
 
   const handleDelete = (serviceId) => {
+    console.log(serviceId)
     if (workingService?.status === 'completed') return; // Prevent deletion if completed
     dispatch(deleteOnSiteService(serviceId));
   };

@@ -245,7 +245,6 @@ expertCtlr.verify = async (req, res) => {
     const { isVerified } = req.body;
 
     try {
-        // 1️⃣ Update verification status
         const verifyExpert = await Expert.findOneAndUpdate(
             { userId: id },
             { $set: { isVerified } },
@@ -261,15 +260,14 @@ expertCtlr.verify = async (req, res) => {
             return res.status(404).json({ error: "User not found" });
         }
 
-        // 2️⃣ Check if expert already has a Stripe account
         if (verifyExpert.stripeAccountId) {
             return res.status(400).json({ error: "Expert already has a Stripe account" });
         }
 
-        // 3️⃣ Create a Stripe Express account for the expert
+        // Create a Stripe Express account for the expert
         const stripeAccount = await stripe.accounts.create({
             type: "express",
-            country: "US", // Change based on the expert's country
+            country: "US",
             email: user.email, 
             capabilities: {
                 card_payments: { requested: true },
@@ -277,11 +275,10 @@ expertCtlr.verify = async (req, res) => {
             },
         });
 
-        // 4️⃣ Save the Stripe account ID in the database
         verifyExpert.stripeAccountId = stripeAccount.id;
         await verifyExpert.save();
 
-        // 5️⃣ Generate an onboarding link
+        // Generate an onboarding link
         const accountLink = await stripe.accountLinks.create({
             account: stripeAccount.id,
             refresh_url: "http://localhost:3000/stripe-onboarding",
@@ -289,7 +286,7 @@ expertCtlr.verify = async (req, res) => {
             type: "account_onboarding",
         });
 
-        // 6️⃣ Send an email with the onboarding link
+        // Send an email with the onboarding link
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: user.email,
@@ -305,11 +302,6 @@ expertCtlr.verify = async (req, res) => {
 
         await transporter.sendMail(mailOptions);
 
-        // res.status(200).json({
-        //     message: "Expert verified, Stripe account created, and onboarding email sent!",
-        //     stripeAccountId: stripeAccount.id,
-        //     onboardingLink: accountLink.url,
-        // });
         console.log("Expert verified, Stripe account created, and onboarding email sent!")
         res.json(verifyExpert)
 
@@ -318,74 +310,6 @@ expertCtlr.verify = async (req, res) => {
         res.status(500).json({ error: "Something went wrong" });
     }
 };
-
-
-
-
-// expertCtlr.updateAvailability = async (req, res) => {
-//     try {
-//         const { availability } = req.body;
-//         console.log(availability)
-//         // Ensure availability is an array
-//         if (!Array.isArray(availability)) {
-//             return res.status(400).json({ error: "Availability must be an array of dates." });
-//         }
-
-//         // Convert valid date strings to Date objects
-//         const validDates = availability
-//             .map(date => new Date(date))
-//             .filter(date => !isNaN(date)); // Remove invalid dates
-
-//         if (validDates.length === 0) {
-//             return res.status(400).json({ error: "No valid dates provided." });
-//         }
-
-//         // Find expert by userId
-//         const expert = await Expert.findOne({ userId: req.currentUser.userId });
-//         if (!expert) {
-//             return res.status(404).json({ error: "Expert not found" });
-//         }
-
-//         // Extract existing dates
-//         const existingDates = expert.availability || [];
-
-//         // Convert dates to ISO format for comparison
-//         const formattedAvailability = validDates.map(date => date.toISOString().split("T")[0]);
-//         const formattedExistingDates = existingDates.map(date => new Date(date).toISOString().split("T")[0]);
-
-//         // Get dates to add
-//         const datesToAdd = formattedAvailability.filter(date => !formattedExistingDates.includes(date));
-
-//         // Get dates to remove
-//         const datesToRemove = formattedExistingDates.filter(date => !formattedAvailability.includes(date));
-
-//         let updatedAvailability = expert.availability;
-
-//         // Add new dates
-//         if (datesToAdd.length > 0) {
-//             updatedAvailability = await Expert.findOneAndUpdate(
-//                 { userId: req.currentUser.userId },
-//                 { $addToSet: { availability: { $each: datesToAdd } } },
-//                 { new: true, projection: { availability: 1 } }
-//             );
-//         }
-
-//         // Remove dates
-//         if (datesToRemove.length > 0) {
-//             updatedAvailability = await Expert.findOneAndUpdate(
-//                 { userId: req.currentUser.userId },
-//                 { $pull: { availability: { $in: datesToRemove } } },
-//                 { new: true, projection: { availability: 1 } }
-//             );
-//         }
-//         console.log('wes',updatedAvailability.availability)
-//         return res.json(updatedAvailability ? updatedAvailability.availability : expert.availability);
-//     } catch (err) {
-//         console.log("Update Availability Error:", err);
-//         return res.status(500).json({ error: "Something went wrong" });
-//     }
-// };
-
 
 expertCtlr.updateAvailability = async (req, res) => {
     try {

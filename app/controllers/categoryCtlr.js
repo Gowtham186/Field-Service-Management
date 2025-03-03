@@ -1,7 +1,6 @@
 import { validationResult } from "express-validator";
 import Category from "../models/category-model.js";
 import Service from "../models/service-model.js";
-import categoryValidation from "../validators/category-validation.js";
 import Skill from "../models/skill-model.js";
 import mongoose from "mongoose";
 

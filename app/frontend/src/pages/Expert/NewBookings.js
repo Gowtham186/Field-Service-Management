@@ -13,41 +13,6 @@ export default function NewBookings() {
 
     useEffect(() => {
         dispatch(getMyServices());
-    
-        // const expertId = user?._id;
-        // if (expertId) {
-        //     console.log(`🔗 Attempting to join expert room: expert-${expertId}`);
-        //     socket.emit("joinExpertRoom", `expert-${expertId}`);
-        // }
-    
-        // // Listen for any events
-        // socket.onAny((event, ...args) => {
-        //     console.log(`📢 Received event: ${event}`, args);
-        // });
-    
-        // socket.on("newBooking", (data, callback) => {
-        //     console.log("📢 New booking received:", data);
-        
-        //     if (!data) {
-        //         console.log("⚠️ newBooking event received, but data is undefined!");
-        //     } else {
-        //         console.log("✅ newBooking received successfully:", JSON.stringify(data, null, 2));
-        //     }
-        
-        //     // Send acknowledgment back to server
-        //     if (callback) {
-        //         console.log("📩 Sending acknowledgment for newBooking...");
-        //         callback({ status: "received", timestamp: new Date().toISOString() });
-        //     }
-        
-        //     // dispatch(getMyServices()); // Refresh expert services list
-        //     dispatch(addNewService(data.request))
-        // });        
-        
-    
-        // return () => {
-        //     socket.off("newBooking");
-        // };
     }, [dispatch]);
     
 
@@ -90,7 +55,7 @@ export default function NewBookings() {
                                     Accept
                                 </button>
                                 <button 
-                                    onClick={() => handleAction(service._id, "cancelled")}
+                                    onClick={() => handleAction(service._id, "rejected")}
                                     className="px-4 py-2 bg-red-500 text-white rounded-md"
                                 >
                                     Reject

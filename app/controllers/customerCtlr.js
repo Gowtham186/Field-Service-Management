@@ -82,64 +82,32 @@ customerCtlr.myBookings = async(req,res)=>{
     }
 }
 
-// customerCtlr.saveBookings = async (req, res) => {
-//     const { id } = req.params; // Customer user ID
-//     const { expertId, selectedServices } = req.body;
-//     console.log(req.body)
-//     try {
-//         const customer = await Customer.findOneAndUpdate(
-//             { userId: id }, // Find by userId
-//             {
-//                 $set: {
-//                     "savedBookings.expertId": expertId,
-//                     "savedBookings.selectedServices": selectedServices
-//                 }
-//             },
-//             { new: true, upsert: true } // Create new if not exists
-//         );
-
-//         if (!customer) {
-//             return res.status(404).json({ message: "Customer not found" });
-//         }
-//         console.log(customer.savedBookings)
-//         res.json(customer.savedBookings);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: "Server error. Could not save bookings." });
-//     }
-// };
-
 customerCtlr.saveBookings = async (req, res) => {
-    const { id } = req.params; // Customer user ID
+    const { id } = req.params; 
     const { expertId, selectedServices } = req.body;
 
     try {
         let customer = await Customer.findOne({ userId: id });
 
         if (!customer) {
-            // Create a new customer if not found
             customer = new Customer({
                 userId: id,
                 savedBookings: []
             });
         }
 
-        // Ensure savedBookings is an array
         if (!Array.isArray(customer.savedBookings)) {
             customer.savedBookings = [];
         }
 
-        // Check if the same expertId already exists in savedBookings
         const isDuplicate = customer.savedBookings.some(
             (booking) => booking.expertId === expertId
         );
 
         if (!isDuplicate) {
-            // Push new booking only if it's not a duplicate
             customer.savedBookings.push({ expertId, selectedServices });
         }
 
-        // Save the updated customer document
         await customer.save();
 
         res.json(customer.savedBookings);

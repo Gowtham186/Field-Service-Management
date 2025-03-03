@@ -31,76 +31,97 @@ userCtlr.register = async(req,res)=>{
     }
 }
 
-userCtlr.login = async(req,res)=>{
-    try{
-        const body = req.body
+userCtlr.login = async (req, res) => {
+    try {
+        const { phone_number, email, password } = req.body;
         let user;
-        //customer login / register
-        if(body.phone_number){
-            user = await User.findOne({phone_number : body.phone_number})
-            if(!user){
-                user = new User({phone_number : body.phone_number}) //new customer
-            }
-            const otp = generateOtp()
 
-            const otpDoc = await Otp.create({
-                identifier: body.phone_number,
+        if (phone_number) {
+            user = await User.findOne({ phone_number });
+
+            if (!user) {
+                user = new User({ phone_number }); 
+            }
+
+            const otp = generateOtp();
+            await Otp.create({
+                identifier: phone_number,
                 otpCode: otp,
-                purpose: 'login'
-            })
-            await user.save()
-            
-            //await sendSMS(phone_number, otp)
-            //console.log({message : 'otp sent successfully', otpDoc})
-           return res.json({message : 'otp sent successfully', otpDoc})
+                purpose: 'login',
+                createdAt: new Date(),
+            });
+
+            await user.save();
+            await sendSMS(phone_number, otp);
+
+            return res.json({ message: 'OTP sent successfully' });
         }
 
-        if(body.email){
-            user = await User.findOne({email : body.email})
-            if(!user){
-                return res.status(404).json({errors : 'invalid email'})
+        // expert/Admin Login using Email
+        if (email) {
+            user = await User.findOne({ email });
+            if (!user) {
+                return res.status(404).json({ errors: 'Invalid email' });
             }
-            
-            const isValidUser = await bcryptjs.compare(body.password, user.password)
-            if(!isValidUser){
-                return res.status(404).json({errors : 'invalid password'})
+
+            const isValidUser = await bcryptjs.compare(password, user.password);
+            if (!isValidUser) {
+                return res.status(400).json({ errors: 'Invalid password' });
             }
-            //console.log(user)
-            const token = jwt.sign({ userId : user?._id, role: user?.role}, process.env.SECRET_KEY, {expiresIn : '7d'})
-            return res.json({token : `Bearer ${token}`})
-        }    
 
-        
-    }catch(err){
-        console.log(err)
-        res.status(500).json({errors : 'something went wrong'})
-    }
-}
+            const token = jwt.sign(
+                { userId: user._id, role: user.role },
+                process.env.SECRET_KEY,
+                { expiresIn: '7d' }
+            );
 
-userCtlr.verifyOtp = async(req,res)=>{
-    const { identifier, otp } = req.body
-    //console.log({identifier, otp})
-    try{
-        const findOtp = await Otp.findOne({identifier : identifier})
-        //console.log(findOtp)
-        const user = await User.findOne({phone_number : identifier})
-
-        if(!findOtp){
-            return res.status(404).json({errors: 'invalid otp or otp expired'})
-        }
-        
-        if(findOtp.otpCode != otp){
-            return res.status(400).json({errors : 'invalid otp'})
+            return res.json({ token: `Bearer ${token}` });
         }
 
-        const token = jwt.sign({userId: user._id, role:user.role}, process.env.SECRET_KEY, { expiresIn : '7d'})
-        return res.json({message:'otp has verified successfully', token : `Bearer ${token}`})
-        
-    }catch(err){
-        console.log(err)
-        res.status(500).json({errors : 'something went wrong'})
+        return res.status(400).json({ error: 'Invalid request' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Something went wrong' });
     }
-}
+};
+
+userCtlr.verifyOtp = async (req, res) => {
+    try {
+        const { identifier, otp } = req.body;
+        console.log({ identifier, otp });
+
+        const findOtp = await Otp.findOne({ identifier }).sort({ createdAt: -1 });
+
+        if (!findOtp) {
+            return res.status(400).json({ error: 'Invalid OTP or OTP expired' });
+        }
+
+        const otpAge = (Date.now() - findOtp.createdAt) / 1000; // Convert to seconds
+        if (otpAge > 300) { // 300 seconds = 5 minutes
+            await Otp.deleteOne({ _id: findOtp._id });
+            return res.status(400).json({ error: 'OTP expired. Please request a new one.' });
+        }
+
+        if (findOtp.otpCode !== otp) {
+            return res.status(400).json({ error: 'Invalid OTP' });
+        }
+
+        const user = await User.findOne({ phone_number: identifier });
+        const token = jwt.sign(
+            { userId: user._id, role: user.role },
+            process.env.SECRET_KEY,
+            { expiresIn: '7d' }
+        );
+
+        await Otp.deleteOne({ _id: findOtp._id });
+
+        return res.json({ message: 'OTP verified successfully', token: `Bearer ${token}` });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+};
+
 
 userCtlr.adminLogin = async(req,res)=>{
     const errors = validationResult(req)

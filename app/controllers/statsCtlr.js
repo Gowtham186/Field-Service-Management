@@ -10,31 +10,6 @@ import User from "../models/user-model.js"
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 const statsCtlr = {}
 
-// statsCtlr.totalRevenue = async(req,res)=>{
-//     try{
-//         const payments = await stripe.paymentIntents.list()
-
-//         const paymente = await Payment.find({paymentReason : 'booking'})
-//     const totalBookingFee = paymente.reduce((acc,cv) => acc + cv.amount, 0)
-//     console.log("totalBookingFee", totalBookingFee)
-
-//     const sharePayements = await Payment.find({systemAmount})
-//     const totalServiceFee = sharePayements.reduce((acc,cv) => acc + cv.systemAmount, 0)
-//     console.log("totalServiceFee", totalServiceFee)
-
-//         const totalRevenue = payments.data
-//             .filter(payment => payment.status === 'succeeded')
-//             .reduce((sum, payment) => sum + payment.amount, 0)
-//         console.log(totalRevenue / 100)
-
-//         res.json({totalRevenue : totalRevenue / 100})
-        
-//     }catch(err){
-//         console.log(err)
-//         return res.status(500).json({errors : 'something went wrong'})
-//     }
-// }
-
 statsCtlr.totalRevenue = async (req, res) => {
   try {
     const paymente = await Payment.find({ paymentReason: "booking" });
@@ -46,10 +21,8 @@ statsCtlr.totalRevenue = async (req, res) => {
     const totalServiceFee = sharePayments.reduce((acc, cv) => acc + cv.systemAmount, 0);
     console.log("Total Service Fee:", totalServiceFee);
 
-    // Calculate total revenue (Stripe + Booking Fees + Service Fees)
     const totalRevenue = totalBookingFee + totalServiceFee;
 
-    // Return the structured response
     res.json({ totalRevenue });
   } catch (err) {
     console.error("Error in totalRevenue:", err);
@@ -66,20 +39,19 @@ statsCtlr.expertRevenue = async(req,res)=>{
         console.log(expertServiceRequests.length)
         const serviceRequestIds = expertServiceRequests.map(payment => payment.serviceRequestId);
 
-        // Fetch Service Requests and populate serviceType (Category)
         const serviceRequests = await ServiceRequest.find({ _id: { $in: serviceRequestIds } })
             .populate({
                 path: "serviceType.category",
                 model: "Category",
-                select: "name", // ✅ Get only category name
+                select: "name", 
             })
             .populate({
                 path: "serviceType.servicesChoosen",
                 model: "Service",
-                select: "serviceName price", // ✅ Get service details
+                select: "serviceName price", 
             });
         
-        // console.log(JSON.stringify(serviceRequests, null, 2)); // ✅ Check structured output
+        // console.log(JSON.stringify(serviceRequests, null, 2)); 
 
         const revenueByCategory = {};
 
@@ -123,7 +95,6 @@ statsCtlr.revenueAnalytics = async(req,res)=>{
     const totalBookingFee = paymente.reduce((acc, cv) => acc + cv.amount, 0);
     console.log("Total Booking Fee:", totalBookingFee);
 
-    // Fetch all system service fee payments
     const sharePayments = await Payment.find({ systemAmount: { $exists: true } });
     const totalServiceFee = sharePayments.reduce((acc, cv) => acc + cv.systemAmount, 0);
     console.log("Total Service Fee:", totalServiceFee);
@@ -132,15 +103,14 @@ statsCtlr.revenueAnalytics = async(req,res)=>{
             .populate({
                 path: "serviceType.category",
                 model: "Category",
-                select: "name", // ✅ Get only category name
+                select: "name", 
             })
             .populate({
                 path: "serviceType.servicesChoosen",
                 model: "Service",
-                select: "serviceName price", // ✅ Get service details
+                select: "serviceName price", 
             });
         
-
         const revenueByCategory = {};
 
         serviceRequests.forEach(request => {
@@ -190,7 +160,6 @@ statsCtlr.expertBookingsAnalytics = async (req, res) => {
       const currentStartDate = getStartDate(period);
       const previousStartDate = getStartDate(period, 1);
   
-      // Fetch expert's total bookings
       const totalBookings = await ServiceRequest.countDocuments({ expertId: id });
       console.log("totalBookings", totalBookings)
   
@@ -200,17 +169,14 @@ statsCtlr.expertBookingsAnalytics = async (req, res) => {
         ServiceRequest.countDocuments({ expertId: id, createdAt: { $gte: previousStartDate, $lt: currentStartDate } }),
       ]);
   
-      // Calculate growth percentage
       const growth = previousBookings > 0
         ? ((currentBookings - previousBookings) / previousBookings) * 100
         : currentBookings > 0 ? 100 : 0;
   
-      // Fetch bookings with populated category and services
       const serviceRequests = await ServiceRequest.find({ expertId: id })
         .populate("serviceType.category", "name")
         .populate("serviceType.servicesChoosen", "serviceName price");
   
-      // Count bookings per category
       const categoryCounts = serviceRequests.reduce((acc, service) => {
         service.serviceType?.forEach((serviceItem) => {
           const categoryName = serviceItem?.category?.name;
@@ -234,7 +200,7 @@ statsCtlr.expertBookingsAnalytics = async (req, res) => {
         previousBookings,
         growth: parseFloat(growth.toFixed(2)),
         bookingsByCategory: categoryCounts,
-        bookings: bookingTimestamps.map((b) => b.createdAt), // Send only timestamps
+        bookings: bookingTimestamps.map((b) => b.createdAt), 
       });
   
     } catch (err) {
@@ -242,7 +208,6 @@ statsCtlr.expertBookingsAnalytics = async (req, res) => {
       return res.status(500).json({ errors: "Something went wrong" });
     }
   };
-
 
   statsCtlr.getStatCounts = async(req,res)=>{
     try{
@@ -321,7 +286,7 @@ statsCtlr.expertBookingsAnalytics = async (req, res) => {
         previousBookings,
         growth: parseFloat(growth.toFixed(2)),
         bookingsByCategory: categoryCounts,
-        bookings: bookingTimestamps.map((b) => b.createdAt), // Send only timestamps
+        bookings: bookingTimestamps.map((b) => b.createdAt), 
       });
   
     } catch (err) {
@@ -330,6 +295,4 @@ statsCtlr.expertBookingsAnalytics = async (req, res) => {
     }
   };
 
-
-  
 export default statsCtlr

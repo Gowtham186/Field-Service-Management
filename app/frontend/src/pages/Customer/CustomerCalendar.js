@@ -3,7 +3,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getMyBookings  } from "../../redux/slices.js/customer-slice";
+import { getMyBookings, setCurrentService  } from "../../redux/slices.js/customer-slice";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { setServiceRequestId } from "../../redux/slices.js/expert-slice";
@@ -55,21 +55,21 @@ export default function CustomerCalendar() {
         : [];
 
     const handleViewDetails = (id) => {
-        dispatch(setServiceRequestId(id));
-        navigate("/service-details");
+        dispatch(setCurrentService(id));
+        navigate('/view-service-details');
     };
 
     const renderEventContent = (eventInfo) => {
         return (
             <div className={`p-2 rounded ${eventInfo.event.className}`}>
                 <p className="font-semibold text-black">{eventInfo.event.title}</p>
-                <button
+                {/* <button
                     className="mt-1 px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
                     onClick={() => handleViewDetails(eventInfo.event.extendedProps.bookingDetails._id)}
                 >
                     View Details
-                </button>
-            </div>
+                </button> */}
+            </div>  
         );
     };
 

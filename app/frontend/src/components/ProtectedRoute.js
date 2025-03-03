@@ -13,7 +13,7 @@ export default function ProtectedRoute({ children, role }) {
         localStorage.setItem("prevPath", location.pathname);
 
         // role-based redirection
-        const loginPath = role === "expert" || role === "admin" ? "/expertlogin" : "/customerlogin";
+        const loginPath = role === "expert" || role === "admin"  ? "/expertlogin" : "/customerlogin";
         return <Navigate to={loginPath} replace />;
     }
 

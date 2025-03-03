@@ -147,7 +147,7 @@ export default function ServiceRequest() {
                 .unwrap()
                 .then(()=>{
                     setIsBooked(true)
-                    // toast.success("Successfully Booked")
+                    toast.success("Successfully Booked")
                     navigate('/my-bookings')    
                 })
                 .catch((err)=> console.log(err))

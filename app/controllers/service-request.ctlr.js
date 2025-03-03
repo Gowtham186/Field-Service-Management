@@ -49,8 +49,6 @@ serviceRequestCtlr.create = async (req, res) => {
 
         const updateLocation = { address: body.location.address, coords: { lat, lng } };
 
-        
-        
         const serviceFinal = body.serviceType.map(ele => ({
             category: ele._id, 
             servicesChoosen: ele.services.map(service => service._id)
@@ -62,16 +60,15 @@ serviceRequestCtlr.create = async (req, res) => {
         
         const serviceRequest = new ServiceRequest({
             ...body,
-            serviceType: serviceFinal, // ✅ Ensure serviceType is properly set
+            serviceType: serviceFinal, 
             customerId: req.currentUser.userId,
             location: updateLocation,
             budget: { bookingFee: 50 },
         });
-        // ✅ Extract selected service IDs correctly
+
         const selectedServices = serviceFinal.flatMap(({ servicesChoosen }) => servicesChoosen);
         console.log("selectedServices", selectedServices);
         
-        // ✅ Fetch service prices correctly
         const servicePrices = await Promise.all(selectedServices.map(id => Service.findById(id)));
         console.log("servicePrices", servicePrices);
         
@@ -95,26 +92,13 @@ serviceRequestCtlr.create = async (req, res) => {
             await customerFind.save();
         }
         
-        // Save service request
         await serviceRequest.save();
         console.log(serviceRequest)
         console.log("📢 Attempting to emit newBooking to:", `expert-${serviceRequest?.expertId}`);
 
-        io.to(`customer-${serviceRequest?.customerId}`).emit("newBooking", { request: serviceRequest }, (ack) => {
-            if (ack?.status === "received") {
-                console.log(`✅ newBooking received by customer at ${ack.timestamp}`);
-            } else {
-                console.log(`⚠️ newBooking emitted, but no acknowledgment from customer!`);
-            }
-        });
+        io.to(`customer-${serviceRequest?.customerId}`).emit("newBooking", { request: serviceRequest });
 
-        io.to(`expert-${serviceRequest?.expertId}`).emit("newBooking", { request: serviceRequest }, (ack) => {
-            if (ack?.status === "received") {
-                console.log(`✅ newBooking received by expert at ${ack.timestamp}`);
-            } else {
-                console.log(`⚠️ newBooking emitted, but no acknowledgment from expert!`);
-            }
-        });
+        io.to(`expert-${serviceRequest?.expertId}`).emit("newBooking", { request: serviceRequest });        
         
         res.status(201).json(serviceRequest);
     } catch (err) {
@@ -122,7 +106,6 @@ serviceRequestCtlr.create = async (req, res) => {
         res.status(500).json({ errors: "Something went wrong" });
     }
 };
-
 
 serviceRequestCtlr.getAllServiceRequests = async (req, res) => {
     try {
@@ -310,7 +293,7 @@ serviceRequestCtlr.updateStatus = async (req,res)=>{
             model: "Service",
             select: "serviceName price",
         })
-        .populate("customerId", "name") // Populate customer details
+        .populate("customerId", "name") 
         .populate("expertId", "name");
         if(!serviceRequest){
             return res.status(404).json({errors : 'service request is not found'})
@@ -347,7 +330,7 @@ serviceRequestCtlr.updateStatus = async (req,res)=>{
             });
         }        
 
-        console.log('booking status updation emitted')
+        console.log('booking status updation emitted', serviceRequest.status)
         //console.log(serviceRequest)
         res.json(serviceRequest)
 
@@ -455,7 +438,6 @@ serviceRequestCtlr.deleteOnSiteService = async(req,res)=>{
             serviceRequestId: serviceRequest._id,
         });
 
-        // Emit event to expert
         io.to(`expert-${serviceRequest?.expertId}`).emit("onSiteServiceDeleted", {
             userType: "expert",
             removedServiceId: serviceId,

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getMyServices } from "../../redux/slices.js/expert-slice";
-import UpcomingService from "../../components/UpcomingService";
 import OngoingService from "../../components/OngoingService";
 import { Users, Calendar, DollarSign, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -29,11 +28,13 @@ export default function ExpertDashboard() {
                     let bookings = expertBookingAnalytics;
                     let revenue = expertRevenue;
 
-                    if (bookings === null) {
+                    if (bookings.totalBookings === 0) {
                         bookings = await dispatch(getExpertBookingAnalytics({ id: user?._id, period: "" })).unwrap();
+                        console.log(bookings)
                     }
-                    if (revenue === null) {
+                    if (revenue.totalRevenue === 0) {
                         revenue = await dispatch(getExpertRevenue(user?._id)).unwrap();
+                        console.log(revenue)
                     }
 
                     setExpertStats({
@@ -45,7 +46,7 @@ export default function ExpertDashboard() {
                 }
             })();
         }
-    }, [dispatch, user?._id, expertBookingAnalytics, expertRevenue]);
+    }, [dispatch, user?._id]);
 
     return (
         <>

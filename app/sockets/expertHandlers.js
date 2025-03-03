@@ -12,12 +12,12 @@ export const expertHandlers = (io, socket) => {
         if (!experts[userId]) {
             experts[userId] = socket.id;
         }
-        socket.join(`expert-${userId}`); // ✅ Ensure expert joins their unique room
+        socket.join(`expert-${userId}`); // Ensure expert joins their unique room
         console.log(`✅ Expert Registered: ${userId}, Socket ID: ${socket.id}`);
         console.log(`🏠 Expert joined room: expert-${userId}`);
     });
 
-    // ✅ Notify the correct customer when expert arrives
+    // Notify the correct customer when expert arrives
     socket.on("expertArrived", ({ serviceId, customerId }) => {
         console.log("🚀 Expert arrived for service:", serviceId, "Customer ID:", customerId);
 

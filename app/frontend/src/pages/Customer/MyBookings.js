@@ -7,7 +7,7 @@ import { payBookingFee } from "../../redux/slices.js/service-request-slice";
 import { toast } from "react-toastify";
 
 export default function MyBookings() {
-  const [filter, setFilter] = useState("requested" || "scheduledToday" || "accepted" || "assigned"); // Default filter
+  const [filter, setFilter] = useState("scheduledToday" || "requested" || "accepted" || "assigned"); // Default filter
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const myBookings  = useSelector((state) => state.customer.myBookings);
@@ -28,7 +28,6 @@ export default function MyBookings() {
   useEffect(() => {
     console.log("Updated Bookings:", myBookings);
 }, [myBookings]);
-
 
   // Filter scheduled today
   const scheduledTodayBookings = myBookings?.filter((booking) => {
@@ -57,6 +56,7 @@ export default function MyBookings() {
       const body = {
         serviceRequestId: booking?._id,
         amount: booking?.budget.bookingFee,
+        status : "assigned"
       };
       const response = await dispatch(payBookingFee(body)).unwrap();
 

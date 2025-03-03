@@ -106,28 +106,27 @@ console.log(selectedServices)
                             <p className="text-gray-700 font-semibold text-md">{service?.price}</p>
                           </div>
                           <div className="flex justify-end mt-4">
-  {(() => {
-    const isSelected = selectedServices.some(
-      (ele) =>
-        ele._id === category._id &&
-        ele.services.some((s) => s._id === service._id)
-    );
+                            {(() => {
+                              const isSelected = selectedServices.some(
+                                (ele) =>
+                                  ele._id === category._id &&
+                                  ele.services.some((s) => s._id === service._id)
+                              );
 
-    return (
-      <button
-        onClick={() => handleSelectService(category, service)}
-        className={`py-1 px-3 border text-blue-500 font-semibold rounded-md ${
-          isSelected
-            ? "bg-red-700 text-white"
-            : "hover:bg-blue-700 hover:text-white"
-        }`}
-      >
-        {isSelected ? "Unselect" : "Select"}
-      </button>
-    );
-  })()}
-</div>
-
+                              return (
+                                <button
+                                  onClick={() => handleSelectService(category, service)}
+                                  className={`py-1 px-3 border text-blue-500 font-semibold rounded-md ${
+                                    isSelected
+                                      ? "bg-red-700 text-white"
+                                      : "hover:bg-blue-700 hover:text-white"
+                                  }`}
+                                >
+                                  {isSelected ? "Unselect" : "Select"}
+                                </button>
+                              );
+                            })()}
+                          </div>
                         </div>
                       )
                     ))}
@@ -149,7 +148,7 @@ console.log(selectedServices)
           {item.services.map((service) => (
             <div className="flex justify-between mb-4" key={service._id}>
               <p>{service.serviceName}</p>
-              <p>${service.price}</p>
+              <p>₹{service.price}</p>
               <hr />
             </div>
           ))}
@@ -162,7 +161,7 @@ console.log(selectedServices)
       <div className="flex justify-between font-bold">
         <p>Total:</p>
         <p>
-          ${selectedServices
+        ₹{selectedServices
             .reduce(
               (total, item) =>
                 total +

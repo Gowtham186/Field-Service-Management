@@ -73,20 +73,8 @@ queryCtlr.search = async (req, res) => {
         }
         // console.log(`Filtered Experts by location & skill: ${filteredExperts.length}`);
 
-            
         const verifiedExperts = filteredExperts.filter(expert => expert.isVerified === true)
 
-        // const expertsWithReviews = await Promise.all(
-        //     verifiedExperts.map(async expert => {
-        //         const reviews = await Review.find({ reviewee : expert.userId})
-        //             .populate({
-        //                 path: 'reviewer',   
-        //                 select: 'name'  
-        //             });                
-        //         return { ...expert.toObject(), reviews}
-        //     })
-        // )
-        // console.log(expertsWithReviews)
         res.json({verifiedExperts : verifiedExperts});
             
         } catch (err) {
@@ -106,26 +94,6 @@ queryCtlr.getAddress = async (req,res)=>{
         return res.status(500).json({ errors: 'Something went wrong' });
     }
 }
-
-// queryCtlr.getCoords = async (req,res)=>{
-//     const { address } = req.query
-//     try{
-//         const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
-//             params: { q: address, key: process.env.OPENCAGE_API_KEY }
-//         });
-
-//         if (resource.data.results.length === 0) {
-//             return res.status(400).json({ errors: 'Try another address' });
-//         }
-
-//         const geometry = resource.data.results[0].geometry;
-//         lat = geometry.lat;
-//         lng = geometry.lng;
-//         res.json({lat, lng})
-//     }catch(err){
-//         console.log(err)
-//     }
-// }
 
 queryCtlr.getCoords = async (req, res) => {
     const { address } = req.query;

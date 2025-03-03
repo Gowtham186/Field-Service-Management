@@ -71,7 +71,7 @@ export default function SearchComponent() {
   const getCoordsFromAddress = async (searchLocation) => {
     try {
       const response = await dispatch(getCoords({ address: searchLocation })).unwrap();
-      return response; // Ensure lat/lng is returned
+      return response; //lat/lng 
     } catch (err) {
       console.log(err);
       return null;
@@ -89,74 +89,10 @@ export default function SearchComponent() {
     }
   };
 
-  // return (
-  //   <div className="p-4 relative top-14 max-w-8xl mx-auto">
-
-  //     <div className="bg-white p-3 rounded-lg shadow-md">
-  //       <form onSubmit={handleSearch} className="flex flex-col items-center space-y-4">
-  //         {/* Location & Skill Row */}
-  //         <div className="flex space-x-2 w-full max-w-3xl">
-  //           <input
-  //             type="search"
-  //             value={searchLocation}
-  //             onChange={(e) => setSearchLocation(e.target.value)}
-  //             placeholder="Enter location"
-  //             className="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-  //           />
-  //           <button
-  //             type="button"
-  //             onClick={getCurrentLocation}
-  //             className="p-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-  //           >
-  //             <FaLocationArrow />
-  //           </button>
-  //           <Select
-  //             options={skillOptions}
-  //             className="flex-1"
-  //             onChange={handleSkillSelect}
-  //             isClearable
-  //           />
-  //         </div>
-
-  //         {/* Search Button */}
-  //         <input
-  //           type="submit"
-  //           value="Search"
-  //           className="bg-blue-500 text-white px-6 py-2 rounded-md cursor-pointer hover:bg-blue-600"
-  //         />
-  //       </form>
-  //     </div>
-
-  //     {serverError && <p className="text-red-500 text-center mt-4">{serverError}</p>}
-  //     {resultsExperts && resultsExperts.length === 0 && (
-  //       <p className="text-red-500 text-center mt-4">No experts found in this location & skill</p>
-  //     )}
-
-  //     {/* Show HeroSection only on the first render (before search) */}
-  //     {(!resultsExperts || resultsExperts.length === 0) && !serverError && <HeroSection />}
-
-  //     {/* Map Section (Replaces HeroSection after search) */}
-  //     {resultsExperts?.length > 0 && (
-  //       <div className="mt-8 flex flex-col gap-6 z-0">
-  //         <div className="w-full z-50 h-96 md:h-[500px]">
-  //           <FilteredExpertsMap
-  //             resultsExperts={resultsExperts}
-  //             coords={coords}
-  //             searchLocation={searchLocation}
-  //             className="w-full h-full rounded-lg shadow-md"
-  //           />
-  //         </div>
-  //       </div>
-  //     )}
-  //   </div>
-  // );
-  
   return (
     <div className="p-4 relative top-14 max-w-8xl mx-auto">
-      {/* Filters Section (Always Visible) */}
       <div className="bg-white p-3 rounded-lg shadow-md">
         <form onSubmit={handleSearch} className="flex flex-col items-center space-y-4">
-          {/* Location & Skill Row */}
           <div className="flex space-x-2 w-full max-w-3xl">
             <input
               type="search"
@@ -174,13 +110,12 @@ export default function SearchComponent() {
             </button>
             <Select
               options={skillOptions}
-              className="flex-1"
+              className="flex-1 z-40"
               onChange={handleSkillSelect}
               isClearable
             />
           </div>
   
-          {/* Search Button */}
           <input
             type="submit"
             value="Search"
@@ -189,25 +124,20 @@ export default function SearchComponent() {
         </form>
       </div>
   
-      {/* Loading Indicator (Below Filters) */}
       {loading && (
         <div className="flex justify-center items-center py-4">
           <p className="text-blue-500">Loading...</p>
         </div>
       )}
   
-      {/* Error Message */}
       {serverError && <p className="text-red-500 text-center mt-4">{serverError}</p>}
   
-      {/* No Results Message */}
       {!loading && resultsExperts && resultsExperts.length === 0 && (
         <p className="text-red-500 text-center mt-4">No experts found in this location & skill</p>
       )}
   
-      {/* Show HeroSection only on the first render (before search) */}
       {!loading && (!resultsExperts || resultsExperts.length === 0) && !serverError && <HeroSection />}
   
-      {/* Map Section (Replaces HeroSection after search) */}
       {!loading && resultsExperts?.length > 0 && (
         <div className="mt-8 flex flex-col gap-6 z-0">
           <div className="w-full z-50 h-96 md:h-[500px]">

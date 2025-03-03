@@ -1,11 +1,9 @@
-// customerHandlers.js
 
-const customers = {}; // Store customer socket IDs
+const customers = {};
 
 export const customerHandlers = (io, socket) => {
     console.log("👤 Customer Connected:", socket.id);
 
-    // ✅ Store customer socket ID when they join
     socket.on("joinCustomer", ({ userId }) => {
         if (!customers[userId]) {
             customers[userId] = socket.id;
@@ -17,7 +15,6 @@ export const customerHandlers = (io, socket) => {
         }
     });
 
-    // ✅ Handle disconnection (remove from tracking)
     socket.on("disconnect", () => {
         Object.keys(customers).forEach((key) => {
             if (customers[key] === socket.id) {
@@ -28,4 +25,4 @@ export const customerHandlers = (io, socket) => {
     });;
 };
 
-export { customers }; // Export customers so experts can access it
+export { customers }; 

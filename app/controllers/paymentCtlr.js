@@ -13,19 +13,16 @@ paymentCtlr.payServiceFee = async (req, res) => {
     console.log({ serviceRequestId, expertId, amount });
 
     try {
-        // Fetch the expert's Stripe account
         const expert = await Expert.findOne({ userId: expertId });
         if (!expert || !expert.stripeAccountId) {
             return res.status(400).json({ errors: "Expert Stripe account not found" });
         }
 
-        // Split the amount
-        const systemShare = Math.round(amount * 0.10); // 10% for platform
-        const expertShare = Math.round(amount * 0.90); // 90% for expert
+        const systemShare = Math.round(amount * 0.10); 
+        const expertShare = Math.round(amount * 0.90);
 
         const BASE_URL = process.env.CLIENT_URL || "http://localhost:3000";
 
-        // Create a Stripe customer
         let customer = await stripe.customers.create({
             name: "Testing",
             address: {
@@ -39,7 +36,6 @@ paymentCtlr.payServiceFee = async (req, res) => {
 
         console.log("Customer Created:", customer.id);
 
-        // Create a Checkout Session with correct split
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             mode: "payment",
@@ -51,15 +47,15 @@ paymentCtlr.payServiceFee = async (req, res) => {
                     price_data: {
                         currency: "inr",
                         product_data: { name: "Service Fee" },
-                        unit_amount: amount * 100, // Convert to paise
+                        unit_amount: amount * 100, 
                     },
                     quantity: 1,
                 },
             ],
             payment_intent_data: {
-                application_fee_amount: systemShare * 100, // Platform's 10%
+                application_fee_amount: systemShare * 100, 
                 transfer_data: {
-                    destination: expert.stripeAccountId, // Only set destination
+                    destination: expert.stripeAccountId, 
                 },
             },
             metadata: {
@@ -72,7 +68,6 @@ paymentCtlr.payServiceFee = async (req, res) => {
         console.log("Session ID:", session.id);
         console.log("Session URL:", session.url);
 
-        // Save Payment Details to DB
         const payment = new Payment({
             serviceRequestId,
             expertId,
@@ -191,23 +186,18 @@ paymentCtlr.payBookingFee = async (req, res) => {
         console.log("Session URL:", session.url);
 
         const serviceRequest = await ServiceRequest.findById(body.serviceRequestId);
+        serviceRequest.status = body.status
+        await serviceRequest.save()
         console.log("Service Request:", serviceRequest);
-
-        if (serviceRequest.expertId) {
-            io.to(`expert-${serviceRequest.expertId}`).emit("bookingStatusUpdated", {
-                userType: "expert",
-                booking: serviceRequest,
-            });
-        }
 
         const payment = new Payment({
             serviceRequestId: body.serviceRequestId,
-            transactionId: session.id, // Store session ID (not payment_intent)
+            transactionId: session.id, 
             paymentReason: "booking",
             paymentType: "card",
             amount: body.amount,
             customerId: serviceRequest.customerId,
-            paymentStatus: "pending", // Set default status to pending
+            paymentStatus: "pending", 
         });
 
         await payment.save();
@@ -218,95 +208,6 @@ paymentCtlr.payBookingFee = async (req, res) => {
         res.status(500).json({ error: "Payment processing failed" });
     }
 };
-
-// paymentCtlr.webhooks = async (req, res) => {
-//     const signature = req.headers["stripe-signature"];
-//     console.log("Stripe Signature:", signature);
-
-//     try {
-//         const event = stripe.webhooks.constructEvent(
-//             req.body,
-//             signature,
-//             process.env.STRIPE_WEBHOOK_SECRET
-//         );
-
-//         const session = event.data.object;
-//         console.log("Webhook Session Object:", session);
-
-//         const sessionId = session.id; // Initially stored session ID
-//         const paymentIntentId = session.payment_intent || session.id; // Get actual transaction ID
-
-//         console.log(`Received event: ${event.type}, Session ID: ${sessionId}, Payment Intent: ${paymentIntentId}`);
-
-//         // Find the payment record using session ID (fallback to paymentIntentId)
-//         let payment = await Payment.findOne({
-//             $or: [{ transactionId: sessionId }, { transactionId: paymentIntentId }],
-//         });
-
-//         if (!payment) {
-//             console.log("Payment record not found");
-//             return res.status(404).send("Payment record not found");
-//         }
-
-//         if (!payment.transactionId && paymentIntentId) {
-//             // If transactionId is missing, update it
-//             payment.transactionId = paymentIntentId;
-//         }
-
-//         const serviceRequest = await ServiceRequest.findById(payment.serviceRequestId);
-//         if (!serviceRequest) {
-//             console.log("Service request not found");
-//             return res.status(404).send("Service request not found");
-//         }
-
-//         if (event.type === "checkout.session.completed" || event.type === "payment_intent.succeeded") {
-//             payment.paymentStatus = "success";
-//             await payment.save();
-//             console.log("Payment successful, updated record");
-
-//             serviceRequest.status = "assigned"
-//             await serviceRequest.save()
-//             console.log('updated status', serviceRequest)
-
-//             io.to(`customer-${payment.customerId}`).emit("paymentStatusUpdated", {
-//                 userType: "customer",
-//                 payment: payment,
-//             });
-//             console.log('emitting...')
-
-//             io.to(`customer-${serviceRequest.customerId}`).emit("bookingStatusUpdated", {
-//                 userType: "customer",
-//                 booking: serviceRequest, // Send the full updated booking object
-//             });
-            
-//             if (serviceRequest.expertId) {
-//                 io.to(`expert-${serviceRequest.expertId}`).emit("bookingStatusUpdated", {
-//                     userType: "expert",
-//                     booking: serviceRequest, // Send the full updated booking object
-//                 });
-//             } 
-
-//             return res.status(200).send("Payment processed successfully");
-//         } else if (event.type === "payment_intent.payment_failed" || event.type === "checkout.session.expired") {
-//             payment.paymentStatus = "failed";
-//             payment.failure_reason = session.last_payment_error?.message || "Payment failed";
-//             await payment.save();
-//             console.log("Payment failed, updated record");
-
-//             io.to(`customer-${payment.customerId}`).emit("paymentStatusUpdated", {
-//                 userType: "customer",
-//                 payment: payment,
-//             });
-
-//             return res.status(400).send("Payment failed");
-//         } else {
-//             return res.status(400).send("Unhandled event type");
-//         }
-//     } catch (err) {
-//         console.error("Webhook error:", err);
-//         return res.status(400).send(`Webhook error: ${err.message}`);
-//     }
-// };
 
 paymentCtlr.webhooks = async (req, res) => {
     const signature = req.headers["stripe-signature"];
@@ -320,18 +221,16 @@ paymentCtlr.webhooks = async (req, res) => {
         );
 
         const session = event.data.object;
-        // console.log("Webhook Session Object:", session);
 
-        const sessionId = session.id; // Initially stored session ID
+        const sessionId = session.id; 
         const paymentIntentId = session.payment_intent || session.id; // Get actual transaction ID
 
         console.log(`Received event: ${event.type}, Session ID: ${sessionId}, Payment Intent: ${paymentIntentId}`);
 
         // Extract payment reason from metadata
-        const paymentReason = session.metadata?.paymentReason || "service"; // Default to "service" if not provided
+        const paymentReason = session.metadata?.paymentReason || "service"; 
         console.log("Payment Reason:", paymentReason);
 
-        // Find the payment record using session ID (fallback to paymentIntentId)
         let payment = await Payment.findOne({
             $or: [{ transactionId: sessionId }, { transactionId: paymentIntentId }],
         });
@@ -342,11 +241,11 @@ paymentCtlr.webhooks = async (req, res) => {
         }
 
         if (!payment.transactionId && paymentIntentId) {
-            // If transactionId is missing, update it
             payment.transactionId = paymentIntentId;
         }
 
         const serviceRequest = await ServiceRequest.findById(payment.serviceRequestId);
+        console.log(serviceRequest)
         if (!serviceRequest) {
             console.log("Service request not found");
             return res.status(404).send("Service request not found");
@@ -357,12 +256,28 @@ paymentCtlr.webhooks = async (req, res) => {
             await payment.save();
             console.log("Payment successful, updated record");
 
-            // Update the service request status based on payment reason
             if (paymentReason === "service") {
-                serviceRequest.status = "paid"; // Full service payment
+                serviceRequest.status = "paid"; 
             }
             if (paymentReason === "booking") {
-                serviceRequest.status = "assigned"; // Only booking fee paid
+                const expert = await Expert.findOne({userId : serviceRequest.expertId})
+                
+                if (expert) {
+                    const scheduleDateFormatted = new Date(serviceRequest.scheduleDate)
+                        .toISOString()
+                        .split("T")[0];
+                
+                    console.log("Formatted Schedule Date:", scheduleDateFormatted);
+                    
+                    expert.availability = expert.availability.filter(
+                        (date) => date.split("T")[0] !== scheduleDateFormatted
+                    );
+                
+                    await expert.save(); 
+                }
+                console.log("Updated Availability:", expert.availability);
+                console.log("Service Request Date:", serviceRequest.scheduleDate);
+                
             }
 
             await serviceRequest.save();
@@ -375,13 +290,13 @@ paymentCtlr.webhooks = async (req, res) => {
 
             io.to(`customer-${serviceRequest.customerId}`).emit("bookingStatusUpdated", {
                 userType: "customer",
-                booking: serviceRequest, // Send the full updated booking object
+                booking: serviceRequest, 
             });
 
             if (serviceRequest.expertId) {
                 io.to(`expert-${serviceRequest.expertId}`).emit("bookingStatusUpdated", {
                     userType: "expert",
-                    booking: serviceRequest, // Send the full updated booking object
+                    booking: serviceRequest, 
                 });
             }
 

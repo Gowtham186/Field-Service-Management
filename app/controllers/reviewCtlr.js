@@ -63,6 +63,4 @@ reviewCtlr.getReviews = async (req, res) => {
     }
 };
 
-
-
 export default reviewCtlr

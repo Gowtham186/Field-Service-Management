@@ -66,7 +66,7 @@ export default function CustomerLogin({ closeLogin }) {
     } else {
       try {
         setClientErrors({});
-        await dispatch(customerLogin({ phone_number })).unwrap();
+        dispatch(customerLogin({ phone_number }))
         toast.success("OTP sent successfully! 🎉", { autoClose: 1000 });
         //localStorage.removeItem('customerLogin')
         setOtpSent(true)

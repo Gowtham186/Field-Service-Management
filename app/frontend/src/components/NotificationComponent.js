@@ -52,6 +52,7 @@ const NotificationComponent = ({ userId, role }) => {
                     completed: "🎉 Your service is completed!",
                     approved: "✔️ Your booking is approved!",
                     cancelled: "❌ Your booking was cancelled.",
+                    rejected: "📢 Your booking was rejected.",
                 },
                 expert: {
                     requested: "📢 A new service request is available!",
@@ -61,6 +62,7 @@ const NotificationComponent = ({ userId, role }) => {
                     completed: "🎉 You have completed the service!",
                     approved: "✔️ Your service completion has been approved!",
                     cancelled: "❌ The booking has been cancelled by the customer.",
+                    rejected: "📢 You rejected the booking.",
                 }
             };
 
