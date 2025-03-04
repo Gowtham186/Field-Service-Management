@@ -4,6 +4,7 @@ import { expertRegister, getUserProfile } from "../redux/slices.js/user-slice";
 import validator from 'validator';
 import { useNavigate } from "react-router-dom";
 import ExpertRegisterImg from '../images/expertRegister.jpg'
+import { toast } from "react-toastify";
 
 const formInitialState = {
   name: '',
@@ -63,10 +64,12 @@ export default function ExpertRegister() {
     } else {
       try {
         setClientErrors({});
-        await dispatch(expertRegister({ formData, resetForm })).unwrap();
+        await dispatch(expertRegister({ formData, resetForm })).unwrap()
+        toast.success("Successfully Registered")
         await dispatch(getUserProfile()).unwrap()
         navigate('/create-expert');
       } catch (err) {
+        toast.error('Registration Failed')
         console.log('Error registering expert', err);
       }
     }

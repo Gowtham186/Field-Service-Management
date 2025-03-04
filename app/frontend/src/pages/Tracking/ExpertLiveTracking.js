@@ -37,7 +37,7 @@ export default function ExpertLiveTracking() {
 
             return () => navigator.geolocation.clearWatch(watchId); // Clean up on unmount
         }
-    }, [userId]); // ✅ Runs when userId is available
+    }, [userId]); 
 
     return <p>Tracking Expert Location...</p>;
 }

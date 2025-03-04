@@ -81,7 +81,7 @@ export default function ManageBookings() {
                         </thead>
                         <tbody>
                             {allServiceRequests?.data?.map((request, index) => (
-                                <tr key={request?._id} className="border-t hover:bg-gray-50">
+                                <tr key={request?._id} className="border-t hover:bg-gray-50 text-center">
                                     <td className="p-3">{(page - 1) * limit + index + 1}</td>
                                     <td className="p-3">{request.customer?.name || "N/A"}</td>
                                     <td className="p-3">{request.expert?.name || "N/A"}</td>

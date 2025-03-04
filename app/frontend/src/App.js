@@ -71,16 +71,25 @@ function App() {
           {/* customer */}
           <Route path='/customerlogin' element={<CustomerLogin />}/>
           <Route path="/my-bookings" element={
-            <MainLayout>
-              <MyBookings />
-            </MainLayout>
+            <ProtectedRoute role="customer">
+              <MainLayout>
+                <MyBookings />
+              </MainLayout>
+            </ProtectedRoute>
+              
           }/>
           <Route path="/cart" element={
             <MainLayout>
               <Cart />
             </MainLayout>
             }/>
-          <Route path="/my-calendar" element={<CustomerCalendar />}/>
+          <Route path="/my-calendar" element={
+            <ProtectedRoute role="customer">
+              <MainLayout>
+              <CustomerCalendar />
+
+              </MainLayout>
+            </ProtectedRoute>}/>
           <Route path="/experts/:id" element={
             <MainLayout>
               <ExpertDetails />
@@ -193,7 +202,7 @@ function App() {
             </ProtectedRoute> 
           }/>
           <Route path="/reset-password" element={
-            <ProtectedRoute>
+            <ProtectedRoute role='expert'>
               <MainLayout>
                 <ResetPassword />
               </MainLayout>

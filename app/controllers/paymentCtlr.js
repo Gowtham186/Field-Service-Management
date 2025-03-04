@@ -261,19 +261,19 @@ paymentCtlr.webhooks = async (req, res) => {
             }
             if (paymentReason === "booking") {
                 const expert = await Expert.findOne({userId : serviceRequest.expertId})
-                
                 if (expert) {
                     const scheduleDateFormatted = new Date(serviceRequest.scheduleDate)
-                        .toISOString()
-                        .split("T")[0];
-                
+                    .toISOString()
+                    .split("T")[0];
+                    
                     console.log("Formatted Schedule Date:", scheduleDateFormatted);
                     
                     expert.availability = expert.availability.filter(
                         (date) => date.split("T")[0] !== scheduleDateFormatted
                     );
-                
+                    
                     await expert.save(); 
+                    console.log(expert)
                 }
                 console.log("Updated Availability:", expert.availability);
                 console.log("Service Request Date:", serviceRequest.scheduleDate);

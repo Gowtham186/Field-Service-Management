@@ -26,7 +26,7 @@ export default function ServiceRequest() {
     const navigate = useNavigate()
     const [isBooked, setIsBooked] = useState(false)
     const [ showLogin, setShowLogin] = useState(false)
-    const { currentBooking, loading } = useSelector((state) => state.customer)
+    const { currentBooking, loading, serverError } = useSelector((state) => state.customer)
     const { profile } = useSelector((state) => state.expert)
     const [clientErrors, setClientErrors] = useState({})
     const errors = {}
@@ -54,10 +54,6 @@ export default function ServiceRequest() {
             }));
         }
     }, [currentAddress]);
-
-    useEffect(()=>{
-        
-    },[])
 
     const handleGetAddress = () => {
         if ("geolocation" in navigator) {
@@ -150,7 +146,11 @@ export default function ServiceRequest() {
                     toast.success("Successfully Booked")
                     navigate('/my-bookings')    
                 })
-                .catch((err)=> console.log(err))
+                .catch((err)=> {
+                    
+                    console.log(err)
+                    setClientErrors((prev) => ({...prev, location : err}))
+                })
         }
     };
 
@@ -211,6 +211,7 @@ export default function ServiceRequest() {
                     {clientErrors.location && (
                         <p className="text-red-500 text-xs text-left">{clientErrors.location}</p>
                     )} 
+                    {/* {(serverError && serverError.includes('Location')) &&  <p className="text-red-500 text-xs text-left">{serverError}</p>} */}
                     {formData.location.address && (
                         <button
                             type="button"
@@ -233,7 +234,7 @@ export default function ServiceRequest() {
                         selected={formData.scheduleDate}
                         className="mt-1 block p-1 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                         onChange={(date) => {
-                            const formattedDate = date.toLocaleDateString("en-CA"); // Fix timezone issue
+                            const formattedDate = date.toLocaleDateString("en-CA"); 
                             setFormData((prevForm) => ({
                                 ...prevForm,
                                 scheduleDate: formattedDate

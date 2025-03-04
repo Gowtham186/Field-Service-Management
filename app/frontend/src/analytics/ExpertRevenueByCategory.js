@@ -6,7 +6,6 @@ export default function ExpertRevenueByCategory() {
     const { expertRevenue } = useSelector((state) => state.stats);
     const [hoveredCategory, setHoveredCategory] = useState(null);
 
-    // Ensure `categoriesRevenue` exists before mapping
     const data = expertRevenue?.categoriesRevenue
         ? Object.entries(expertRevenue.categoriesRevenue).map(([category, amount]) => ({
             name: category,

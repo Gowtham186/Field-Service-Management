@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getMyServices } from "../../redux/slices.js/expert-slice";
-import { useParams } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { getMyServices, setServiceRequestId } from "../../redux/slices.js/expert-slice";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function ExpertHistory() {
   const dispatch = useDispatch();
+  const navigate = useNavigate()
   const { id } = useParams();
   const { myServices } = useSelector((state) => state.expert);
 
@@ -17,6 +17,11 @@ export default function ExpertHistory() {
       dispatch(getMyServices());
     }
   }, [dispatch, id]);
+
+  const handleViewDetails = (id) => {
+    dispatch(setServiceRequestId(id));
+    navigate(`/service-details`);
+};
 
   return (
     <div className="p-6 min-h-screen">
@@ -72,12 +77,12 @@ export default function ExpertHistory() {
                   <td className="p-4 text-center text-gray-800 font-semibold">₹{request?.budget?.servicesPrice || "N/A"}</td>
                   <td className="p-4">{new Date(request.scheduleDate).toLocaleDateString("en-GB")}</td>
                   <td className="p-4 text-center">
-                    <Link
-                      to={`/service-details/${request?._id}`}
+                  <button
                       className="px-3 py-1 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 transition"
-                    >
+                      onClick={() => handleViewDetails(request?._id)}
+                  >
                       View Details
-                    </Link>
+                  </button>
                   </td>
                 </tr>
               ))}

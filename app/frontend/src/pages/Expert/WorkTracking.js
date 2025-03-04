@@ -5,6 +5,7 @@ import { deleteOnSiteService, getServiceRequest, onSiteService, updateBookingSta
 import { v4 as uuidv4 } from 'uuid';
 import { Star } from 'lucide-react';
 import { submitReview } from "../../redux/slices.js/service-request-slice";
+import { toast } from 'react-toastify'
 
 export default function WorkTracking() {
   const dispatch = useDispatch();
@@ -32,14 +33,27 @@ export default function WorkTracking() {
 
   const handleCompleted = async () => {
     try {
-      if (!workingService?._id) return;
-      await dispatch(updateBookingStatus({ id: workingService._id, body: { status: 'completed' } })).unwrap();
-      setIsCompleted(true);
-      setOpenReviewForm(true);
+        if (!workingService || !workingService._id) {
+            toast.error("Service ID is missing.");
+            return;
+        }
+
+        await dispatch(updateBookingStatus({ id: workingService._id, body: { status: 'completed' } })).unwrap();
+
+        toast.success('You have completed the service');
+
+        setIsCompleted(true);
+        setOpenReviewForm(true);
+
+        setTimeout(() => {
+            navigate(-1);
+        }, 500); 
+
     } catch (error) {
-      console.error('Failed to update service status:', error);
+        console.error('Failed to update service status:', error);
+        toast.error("Failed to update service status. Please try again.");
     }
-  };
+};
 
   const handleAddService = () => {
     if (workingService?.status === 'completed') return; // Prevent adding service if completed
@@ -65,10 +79,10 @@ export default function WorkTracking() {
       .catch((err) => console.log(err));
   };
 
-  const handleDelete = (serviceId) => {
+  const handleDelete = async(serviceId) => {
     console.log(serviceId)
     if (workingService?.status === 'completed') return; // Prevent deletion if completed
-    dispatch(deleteOnSiteService(serviceId));
+    await dispatch(deleteOnSiteService(serviceId)).unwrap()
   };
 
   const handleStarClick = (index) => {

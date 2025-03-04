@@ -133,6 +133,7 @@ const customerSlice = createSlice({
             state.currentBooking = action.payload
         })
         builder.addCase(bookserviceRequest.rejected, (state,action) => {
+            state.loading = false
             state.serverError = action.payload
         })
         builder.addCase(getMyBookings.fulfilled, (state,action)=>{

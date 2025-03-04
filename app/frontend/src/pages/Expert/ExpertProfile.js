@@ -111,7 +111,7 @@ export default function ExpertProfile() {
             .unwrap()
             .then(() => {
                 console.log("Profile picture updated successfully!");
-                dispatch(getExpertProfile(id)); // Fetch updated profile data
+                dispatch(getExpertProfile({id}))  
             })
             .catch((error) => {
                 console.error("Failed to update profile picture:", error);

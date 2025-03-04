@@ -10,7 +10,6 @@ export default function ExpertAvgBookingValueChart() {
       ? expertRevenue?.totalRevenue /expertRevenue?.totalBookings
       : 0;
 
-  // Prepare data for the chart (In this case, a single data point representing the average booking value)
   const data = [
     {
       name: "Expert",
@@ -32,8 +31,8 @@ export default function ExpertAvgBookingValueChart() {
             dataKey="avgBookingValue"
             stroke="#82ca9d"
             fill="#82ca9d"
-            fillOpacity={0.5} // Adjust opacity to make the fill more visible
-            strokeWidth={2}  // Thicker stroke to make it stand out more
+            fillOpacity={0.5} 
+            strokeWidth={2}  
           />
         </AreaChart>
       </ResponsiveContainer>

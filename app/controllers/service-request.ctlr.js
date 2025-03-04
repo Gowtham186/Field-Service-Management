@@ -34,13 +34,24 @@ serviceRequestCtlr.create = async (req, res) => {
 
         const customerLocation = await Customer.findOne({ 'location.address': body.location.address });
         if (!customerLocation) {
-            const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
-                params: { q: body.location.address, key: process.env.OPENCAGE_API_KEY },
-            });
-            const geometry = resource.data.results[0].geometry;
-            lat = geometry.lat;
-            lng = geometry.lng;
-            console.log({ lat, lng });
+            try{
+                const resource = await axios.get(`https://api.opencagedata.com/geocode/v1/json`, {
+                    params: { q: body.location.address, key: process.env.OPENCAGE_API_KEY },
+                });
+    
+                if (!resource.data.results || resource.data.results.length === 0) {
+                    return res.status(400).json({ errors: "Invalid location. Please enter a valid address." });
+                }
+    
+                const geometry = resource.data.results[0].geometry;
+                lat = geometry.lat;
+                lng = geometry.lng;
+                console.log({ lat, lng });
+            }catch(err){
+                console.error("Error fetching geolocation data:", error);
+                return res.status(500).json({ errors: "Failed to fetch location data. Please try again later." });
+            }
+            
         } else {
             const geometry = customerLocation.location.coords;
             lat = geometry.lat;
@@ -94,7 +105,7 @@ serviceRequestCtlr.create = async (req, res) => {
         
         await serviceRequest.save();
         console.log(serviceRequest)
-        console.log("📢 Attempting to emit newBooking to:", `expert-${serviceRequest?.expertId}`);
+        // console.log("📢 Attempting to emit newBooking to:", `expert-${serviceRequest?.expertId}`);
 
         io.to(`customer-${serviceRequest?.customerId}`).emit("newBooking", { request: serviceRequest });
 

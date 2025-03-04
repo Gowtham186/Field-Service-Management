@@ -1,9 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { addNewService, getMyServices, updateBookingStatus } from "../../redux/slices.js/expert-slice";
-import { io } from "socket.io-client";
-
-const socket = io("http://localhost:4500"); // Change to your backend URL
 
 export default function NewBookings() {
     const dispatch = useDispatch();

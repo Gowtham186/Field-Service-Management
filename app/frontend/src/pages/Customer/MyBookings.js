@@ -86,7 +86,7 @@ export default function MyBookings() {
             Scheduled Today
           </button>
         )}
-        {["accepted", "requested", "assigned"].map((status) => (
+        {["accepted", "requested", "assigned", "completed"].map((status) => (
           <button
             key={status}
             className={`btn ${filter === status ? "bg-blue-500 text-white" : "bg-gray-200"} p-2`}
@@ -131,7 +131,7 @@ export default function MyBookings() {
                   </button>                
                 )}
 
-                {["in-progress", "scheduledToday", "assigned"].includes(booking.status) && (
+                {["in-progress", "scheduledToday", "assigned", "completed"].includes(booking.status) && (
                   <>
                     <button
                       className="bg-blue-500 text-white p-2 mt-2 rounded"

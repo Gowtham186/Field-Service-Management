@@ -95,7 +95,7 @@ export default function AnalyticsBookings() {
           revenueAnalytics?.totalBookingFee || 0,  // Fetching Booking Fee
           revenueAnalytics?.totalServiceFee || 0   // Fetching Service Fee
         ],
-        backgroundColor: ["#4CAF50", "#36A2EB"], // Different colors for clarity
+        backgroundColor: ["#4CAF50", "#36A2EB"], 
         borderColor: "#333",
         borderWidth: 1,
       },

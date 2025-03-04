@@ -99,7 +99,7 @@ export default function CustomerTracking() {
                 >
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                     
-                    {/* Automatically Re-center the map when location updates */}
+                    {/* Re-center the map when location updates */}
                     <RecenterMap location={expertLocation} />
 
                     {/* Expert's Live Location */}

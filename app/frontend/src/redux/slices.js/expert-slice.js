@@ -51,6 +51,7 @@ export const toggledIsVerified = createAsyncThunk('expert/editExpert', async({id
 
 export const getExpertProfile = createAsyncThunk('expert/getExpertProfile', async({id}, {rejectWithValue}) => {
     try{
+        console.log(id)
         const response = await axios.get(`/api/experts/${id}`)
         console.log(response.data)
         return response.data
@@ -59,18 +60,6 @@ export const getExpertProfile = createAsyncThunk('expert/getExpertProfile', asyn
         return rejectWithValue(err.response.data.errors)
     }
 })
-
-// export const updateAvailability = createAsyncThunk('expert/updateAvailability', async ({ availability }, { rejectWithValue }) => {
-//     try {
-//         console.log(availability)
-//         const token = localStorage.getItem('token');
-//         const response = await axios.put('/api/experts/availability', { availability }, { headers: { Authorization: token } });
-//         return response.data;
-//     } catch (err) {
-//         console.log("Update Availability Error:", err.response?.data || err.message);
-//         return rejectWithValue(err.response?.data || "Failed to update availability");
-//     }
-// });
 
 export const updateAvailability = createAsyncThunk(
     "expert/updateAvailability",
@@ -181,15 +170,25 @@ try{
 }
 })
 
-export const changeProfilePic = createAsyncThunk('expert/changeProfilePic', async({id, profilePicData})=>{
-    try{
-        const response = await axios.put(`/api/experts/${id}/profilePic`, profilePicData, { headers : { Authorization : localStorage.getItem('token')}})
-        console.log(response.data)
-        return response.data
-    }catch(err){
-        console.log(err)
+export const changeProfilePic = createAsyncThunk(
+    "expert/changeProfilePic",
+    async ({ id, profilePicData }, { rejectWithValue }) => {
+      try {
+        const response = await axios.put(`/api/experts/${id}/profilePic`, profilePicData, {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+            "Content-Type": "multipart/form-data", 
+          },
+        });
+  
+        console.log(response.data);
+        return response.data;
+      } catch (err) {
+        console.error("Error updating profile picture:", err);
+        return rejectWithValue(err.response?.data || "Error updating profile picture");
+      }
     }
-})
+  );  
 
 export const getUnverifiedExperts = createAsyncThunk('expert/getUnverifiedExperts', async()=>{
     try{
@@ -272,7 +271,12 @@ const expertSlice = createSlice({
             state.serverError = action.payload
         })
         builder.addCase(createExpertProfile.fulfilled, (state, action)=>{
+            state.loading = false
             state.profile = action.payload
+            state.serverError = null
+        })
+        builder.addCase(createExpertProfile.pending, (state, action)=>{
+            state.loading = true
             state.serverError = null
         })
         builder.addCase(getAllExperts.fulfilled, (state,action)=>{

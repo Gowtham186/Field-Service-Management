@@ -260,50 +260,53 @@ expertCtlr.verify = async (req, res) => {
             return res.status(404).json({ error: "User not found" });
         }
 
-        if (verifyExpert.stripeAccountId) {
-            return res.status(400).json({ error: "Expert already has a Stripe account" });
+        let stripeAccountId = verifyExpert.stripeAccountId;
+
+        // If expert doesn't have a Stripe account, create one
+        if (!stripeAccountId) {
+            const stripeAccount = await stripe.accounts.create({
+                type: "express",
+                country: "US",
+                email: user.email, 
+                capabilities: {
+                    card_payments: { requested: true },
+                    transfers: { requested: true },
+                },
+            });
+
+            verifyExpert.stripeAccountId = stripeAccount.id;
+            await verifyExpert.save();
+            stripeAccountId = stripeAccount.id;
+
+            // Generate an onboarding link only for new Stripe accounts
+            const accountLink = await stripe.accountLinks.create({
+                account: stripeAccountId,
+                refresh_url: "http://localhost:3000/stripe-onboarding",
+                return_url: "http://localhost:3000/",
+                type: "account_onboarding",
+            });
+
+            // Send onboarding email
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: user.email,
+                subject: "You're Verified! Complete Your Stripe Account Setup",
+                html: `
+                    <h3>Congratulations, ${user.name}!</h3>
+                    <p>Your expert account has been verified.</p>
+                    <p>Please complete your Stripe verification by clicking the link below:</p>
+                    <a href="${accountLink.url}" target="_blank">Complete Stripe Setup</a>
+                    <p>Once completed, you'll be ready to receive payments.</p>
+                `,
+            };
+
+            await transporter.sendMail(mailOptions);
+            console.log("Expert verified, Stripe account created, and onboarding email sent!");
+        } else {
+            console.log(`Expert ${id} already has a Stripe account. Skipping Stripe setup.`);
         }
 
-        // Create a Stripe Express account for the expert
-        const stripeAccount = await stripe.accounts.create({
-            type: "express",
-            country: "US",
-            email: user.email, 
-            capabilities: {
-                card_payments: { requested: true },
-                transfers: { requested: true },
-            },
-        });
-
-        verifyExpert.stripeAccountId = stripeAccount.id;
-        await verifyExpert.save();
-
-        // Generate an onboarding link
-        const accountLink = await stripe.accountLinks.create({
-            account: stripeAccount.id,
-            refresh_url: "http://localhost:3000/stripe-onboarding",
-            return_url: "http://localhost:3000/",
-            type: "account_onboarding",
-        });
-
-        // Send an email with the onboarding link
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: user.email,
-            subject: "You're Verified! Complete Your Stripe Account Setup",
-            html: `
-                <h3>Congratulations, ${user.name}!</h3>
-                <p>Your expert account has been verified.</p>
-                <p>Please complete your Stripe verification by clicking the link below:</p>
-                <a href="${accountLink.url}" target="_blank">Complete Stripe Setup</a>
-                <p>Once completed, you'll be ready to receive payments.</p>
-            `,
-        };
-
-        await transporter.sendMail(mailOptions);
-
-        console.log("Expert verified, Stripe account created, and onboarding email sent!")
-        res.json(verifyExpert)
+        res.json(verifyExpert);
 
     } catch (err) {
         console.error("Stripe onboarding error:", err);
